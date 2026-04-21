@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Interior Duct Ltd</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-container">
+    <h1>Admin Panel</h1>
+    <nav>
+      <button onclick="showSection('images')">Manage Images</button>
+      <button onclick="showSection('content')">Edit Content</button>
+      <button onclick="showSection('products')">Manage Products</button>
+      <button onclick="showSection('models')">Manage 3D Models</button>
+      <button onclick="window.open('/3d-demo','_blank')">3D Viewer Demo</button>
+      <button onclick="window.open('/categories.html','_blank')">Organize Images by Category</button>
+      <button onclick="showSection('faq-manager')">FAQ Manager</button>
+      <button onclick="window.location.href='/logout'">Logout</button>
+    </nav>
+    <section id="images-section" class="admin-section">
+      <h2>Manage Images</h2>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="imageUpload" name="images" multiple accept="image/*">
+        <button type="submit">Upload Images</button>
+      </form>
+      <div id="imageList"></div>
+      <script>if(typeof fetchImages==='function'){fetchImages();}</script>
+    </section>
+    <section id="models-section" class="admin-section" style="display:none;">
+      <h2>Manage 3D Models</h2>
+      <form id="modelUploadForm" enctype="multipart/form-data">
+        <input type="file" id="modelUpload" name="models" accept=".glb,.gltf" multiple>
+        <button type="submit">Upload 3D Model(s)</button>
+      </form>
+      <div id="modelList" style="margin-top:1rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;"></div>
+    </section>
+    <section id="content-section" class="admin-section" style="display:none;">
+      <h2>Edit Content</h2>
+      <form id="contentForm">
+        <label>Homepage Message:<br>
+          <input type="text" id="homepageInput" name="homepage" style="width:100%;margin-bottom:1rem;">
+        </label><br>
+        <label>About:<br>
+          <textarea id="aboutInput" name="about" rows="3" style="width:100%;margin-bottom:1rem;"></textarea>
+        </label><br>
+        <label>Contact:<br>
+          <input type="text" id="contactInput" name="contact" style="width:100%;margin-bottom:1rem;">
+        </label><br>
+        <button type="submit">Save Content</button>
+        <span id="contentSaveMsg" style="margin-left:1rem;color:#27ae60;display:none;">Saved!</span>
+      </form>
+    </section>
+    <section id="products-section" class="admin-section" style="display:none;">
+      <h2>Manage Products</h2>
+      <button onclick="addProduct()">Add New Product</button>
+      <div id="productsList" style="margin-top:1rem;"></div>
+    </section>
+    <section id="faq-manager" class="admin-section" style="display:none;"></section>
+  </div>
+  <script>
+    (async function() {
+      try {
+        const response = await fetch('/api/session', { credentials: 'same-origin' });
+        if (!response.ok) {
+          window.location.href = '/login';
+          return;
+        }
+        const data = await response.json();
+        if (!data.logged_in) {
+          window.location.href = '/login';
+        }
+      } catch (err) {
+        window.location.href = '/login';
+      }
+    })();
+  </script>
+  <script src="admin.js"></script>
+  <script src="faq_manager.js"></script>
+</body>
+</html>

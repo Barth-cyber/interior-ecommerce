@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Organize Product Images by Category</title>
+  <link rel="stylesheet" href="admin.css">
+  <style>.cat-tile{display:inline-block;background:#f4f6fa;border-radius:8px;padding:1rem;margin:1rem;min-width:220px;vertical-align:top;box-shadow:0 2px 8px rgba(0,0,0,0.06);} .cat-tile h3{text-align:center;} .cat-imgs{display:flex;flex-wrap:wrap;gap:0.5rem;} .cat-imgs img{width:80px;height:80px;object-fit:cover;border-radius:5px;border:1px solid #ddd;cursor:pointer;} .cat-imgs .remove-btn{background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;position:absolute;top:2px;right:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;} .img-wrap{position:relative;display:inline-block;}</style>
+</head>
+<body>
+  <div class="admin-container">
+    <h1>Organize Product Images</h1>
+    <div id="categories"></div>
+    <div style="margin-top:2rem;">
+      <label>Add Image to Category: 
+        <select id="catSelect"></select>
+        <input type="text" id="imgName" placeholder="Image filename">
+        <button onclick="addToCategory()">Add</button>
+      </label>
+    </div>
+    <button onclick="saveCategories()">Save Changes</button>
+    <span id="catSaveMsg" style="margin-left:1rem;color:#27ae60;display:none;">Saved!</span>
+  </div>
+  <script>
+    let categories = {};
+    async function loadCategories() {
+      const res = await fetch('/categories');
+      categories = await res.json();
+      renderCategories();
+      renderCatSelect();
+    }
+    function renderCategories() {
+      const div = document.getElementById('categories');
+      div.innerHTML = '';
+      for (const cat in categories) {
+        const tile = document.createElement('div');
+        tile.className = 'cat-tile';
+        tile.innerHTML = `<h3>${cat}</h3><div class='cat-imgs'></div>`;
+        const imgsDiv = tile.querySelector('.cat-imgs');
+        categories[cat].forEach(img => {
+          const wrap = document.createElement('div');
+          wrap.className = 'img-wrap';
+          const image = document.createElement('img');
+          image.src = `/idl-images/${encodeURIComponent(img)}`;
+          image.alt = img;
+          image.onerror = function() { this.src = 'https://via.placeholder.com/80?text=No+Image'; };
+          wrap.appendChild(image);
+          const btn = document.createElement('button');
+          btn.className = 'remove-btn';
+          btn.innerHTML = '&times;';
+          btn.onclick = () => removeFromCategory(cat, img);
+          wrap.appendChild(btn);
+          imgsDiv.appendChild(wrap);
+        });
+        div.appendChild(tile);
+      }
+    }
+    function renderCatSelect() {
+      const sel = document.getElementById('catSelect');
+      sel.innerHTML = '';
+      for (const cat in categories) {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        sel.appendChild(opt);
+      }
+    }
+    function addToCategory() {
+      const cat = document.getElementById('catSelect').value;
+      const img = document.getElementById('imgName').value.trim();
+      if (img && cat && !categories[cat].includes(img)) {
+        categories[cat].push(img);
+        renderCategories();
+      }
+    }
+    function removeFromCategory(cat, img) {
+      categories[cat] = categories[cat].filter(i => i !== img);
+      renderCategories();
+    }
+    async function saveCategories() {
+      const res = await fetch('/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categories)
+      });
+      if (res.ok) {
+        document.getElementById('catSaveMsg').style.display = '';
+        setTimeout(() => { document.getElementById('catSaveMsg').style.display = 'none'; }, 2000);
+      }
+    }
+    loadCategories();
+  </script>
+</body>
+</html>

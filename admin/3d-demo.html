@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Viewer Demo - Interior Duct Ltd</title>
+  <script src="/static/3d-viewer.js"></script>
+  <style>body{font-family:sans-serif;background:#f4f6fa;margin:0;padding:2rem;}h1{text-align:center;color:#1b3a6b;}</style>
+</head>
+<body>
+  <h1>3D Product Viewer Demo</h1>
+  <model-viewer id="demoViewer" src="/idl-images/sample-model.glb" alt="3D Model" auto-rotate camera-controls style="width:100%;max-width:600px;height:400px;display:block;margin:2rem auto;background:#fff;border-radius:10px;"></model-viewer>
+  <p id="demoHint" style="text-align:center;">This is a demo of the 3D viewer. Upload model files in the admin panel and use the "Open Demo" button to preview here.</p>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const modelName = params.get('model');
+    if (modelName) {
+      const viewer = document.getElementById('demoViewer');
+      viewer.setAttribute('src', '/idl-images/' + encodeURIComponent(modelName));
+      document.getElementById('demoHint').textContent = 'Showing the selected model: ' + modelName;
+    }
+  </script>
+</body>
+</html>

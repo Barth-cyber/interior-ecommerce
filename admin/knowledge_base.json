@@ -1,0 +1,369 @@
+{
+  "company_info": {
+    "name": "Interior Duct Ltd",
+    "tagline": "Functionality, Durability & Aesthetics",
+    "founded": "27th April, 2023 (commencement of business); originally incorporated as Interior Components Limited on 7th February, 2012",
+    "founder": "Benedict Omoregbe Onaiwu, Director/CEO",
+    "headquarters": "Benin City, Edo State, Nigeria",
+    "showrooms": ["Benin City", "Abuja", "Port Harcourt"],
+    "delivery_coverage": "Nationwide across all 36 states of Nigeria",
+    "international_presence": "4 countries served",
+    "experience": "15+ years of excellence",
+    "pieces_made": "1,200+ bespoke pieces",
+    "mission": "Creating a meaningful living atmosphere in every sphere where our products are applicable.",
+    "vision": "Building a world-class brand and improving local content using environment-friendly practices.",
+    "contact": {
+      "email_primary": "hello@interiorductltd.com",
+      "email_secondary": "info@interiorduct.com",
+      "phone": "+234 803 685 0229",
+      "alt_phone": "+234-800-123-4567",
+      "business_hours": "Mon – Sat: 8am – 6pm WAT",
+      "showroom_visits": "By appointment only"
+    },
+    "social_media": ["X (Twitter)", "LinkedIn", "Instagram", "YouTube", "WhatsApp"],
+    "sdg_commitments": ["SDG 5 - Gender Equality", "SDG 8 - Decent Work & Economic Growth", "SDG 9 - Industry Innovation & Infrastructure", "SDG 12 - Responsible Consumption & Production", "SDG 13 - Climate Action"]
+  },
+  "greetings": [
+    {
+      "trigger": ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings"],
+      "response": "Hello and welcome to Interior Duct Ltd! 👋 I'm Duct AI, your personal luxury design advisor. Whether you're furnishing a single room, building a dream home, or fitting out a hotel — I'm here to help you 24/7. What room or piece are you exploring today?"
+    },
+    {
+      "trigger": ["how are you", "how's it going"],
+      "response": "I'm running smoothly and ready to help you create something beautiful! ✨ Tell me — are you shopping for a specific piece, planning a full room, or just browsing for inspiration?"
+    },
+    {
+      "trigger": ["who are you", "what are you", "your name"],
+      "response": "I'm Duct AI — Interior Duct Ltd's intelligent design assistant. I can help you browse furniture, generate instant quotes, recommend pieces for your space, preview items in 3D, track orders, and connect you to our human team when needed. Think of me as your 24/7 luxury design concierge."
+    },
+    {
+      "trigger": ["thank you", "thanks", "appreciate it"],
+      "response": "You're very welcome! 🙏 It's my pleasure helping you. Is there anything else you'd like to explore — perhaps a complementary piece, a finish suggestion, or a delivery estimate?"
+    },
+    {
+      "trigger": ["goodbye", "bye", "see you", "later"],
+      "response": "Thank you for visiting Interior Duct Ltd! 🌟 Remember, I'm here 24/7 whenever you need design advice or want to place an order. You can also reach our team on WhatsApp at +234 803 685 0229. Have a wonderful day!"
+    }
+  ],
+
+  "faqs": [
+    {
+      "category": "Company & Background",
+      "q": "Who is Interior Duct Ltd?",
+      "a": "Interior Duct Ltd is a leading bespoke furniture and interior solutions company based in Benin City, Edo State, Nigeria. We design, manufacture, and deliver premium furniture, custom doors, and complete interior fit-outs for homes, hotels, offices, schools, hospitals, and commercial spaces across Nigeria and internationally. Our philosophy rests on three pillars: Functionality, Durability, and Aesthetics."
+    },
+    {
+      "category": "Company & Background",
+      "q": "When was Interior Duct Ltd founded?",
+      "a": "Our parent business, Interior Components Limited, was incorporated on 7th February, 2012 by our Founder & CEO, Mr. Benedict Omoregbe Onaiwu. Interior Duct Ltd commenced business on 27th April, 2023, building on over a decade of craftsmanship experience."
+    },
+    {
+      "category": "Company & Background",
+      "q": "Who is the founder of Interior Duct Ltd?",
+      "a": "Our Founder, Director & CEO is Mr. Benedict Omoregbe Onaiwu. A Petroleum Engineering graduate turned master craftsman, he started the business with a passion for creating bespoke furniture from virtually any material. He's also a philanthropist who runs the NG Bomon Development Foundation and the 'Catch Them Young' training scheme for youth furniture craftsmanship since 2017."
+    },
+    {
+      "category": "Company & Background",
+      "q": "Where are you located?",
+      "a": "Our main showroom and manufacturing facility is in Benin City, Edo State, Nigeria. We also serve clients in Abuja, Port Harcourt, and across all 36 states of Nigeria. Showroom visits are by appointment — you can book one through our contact form or by messaging us on WhatsApp at +234 803 685 0229."
+    },
+    {
+      "category": "Company & Background",
+      "q": "Are you accredited or certified?",
+      "a": "Yes! Interior Duct Ltd is accredited by the National Board for Technical Education (NBTE) as an approved Skill Training Centre (STC) for Furniture/Upholstery and Welding/Fabrications. We also collaborate with the ITF SUPA programme to train artisans for self-reliance."
+    },
+
+    {
+      "category": "Products & Catalog",
+      "q": "What products do you sell?",
+      "a": "We offer a wide range of luxury bespoke pieces including:\n• 🛋️ Sofas, lounge chairs & seating sets\n• 🍽️ Dining tables and dining sets\n• 🛏️ Master bedroom suites & wardrobes\n• 🚪 Custom doors (pivot, double entrance, interior, louvred, CNC patterned)\n• 📺 TV consoles & media wall units\n• 🍳 Kitchen cabinets & sink units\n• 🏢 Executive office desks, credenzas & reception counters\n• 🍷 Bar & wine counters\n• ☕ Coffee tables & side tables\nEvery piece is fully customizable. Want me to walk you through a specific category?"
+    },
+    {
+      "category": "Products & Catalog",
+      "q": "What are your bestsellers?",
+      "a": "Some of our most-loved pieces include:\n• Royal Chesterfield Sofa Set — ₦2,800,000\n• Mahogany Dining Table with Quartz Top — ₦3,200,000\n• Master Bedroom Suite with Tufted Headboard — ₦4,800,000\n• Grand Double Entrance Door — ₦4,200,000\n• Executive Manager's Desk & Credenza System — ₦2,600,000\n• Premium Pivot Entrance Door — ₦1,850,000\nWould you like to see any of these in 3D or get a customized quote?"
+    },
+    {
+      "category": "Products & Catalog",
+      "q": "Do you make custom furniture?",
+      "a": "Absolutely — 100% of our work is bespoke! Every dimension, finish, fabric, color, and detail can be customized to your exact specification. Just tell me your room size, preferred style (modern, classic, royal, minimalist, Scandinavian, etc.), color palette, and budget — and I'll help you design the perfect piece."
+    },
+    {
+      "category": "Products & Catalog",
+      "q": "What materials do you use?",
+      "a": "We work with premium materials sourced both locally and internationally, including:\n• Solid mahogany, walnut, oak, and other hardwoods\n• Quartz, granite, and marble for tabletops\n• Premium leathers and linen upholstery\n• High-gloss lacquer, matte, and natural oil finishes\n• Brass, chrome, and stainless steel inlays\n• Tempered glass and mirror inserts\n• Engineered composite boards for modern designs\nAll materials are selected for durability, beauty, and sustainability."
+    },
+    {
+      "category": "Products & Catalog",
+      "q": "Do you sell doors?",
+      "a": "Yes! Custom doors are one of our signature specialties. Our door collection includes:\n🚪 **Pivot Entrance Doors** — from ₦1,850,000\n🚪 **Grand Double Entrance Doors** — from ₦4,200,000\n🚪 **Mahogany Louvred Doors** — from ₦750,000\n🚪 **CNC Hexagon Panel Doors** — from ₦950,000\n🚪 **Modern Interior Doors** — from ₦680,000\n🚪 **Milk White Mirror-Insert Doors** — from ₦580,000\n🚪 **Heritage Carved Double Doors** — from ₦850,000\nAll doors come with security lock hardware. Smart-lock-ready options also available!"
+    },
+    {
+      "category": "Products & Catalog",
+      "q": "Do you furnish hotels and offices?",
+      "a": "Yes! We've completed projects for residences, hotels, restaurants, schools, universities, hospitals, laboratories, and corporate offices. From a single executive desk to a complete hotel fit-out, our team can handle projects of any scale. Would you like to discuss a commercial project? I can connect you with our project consultant."
+    },
+
+    {
+      "category": "Pricing & Quotes",
+      "q": "How much does a custom sofa cost?",
+      "a": "Our sofas start at around ₦890,000 for a luxury lounge chair and go up to ₦3,200,000+ for a premium living room set. The exact price depends on size, upholstery, frame material, and finishing. For a precise quote, share your room dimensions, preferred style, and number of seats — I'll generate an instant branded PDF quote in under 30 seconds."
+    },
+    {
+      "category": "Pricing & Quotes",
+      "q": "Can I get a quote?",
+      "a": "Absolutely! I can generate an instant branded quote for you in under 30 seconds. Just tell me:\n1. The product or room you're interested in\n2. Approximate dimensions (or room size)\n3. Preferred style/finish\n4. Your budget range (optional)\n5. Currency preference (NGN, USD, GBP, or EUR)\nReady when you are!"
+    },
+    {
+      "category": "Pricing & Quotes",
+      "q": "Do your prices include delivery and installation?",
+      "a": "Within Benin City, delivery and basic installation are typically included. For other locations across Nigeria, delivery is calculated based on distance and item volume, while installation is quoted separately for complex pieces (kitchens, wardrobes, doors, media walls). I can give you a complete delivered-and-installed quote — just share your location."
+    },
+    {
+      "category": "Pricing & Quotes",
+      "q": "Do you offer discounts?",
+      "a": "Yes! We offer factory-direct pricing (no middlemen markup), and additional discounts may apply for:\n• Bulk/multi-room orders\n• Hotel and corporate fit-outs\n• Repeat customers\n• Trade & interior designer partnerships\n• Seasonal promotions\nLet me know your project scope and I'll see what's available."
+    },
+    {
+      "category": "Pricing & Quotes",
+      "q": "What currencies do you accept?",
+      "a": "We display and accept payments in Nigerian Naira (₦ NGN), US Dollars ($ USD), British Pounds (£ GBP), and Euros (€ EUR). International clients are billed via Stripe; Nigerian clients via Paystack."
+    },
+
+    {
+      "category": "Payments",
+      "q": "How can I pay?",
+      "a": "We offer secure, flexible payment options:\n🇳🇬 **Nigeria — Paystack:** Bank transfer, USSD, debit/credit card, mobile money\n🌍 **International — Stripe:** Visa, Mastercard, Apple Pay, Google Pay, bank debits\nAll transactions are PCI-DSS Level 1 compliant, encrypted with TLS 1.3, and 3D Secure verified. Your data is always protected."
+    },
+    {
+      "category": "Payments",
+      "q": "Do you accept installment payments?",
+      "a": "For bespoke orders, we typically work with a 60% deposit to begin production and 40% balance before delivery. For larger projects (full home or hotel fit-outs), we can arrange milestone-based payment plans. Let me connect you with our finance team to discuss options that work for you."
+    },
+    {
+      "category": "Payments",
+      "q": "Is online payment safe?",
+      "a": "Yes — completely. All payments are processed through Paystack (Nigeria) or Stripe (international), both of which are PCI-DSS Level 1 compliant. Your data is encrypted using TLS 1.3 and protected by 3D Secure verification. We never store card details on our servers."
+    },
+
+    {
+      "category": "Delivery & Shipping",
+      "q": "Do you deliver?",
+      "a": "Yes! We deliver nationwide to all 36 states in Nigeria with secure, insured shipping. Major cities like Benin, Lagos, Abuja, Port Harcourt, Warri, Asaba, Ibadan, and Kano are served regularly. International shipping is available on request — we've delivered to 4 countries so far."
+    },
+    {
+      "category": "Delivery & Shipping",
+      "q": "How long does delivery take?",
+      "a": "Delivery timelines depend on the item:\n• **In-stock items:** 3–7 working days within Nigeria\n• **Bespoke furniture:** 2–6 weeks production + delivery\n• **Custom doors (CNC bespoke):** ~2 weeks lead time\n• **Full room fit-outs:** 4–8 weeks\n• **Hotel/commercial projects:** Custom timeline based on scope\nYou can track your order status anytime — just ask me!"
+    },
+    {
+      "category": "Delivery & Shipping",
+      "q": "Can I track my order?",
+      "a": "Yes! I can give you real-time updates on:\n📦 Manufacturing status\n🚚 Shipping & delivery estimates\n🔧 Installation scheduling\nJust share your order number or the email/phone used at checkout, and I'll pull up the latest status."
+    },
+    {
+      "category": "Delivery & Shipping",
+      "q": "Do you ship internationally?",
+      "a": "Yes, we currently serve clients in 4 countries and can arrange international shipping on request. International orders are quoted individually based on destination, dimensions, and freight class. Reach out and I'll get you a complete delivered quote."
+    },
+
+    {
+      "category": "Customization & Design",
+      "q": "Can I customize the color or finish?",
+      "a": "Absolutely! Every piece can be customized in:\n• **Wood finish:** natural oil, matte, satin, high-gloss lacquer\n• **Color:** any RAL or Pantone color you choose\n• **Upholstery:** premium leather, linen, velvet, suede, or your own fabric\n• **Hardware:** brass, chrome, brushed nickel, matte black, gold\n• **Inlays:** chrome, gold, mother-of-pearl, LED backlit\nShare your vision and I'll suggest the best combinations."
+    },
+    {
+      "category": "Customization & Design",
+      "q": "Can I send my own design or sketch?",
+      "a": "Yes, please do! We love bringing client visions to life. You can upload a sketch, photo, Pinterest board, 3D model, or even a rough description — and our design team will translate it into a detailed CAD drawing for your approval before production begins. Send it through this chat or via WhatsApp at +234 803 685 0229."
+    },
+    {
+      "category": "Customization & Design",
+      "q": "Do you help with room planning?",
+      "a": "Absolutely — that's one of my favorite things to do! Just tell me:\n📐 Room dimensions (length × width × height)\n🎨 Your preferred style (modern, classic, royal, minimalist, Scandinavian, industrial, etc.)\n💰 Your budget\n👨‍👩‍👧 Who uses the space\nI'll generate a curated furniture plan with live pricing and even a 3D preview if you'd like!"
+    },
+
+    {
+      "category": "3D Preview & Technology",
+      "q": "Can I see the furniture in 3D?",
+      "a": "Yes! 🎨 Our 3D Virtual Design Preview (powered by WebGL) lets you rotate, scale, and change materials on selected products before you order. Just click 'View in 3D' on any signature piece, or tell me which item you'd like to preview and I'll load it for you."
+    },
+    {
+      "category": "3D Preview & Technology",
+      "q": "What technology do you use to make furniture?",
+      "a": "Our state-of-the-art workshop uses:\n🛠️ **CNC Router & Carving System** — precision cutting and intricate carving\n🔥 **Industrial Laser Cutter** — high-speed cuts for metal, acrylic, wood inlays\n📐 **Automated Edge Bander** — flawless edge finishing\n✨ **Precision Sanding System** — premium surface refinement\n🪵 **Dovetail Joinery System** — high-strength elegant joints\n🏭 **Integrated Manufacturing Floor** — coordinated end-to-end production\nThis tech-driven approach means consistent quality, precise customization, and faster turnaround."
+    },
+    {
+      "category": "3D Preview & Technology",
+      "q": "Do you have an AI design assistant?",
+      "a": "You're already chatting with me! 🤖 I'm Duct AI — available 24/7 across web, WhatsApp, and email. I can recommend furniture, generate instant quotes, preview rooms in 3D, track orders, and answer any question about our products and services. How can I help you today?"
+    },
+
+    {
+      "category": "Warranty & After-Sales",
+      "q": "Do you offer a warranty?",
+      "a": "Yes! All our furniture comes with a **5-year structural warranty** covering frame, joinery, and core construction. Custom doors are backed by expert support and hardware warranties from our suppliers. Upholstery and finishes carry separate care guidelines. We stand behind every piece we make."
+    },
+    {
+      "category": "Warranty & After-Sales",
+      "q": "What if my furniture gets damaged?",
+      "a": "Don't worry — we're here to help! If damage occurs during delivery, report it within 48 hours and we'll repair or replace it free of charge. For wear-and-tear issues within the warranty period, our team will assess and repair at no cost. After warranty, we offer affordable refurbishment services. Just message me with photos and I'll log the request immediately."
+    },
+    {
+      "category": "Warranty & After-Sales",
+      "q": "How do I care for my furniture?",
+      "a": "Great question! General tips:\n• 🪵 **Wood:** Dust weekly with a soft cloth; polish quarterly with beeswax or recommended oil. Avoid direct sunlight and humidity extremes.\n• 🛋️ **Leather:** Wipe with a damp cloth; condition every 6 months.\n• 🧶 **Fabric upholstery:** Vacuum weekly; treat spills immediately with mild soap.\n• ✨ **High-gloss surfaces:** Use only microfiber cloths and non-abrasive cleaners.\n• 🚪 **Doors:** Lubricate hinges yearly; touch up finish as needed.\nWe include a detailed care guide with every delivery."
+    },
+
+    {
+      "category": "Cancellations & Returns",
+      "q": "Can I cancel my order?",
+      "a": "Cancellation depends on production stage:\n• **Before production starts:** Full refund (minus 5% processing fee)\n• **Within 7 days of deposit:** 80% refund\n• **After production begins:** Refunds limited to materials not yet used\n• **Custom/bespoke pieces:** Generally non-refundable once production starts (since each piece is made uniquely for you)\nLet me know your order number and I'll check what's possible."
+    },
+    {
+      "category": "Cancellations & Returns",
+      "q": "What is your return policy?",
+      "a": "Because nearly all our pieces are bespoke (made to your exact specs), returns are limited. However, if a piece arrives damaged, defective, or significantly different from what you ordered, we'll repair, replace, or refund — your choice. Standard catalog items can be returned within 7 days of delivery in original condition (return shipping at customer cost)."
+    },
+
+    {
+      "category": "Sustainability",
+      "q": "Are you environmentally responsible?",
+      "a": "Yes, deeply! 🌱 We align with UN Sustainable Development Goals 5, 8, 9, 12, and 13. Our practices include:\n• Using ~96% of incoming wood material (minimal waste)\n• Reusing and recycling manufacturing byproducts\n• Reducing noxious gas emissions in production\n• Sourcing sustainable local materials whenever possible\n• Training and employing local artisans (especially youth and underprivileged communities)\nWe believe luxury and responsibility belong together."
+    }
+  ],
+
+  "products": [
+    {"name": "Royal Chesterfield Sofa Set", "category": "Chairs & Seating", "price_ngn": 2800000, "description": "Elegant chesterfield sofa set with premium leather upholstery and classic tufted design."},
+    {"name": "Luxury Royal Lounge Chair", "category": "Chairs & Seating", "price_ngn": 890000, "description": "Luxurious royal lounge chair with premium comfort and classic styling."},
+    {"name": "Elegant Two-Seater Chair — Royal", "category": "Chairs & Seating", "price_ngn": 1450000, "description": "Elegant royal two-seater chair for sophisticated seating arrangements."},
+    {"name": "Mahogany Dining Table with Quartz Top", "category": "Dining & Tables", "price_ngn": 3200000, "description": "Beautiful mahogany dining table featuring a stunning quartz top for modern elegance."},
+    {"name": "Modern Glass Top Dining Set", "category": "Dining & Tables", "price_ngn": 3400000, "description": "Contemporary dining set with glass top and comfortable seating for 6."},
+    {"name": "Master Bedroom Suite - Tufted Headboard", "category": "Bedroom", "price_ngn": 4800000, "description": "Luxury master bedroom suite with tufted headboard and premium finishes."},
+    {"name": "Elegance Master Bedroom - Contemporary Style", "category": "Bedroom", "price_ngn": 3900000, "description": "Contemporary master bedroom with elegant design and modern aesthetics."},
+    {"name": "Ivory 2-Drawer Bedside Cabinet", "category": "Bedroom", "price_ngn": 7800000, "description": "Elegant ivory bedside cabinet with two drawers and gloss white finish."},
+    {"name": "Executive Manager's Desk & Credenza System", "category": "Office & Commercial", "price_ngn": 2600000, "description": "Professional executive desk and credenza system for modern offices."},
+    {"name": "Premium Reception Counter System", "category": "Office & Commercial", "price_ngn": 2900000, "description": "Elegant reception counter system perfect for corporate environments."},
+    {"name": "Mahogany Louvred Double Door", "category": "Doors", "price_ngn": 750000, "description": "Beautiful mahogany louvred double door with intricate detailing and ventilation."},
+    {"name": "Milk White Mirror-Insert Door", "category": "Doors", "price_ngn": 580000, "description": "Stunning milk white door with full-length mirror inserts."},
+    {"name": "Modern Grey Geometric Door", "category": "Doors", "price_ngn": 650000, "description": "Modern geometric door design in sophisticated grey tones."},
+    {"name": "Heritage Carved Double Door", "category": "Doors", "price_ngn": 850000, "description": "Heritage-style carved double door with traditional craftsmanship."},
+    {"name": "White Composite Door — Modern Style", "category": "Doors", "price_ngn": 320000, "description": "Modern white composite door with sleek minimalist design."},
+    {"name": "Black Mahogany Entry Door", "category": "Doors", "price_ngn": 580000, "description": "Elegant black mahogany entry door for grand entrances."},
+    {"name": "Patterned Wooden Door", "category": "Doors", "price_ngn": 750000, "description": "Intricately patterned wooden door with traditional appeal."},
+    {"name": "Premium Pivot Entrance Door", "category": "Doors", "price_ngn": 1850000, "description": "Centre-pivot mechanism with natural hardwood and precision engineering."},
+    {"name": "Grand Double Entrance Door", "category": "Doors", "price_ngn": 4200000, "description": "Double-leaf with sidelights, natural walnut, smart lock compatible."},
+    {"name": "Modern Interior Door", "category": "Doors", "price_ngn": 680000, "description": "Dark mahogany veneer with aluminium channel inlays and security mortice lock."},
+    {"name": "CNC Hexagon Panel Door", "category": "Doors", "price_ngn": 950000, "description": "Hand-routed CNC hexagon pattern in premium hardwood, fully bespoke."},
+    {"name": "TV Media Wall Unit - Premium Display", "category": "Storage & Media", "price_ngn": 1800000, "description": "Premium TV media wall unit for elegant entertainment setups."},
+    {"name": "White Modern TV Console — Minimalist", "category": "Storage & Media", "price_ngn": 1200000, "description": "Minimalist white modern TV console for clean aesthetics."},
+    {"name": "Sophisticated Dark TV Console", "category": "Storage & Media", "price_ngn": 1350000, "description": "Sophisticated dark TV console with elegant design."},
+    {"name": "Executive Bar & Wine Counter", "category": "Living Room", "price_ngn": 1200000, "description": "Sophisticated bar and wine counter for modern living spaces."},
+    {"name": "Premium Living Room Set", "category": "Living Room", "price_ngn": 3200000, "description": "Complete premium living room set for luxurious comfort."},
+    {"name": "Low Profile Coffee Table", "category": "Living Room", "price_ngn": 425000, "description": "Modern low profile coffee table for contemporary spaces."},
+    {"name": "Prestige Executive Coffee Table", "category": "Living Room", "price_ngn": 3850000, "original_price_ngn": 4500000, "description": "Solid mahogany with high-gloss lacquer finish, dual chrome inlays and floating return."},
+    {"name": "Red Modern Kitchen Cabinet", "category": "Kitchen", "price_ngn": 1850000, "description": "Vibrant red modern kitchen cabinet with contemporary design."},
+    {"name": "Premium Kitchen Sink Unit", "category": "Kitchen", "price_ngn": 425000, "description": "Premium kitchen sink unit with high-quality materials."},
+    {"name": "Nordic TV Console with Multiple Storages", "category": "Storage & Media", "price_ngn": 4200000, "description": "Scandinavian-inspired TV stand with ample storage and minimalist design."}
+  ],
+
+  "categories": [
+    "All", "Bedroom", "Living Room", "Office", "Doors", "Kitchen", "Dining & Tables", "Chairs & Seating", "Storage & Media", "Office & Commercial", "Bespoke Pieces"
+  ],
+
+  "design_tips": [
+    "Use light, neutral colors (cream, ivory, soft grey) on walls and large furniture to make small rooms feel more spacious.",
+    "Combine textures — leather, linen, velvet, and wood — to create a layered, luxurious look.",
+    "Add mirrors strategically to reflect natural light and visually double your space.",
+    "Choose one statement piece per room (a chesterfield sofa, a CNC patterned door, a quartz dining table) and let it anchor the design.",
+    "Stick to a 60-30-10 color rule: 60% dominant color, 30% secondary, 10% accent.",
+    "For luxury bedrooms, invest in a tufted headboard — it instantly elevates the entire room.",
+    "Match your door style to your home's architecture: pivot doors for modern, carved doors for classical, louvred for tropical climates.",
+    "In open-plan spaces, use TV consoles or bar counters as natural room dividers.",
+    "Layer lighting: ambient (ceiling), task (lamps), and accent (LED strips) for depth and warmth.",
+    "Choose mahogany or walnut for timeless durability; lacquer finishes for modern flair.",
+    "Always measure twice — bring your room dimensions when consulting our designers.",
+    "For dining areas, allow at least 90cm of clearance around the table for comfortable seating.",
+    "Pair high-gloss surfaces with matte textures to prevent visual overload.",
+    "Use rugs to define seating areas in large living rooms and add warmth.",
+    "Don't overlook hardware — brass, chrome, or matte black handles can transform a cabinet's character.",
+    "When mixing wood tones, keep them within 2 shades of each other for harmony.",
+    "Floating furniture (wall-mounted TV consoles, vanities) makes floors feel larger and easier to clean.",
+    "For executive offices, an L-shaped desk with credenza maximizes both workspace and storage.",
+    "In Nigerian climates, prioritize hardwoods like mahogany and walnut — they handle humidity better than softer woods.",
+    "A bold front door (black mahogany, grand pivot) is the easiest way to make a powerful first impression."
+  ],
+
+  "style_guides": {
+    "modern": "Clean lines, neutral palettes, high-gloss or matte finishes, minimal ornamentation. Best with our Modern Interior Doors, Glass Top Dining Sets, and White Minimalist TV Consoles.",
+    "classic_royal": "Carved details, tufted upholstery, rich woods, brass/gold accents. Best with our Royal Chesterfield Sofa, Heritage Carved Doors, and Mahogany Dining Tables.",
+    "contemporary": "Mix of modern and traditional, warm neutrals, statement pieces. Best with our Elegance Master Bedroom and Sophisticated Dark TV Console.",
+    "minimalist": "Less is more — clean surfaces, hidden storage, monochrome palettes. Best with our White Composite Doors, Low Profile Coffee Tables.",
+    "scandinavian": "Light woods, white walls, cozy textures, functional design. Best with our Nordic TV Console.",
+    "industrial": "Raw materials, exposed metal, dark woods, edgy hardware. Best with custom pieces — ask me to design one!",
+    "afrocentric_luxury": "Rich hardwoods, bold patterns, handcrafted details celebrating African heritage. Best with our CNC Patterned Doors and bespoke carved pieces."
+  },
+
+  "recommendation_engine_prompts": [
+    {
+      "scenario": "small_living_room",
+      "trigger_phrases": ["small living room", "tiny apartment", "compact space"],
+      "response": "For a compact living room, I'd recommend:\n1. **Elegant Two-Seater Chair — Royal** (₦1,450,000) — luxurious without overwhelming the space\n2. **Low Profile Coffee Table** (₦425,000) — keeps sightlines open\n3. **White Modern TV Console — Minimalist** (₦1,200,000) — wall-mounted look\nTotal: ~₦3,075,000. Add a large mirror on one wall to double the perceived space. Want me to generate a 3D preview?"
+    },
+    {
+      "scenario": "luxury_master_bedroom",
+      "trigger_phrases": ["master bedroom", "luxury bedroom", "bedroom suite"],
+      "response": "For a true luxury master bedroom, I'd suggest:\n1. **Master Bedroom Suite with Tufted Headboard** (₦4,800,000)\n2. **Ivory 2-Drawer Bedside Cabinets** × 2 (₦7,800,000 each — or ask for a smaller bespoke version)\n3. **Custom wardrobe** — quoted based on dimensions\n4. **A statement Heritage Carved Door** (₦850,000) for the entrance\nWant me to design a complete suite for your room dimensions?"
+    },
+    {
+      "scenario": "executive_office",
+      "trigger_phrases": ["office furniture", "executive office", "ceo office"],
+      "response": "For a powerful executive office:\n1. **Executive Manager's Desk & Credenza System** (₦2,600,000)\n2. **Luxury Royal Lounge Chair** (₦890,000) for guests\n3. **Premium Reception Counter System** (₦2,900,000) for the lobby\n4. **Black Mahogany Entry Door** (₦580,000) for that commanding first impression\nTotal package: ~₦6,970,000. Discounts available for full office fit-outs!"
+    },
+    {
+      "scenario": "hotel_furnishing",
+      "trigger_phrases": ["hotel", "hospitality", "guest house", "short let"],
+      "response": "We specialize in hotel and hospitality fit-outs! For each room you'll typically need: bed frame with headboard, wardrobe, bedside tables, luggage rack, desk/vanity, and a custom door. We offer significant volume discounts on orders of 10+ rooms. Share your project details (number of rooms, location, target opening date) and I'll connect you with our commercial team for a tailored proposal."
+    },
+    {
+      "scenario": "kitchen_remodel",
+      "trigger_phrases": ["kitchen", "cabinet", "kitchen remodel"],
+      "response": "For a stunning kitchen, consider:\n1. **Red Modern Kitchen Cabinet** (₦1,850,000) — or any color you choose\n2. **Premium Kitchen Sink Unit** (₦425,000)\n3. **Custom granite/quartz worktops** — quoted by length\n4. **Soft-close drawers and brass handles** as standard upgrades\nShare your kitchen layout (L-shape, U-shape, island, galley) and I'll design a complete cabinet system."
+    }
+  ],
+
+  "human_handoff": {
+    "triggers": ["speak to human", "talk to person", "human agent", "real person", "speak to sales", "complaint", "manager", "complicated", "i need help from someone"],
+    "response": "Of course — I'll connect you to our human team right away. 👨‍💼 You can reach us through:\n📞 **WhatsApp:** +234 803 685 0229 (fastest, 24/7)\n📧 **Email:** hello@interiorductltd.com\n📞 **Phone:** +234 803 685 0229\n🏢 **Showroom visits:** By appointment in Benin City\nOur business hours are Mon–Sat, 8am–6pm WAT. Would you like me to take a message for you in the meantime?"
+  },
+
+  "fallback_responses": [
+    "Hmm, I want to make sure I give you the right answer. Could you rephrase that or tell me a bit more about what you're looking for?",
+    "I'm not 100% sure I understood that. Are you asking about a product, a price, delivery, or something else? I'm happy to dig deeper!",
+    "Great question! Let me connect you to our human team for that one — message us on WhatsApp at +234 803 685 0229 and we'll respond within minutes.",
+    "I'd love to help with that! Could you give me a little more detail — for example, the room, the product type, or the issue you're facing?"
+  ],
+
+  "conversation_starters": [
+    "What room are you furnishing today?",
+    "Are you looking for furniture, doors, or a complete fit-out?",
+    "Do you have a specific style in mind — modern, classic, royal, or minimalist?",
+    "Would you like to see any of our bestsellers?",
+    "Do you have a budget I should design within?",
+    "Want me to generate a quick 3D preview of any piece?",
+    "Should I send you our latest catalog via WhatsApp?"
+  ],
+
+  "promotions_and_features": [
+    "🏭 **Factory Direct Pricing** — no middlemen, no markup",
+    "🎨 **100% Bespoke** — every piece customized to your exact spec",
+    "🚚 **Nationwide Delivery** — insured shipping to all 36 Nigerian states",
+    "🛡️ **5-Year Structural Warranty** on all furniture",
+    "🤖 **24/7 AI Design Assistant** (that's me!)",
+    "🎯 **3D Room Visualisation** before you order",
+    "💳 **Paystack & Stripe Payments** in NGN, USD, GBP, EUR",
+    "📱 **WhatsApp Consultation** anytime"
+  ]
+}
+
+

@@ -1,0 +1,215 @@
+{
+  "about": "Interior Duct Ltd is a leader in bespoke interior solutions, blending craftsmanship and technology.",
+  "contact": "Contact us at info@interiorduct.com or +234-800-123-4567.",
+  "homepage": "Welcome to Interior Duct Ltd! Luxury furniture and interiors.",
+  "products": [
+    {
+      "category": "Chairs & Seating",
+      "description": "Elegant chesterfield sofa set with premium leather upholstery and classic design.",
+      "id": 1,
+      "image": "Chair_Royal.jpg",
+      "name": "Royal Chesterfield Sofa Set",
+      "price": "NGN 2,800,000"
+    },
+    {
+      "category": "Dining & Tables",
+      "description": "Beautiful mahogany dining table featuring a stunning quartz top for modern elegance.",
+      "id": 2,
+      "image": "Dining_Set.jpg",
+      "name": "Mahogany Dining Table with Quartz Top",
+      "price": "NGN 3,200,000"
+    },
+    {
+      "category": "Dining & Tables",
+      "description": "Contemporary dining set with glass top and comfortable seating.",
+      "id": 3,
+      "image": "Dining_chari_and_table.jpg",
+      "name": "Modern Glass Top Dining Set",
+      "price": "NGN 3,400,000"
+    },
+    {
+      "category": "Bedroom",
+      "description": "Luxury master bedroom suite with tufted headboard and premium finishes.",
+      "id": 4,
+      "image": "IMG_20251216_WA0032.jpg",
+      "name": "Master Bedroom Suite - Tufted Headboard",
+      "price": "NGN 4,800,000"
+    },
+    {
+      "category": "Bedroom",
+      "description": "Contemporary master bedroom with elegant design and modern aesthetics.",
+      "id": 5,
+      "image": "IMG_20251229_WA0006.jpg",
+      "name": "Elegance Master Bedroom - Contemporary Style",
+      "price": "NGN 3,900,000"
+    },
+    {
+      "category": "Office & Commercial",
+      "description": "Professional executive desk and credenza system for modern offices.",
+      "id": 6,
+      "image": "IMG_20251217_WA0007.jpg",
+      "name": "Executive Manager's Desk & Credenza System",
+      "price": "NGN 2,600,000"
+    },
+    {
+      "category": "Office & Commercial",
+      "description": "Elegant reception counter system perfect for corporate environments.",
+      "id": 8,
+      "image": "Reception_Counter.jpg",
+      "name": "Premium Reception Counter System",
+      "price": "NGN 2,900,000"
+    },
+    {
+      "category": "Doors",
+      "description": "Beautiful mahogany louvred double door with intricate detailing.",
+      "id": 8,
+      "image": "Door_White.jpg",
+      "name": "Mahogany Louvred Double Door",
+      "price": "NGN 750,000"
+    },
+    {
+      "category": "Doors",
+      "description": "Stunning milk white door with mirror inserts for added elegance.",
+      "id": 9,
+      "image": "door_milk_color.jpg",
+      "name": "Milk White Mirror-Insert Door",
+      "price": "NGN 580,000"
+    },
+    {
+      "category": "Doors",
+      "description": "Modern geometric door design in sophisticated grey tones.",
+      "id": 10,
+      "image": "Door_black.jpg",
+      "name": "Modern Grey Geometric Door",
+      "price": "NGN 650,000"
+    },
+    {
+      "category": "Doors",
+      "description": "Heritage-style carved double door with traditional craftsmanship.",
+      "id": 11,
+      "image": "Door_Pattern.jpg",
+      "name": "Heritage Carved Double Door",
+      "price": "NGN 850,000"
+    },
+    {
+      "category": "Storage & Media",
+      "description": "Premium TV media wall unit for elegant entertainment setups.",
+      "id": 12,
+      "image": "IMG_20251216_WA0033.jpg",
+      "name": "TV Media Wall Unit - Premium Display",
+      "price": "NGN 1,800,000"
+    },
+    {
+      "category": "Living Room",
+      "description": "Sophisticated bar and wine counter for modern living spaces.",
+      "id": 13,
+      "image": "IMG_20251229_WA0008.jpg",
+      "name": "Executive Bar & Wine Counter",
+      "price": "NGN 1,200,000"
+    },
+    {
+      "category": "Kitchen",
+      "description": "Vibrant red modern kitchen cabinet with contemporary design.",
+      "id": 14,
+      "image": "Kitchen_Cabinet.jpg",
+      "name": "Red Modern Kitchen Cabinet",
+      "price": "NGN 1,850,000"
+    },
+    {
+      "category": "Kitchen",
+      "description": "Premium kitchen sink unit with high-quality materials.",
+      "id": 15,
+      "image": "Kitchen_sink.jpg",
+      "name": "Premium Kitchen Sink Unit",
+      "price": "NGN 425,000"
+    },
+    {
+      "category": "Doors",
+      "description": "Modern white composite door with sleek design.",
+      "id": 16,
+      "image": "Door White Composite.jpg",
+      "name": "White Composite Door — Modern Style",
+      "price": "NGN 320,000"
+    },
+    {
+      "category": "Doors",
+      "description": "Elegant black mahogany entry door for grand entrances.",
+      "id": 17,
+      "image": "Door Black Mahogany.jpg",
+      "name": "Black Mahogany Entry Door",
+      "price": "NGN 580,000"
+    },
+    {
+      "category": "Doors",
+      "description": "Intricately patterned wooden door with traditional appeal.",
+      "id": 18,
+      "image": "Door Patterned.jpg",
+      "name": "Patterned Wooden Door",
+      "price": "NGN 750,000"
+    },
+    {
+      "category": "Living Room",
+      "description": "Complete premium living room set for luxurious comfort.",
+      "id": 19,
+      "image": "Living_Room_set.jpg",
+      "name": "Premium Living Room Set",
+      "price": "NGN 3,200,000"
+    },
+    {
+      "category": "Chairs & Seating",
+      "description": "Luxurious royal lounge chair with premium comfort.",
+      "id": 20,
+      "image": "Chair_Royal.jpg",
+      "name": "Luxury Royal Lounge Chair",
+      "price": "NGN 890,000"
+    },
+    {
+      "category": "Chairs & Seating",
+      "description": "Elegant royal two-seater chair for sophisticated seating.",
+      "id": 21,
+      "image": "Chair_Royal_2_seater.jpg",
+      "name": "Elegant Two-Seater Chair — Royal",
+      "price": "NGN 1,450,000"
+    },
+    {
+      "category": "Living Room",
+      "description": "Modern low profile coffee table for contemporary spaces.",
+      "id": 22,
+      "image": "Table_coffee_low.jpg",
+      "name": "Low Profile Coffee Table",
+      "price": "NGN 425,000"
+    },
+    {
+      "category": "Storage & Media",
+      "description": "Minimalist white modern TV console for clean aesthetics.",
+      "id": 23,
+      "image": "tv_console_white1.jpg",
+      "name": "White Modern TV Console — Minimalist",
+      "price": "NGN 1,200,000"
+    },
+    {
+      "category": "Storage & Media",
+      "description": "Sophisticated dark TV console with elegant design.",
+      "id": 24,
+      "image": "tv_console2.jpg",
+      "name": "Sophisticated Dark TV Console",
+      "price": "NGN 1,350,000"
+    },
+    {
+      "category": "Tables",
+      "description": "Description",
+      "id": 1776756764390,
+      "image": "placeholder.jpg",
+      "name": "Office_Desk.jpg",
+      "price": "NGN 9999.99"
+    },
+    {
+      "category": "Office Furnture",
+      "description": "Executive Office Desk — Solid Hardwood with Steel Accents",
+      "id": 1776756938277,
+      "image": "Office_Desk.jpg",
+      "name": "Executive Office Desk — Solid Hardwood with Steel Accents",
+      "price": "NGN 9999.99"
+    }
+  ]
+}
