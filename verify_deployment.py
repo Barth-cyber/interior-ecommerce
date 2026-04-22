@@ -109,21 +109,30 @@ def check_requirements():
         print_error("requirements.txt not found")
         return False
     
-    content = req_path.read_text().strip().split('\n')
+    try:
+        content = req_path.read_text(encoding='utf-8-sig').strip().split('\n')
+    except:
+        content = req_path.read_text(encoding='utf-8', errors='ignore').strip().split('\n')
     
     print_success(f"Found {len(content)} packages")
     
-    # Check for essential packages
+    # Check for essential packages (case-insensitive, with version specifiers)
     essential = {
         'Flask': False,
         'gunicorn': False,
     }
     
     for line in content:
+        line_lower = line.lower().strip()
         for pkg in essential:
-            if line.startswith(pkg):
+            if line_lower.startswith(pkg.lower()):
                 essential[pkg] = True
-                print_success(f"Includes {pkg}")
+                # Extract version if present
+                if '==' in line:
+                    version = line.split('==')[1]
+                    print_success(f"Includes {pkg} ({version})")
+                else:
+                    print_success(f"Includes {pkg}")
     
     all_ok = all(essential.values())
     
@@ -235,7 +244,11 @@ def check_port_hardcoding():
         if '.venv' in str(py_file):
             continue
         
-        content = py_file.read_text()
+        try:
+            content = py_file.read_text(encoding='utf-8', errors='ignore')
+        except:
+            continue
+            
         for pattern, description in hardcoded_checks:
             if pattern in content:
                 # Skip if it's in a comment or docstring
