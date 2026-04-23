@@ -58,7 +58,7 @@ class S3Storage:
                 file_obj,
                 self.bucket_name,
                 key,
-                ExtraArgs={'ContentType': file_obj.content_type or 'application/octet-stream'}
+                ExtraArgs={'ContentType': getattr(file_obj, 'content_type', None) or 'application/octet-stream'}
             )
             
             # Generate public URL
