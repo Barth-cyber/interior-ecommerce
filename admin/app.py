@@ -18,26 +18,13 @@ try:
 except ImportError:
     model = None
 
-# ...existing code...
-
-from flask import Flask
-from flask_cors import CORS
-import os
- 
-app = Flask(__name__)
-
-from flask import Flask, request, redirect, url_for, send_from_directory, jsonify, session
-from werkzeug.security import check_password_hash, generate_password_hash
-from werkzeug.utils import secure_filename
-from functools import wraps
-import os
-import json
-import difflib
+# Import S3 storage
 try:
-    from sentence_transformers import SentenceTransformer, util
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-except ImportError:
-    model = None
+    from s3_storage import init_s3
+    s3_storage = init_s3()
+except Exception as e:
+    print(f"S3 initialization warning: {e}")
+    s3_storage = None
 
 app = Flask(__name__, static_folder=None)
 app.config.update({
@@ -53,12 +40,13 @@ ADMIN_PASSWORD_HASH = os.environ.get(
     'scrypt:32768:8:1$yqcKe3f2fiH8izeD$e4d9d627698e8f6d14d569375589c1f2d7236e3ec875e0c9ded18542bbcd72b58853c8b187696d3d0d49b2e39d6501a43ce8469303dbb085ad34ec574382d74d'
 )
 
+# Fallback local upload folder
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'IDL_Product_branding')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 ALLOWED_3D = {'glb', 'gltf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Ensure upload folder exists
+# Ensure upload folder exists (for local fallback)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 CONTENT_PATH = os.path.join(os.path.dirname(__file__), 'content.json')
@@ -198,11 +186,26 @@ def upload_image():
         return 'No file part', 400
     files = request.files.getlist('images')
     saved = []
+    
     for file in files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            saved.append(filename)
+            
+            # Try S3 first, fallback to local
+            if s3_storage:
+                try:
+                    url = s3_storage.upload_file(file, filename, 'images/')
+                    saved.append({'filename': filename, 'url': url, 'storage': 'S3'})
+                except Exception as e:
+                    app.logger.error(f"S3 upload failed: {e}, using local storage")
+                    file.seek(0)  # Reset file pointer
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    saved.append({'filename': filename, 'storage': 'local'})
+            else:
+                # Use local storage
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                saved.append({'filename': filename, 'storage': 'local'})
+    
     return jsonify({'uploaded': saved})
 
 @app.route('/upload-model', methods=['POST'])
@@ -212,11 +215,26 @@ def upload_model():
         return 'No file part', 400
     files = request.files.getlist('models')
     saved = []
+    
     for file in files:
         if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_3D:
             filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            saved.append(filename)
+            
+            # Try S3 first, fallback to local
+            if s3_storage:
+                try:
+                    url = s3_storage.upload_file(file, filename, 'models/')
+                    saved.append({'filename': filename, 'url': url, 'storage': 'S3'})
+                except Exception as e:
+                    app.logger.error(f"S3 model upload failed: {e}, using local storage")
+                    file.seek(0)  # Reset file pointer
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    saved.append({'filename': filename, 'storage': 'local'})
+            else:
+                # Use local storage
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                saved.append({'filename': filename, 'storage': 'local'})
+    
     return jsonify({'uploaded': saved})
 
 @app.route('/delete', methods=['POST'])
@@ -226,11 +244,20 @@ def delete_image():
     filename = data.get('filename')
     if not filename or not allowed_file(filename):
         return 'Invalid filename', 400
+    
+    # Delete from S3 if available
+    if s3_storage:
+        try:
+            s3_storage.delete_file(filename, 'images/')
+        except Exception as e:
+            app.logger.error(f"S3 delete failed: {e}")
+    
+    # Also delete from local fallback
     path = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.exists(path):
         os.remove(path)
-        return jsonify({'deleted': filename})
-    return 'File not found', 404
+    
+    return jsonify({'deleted': filename})
 
 @app.route('/delete-model', methods=['POST'])
 @login_required
@@ -239,11 +266,20 @@ def delete_model():
     filename = data.get('filename')
     if not filename or '.' not in filename or filename.rsplit('.', 1)[1].lower() not in ALLOWED_3D:
         return 'Invalid filename', 400
+    
+    # Delete from S3 if available
+    if s3_storage:
+        try:
+            s3_storage.delete_file(filename, 'models/')
+        except Exception as e:
+            app.logger.error(f"S3 delete failed: {e}")
+    
+    # Also delete from local fallback
     path = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.exists(path):
         os.remove(path)
-        return jsonify({'deleted': filename})
-    return 'File not found', 404
+    
+    return jsonify({'deleted': filename})
 
 @app.route('/idl-images/<filename>')
 def serve_image(filename):
