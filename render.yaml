@@ -16,8 +16,8 @@ services:
         value: "admin"
       - key: ADMIN_PASSWORD_HASH
         sync: false   # Set manually in Render dashboard
-      # ── Anthropic AI (Chat Agent + Recommender) ───────────────────────────
-      - key: ANTHROPIC_API_KEY
+      # ── Google Gemini AI — FREE tier (Chat Agent + Recommender) ───────────────────────────
+      - key: GEMINI_API_KEY
         sync: false   # Set manually in Render dashboard
       # ── AWS S3 (Image & 3D model storage) ────────────────────────────────
       - key: AWS_ACCESS_KEY_ID
