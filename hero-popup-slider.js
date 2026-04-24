@@ -6,30 +6,79 @@ let bedroomProducts = [];
 let doorsProducts = [];
 let livingProducts = [];
 let officeProducts = [];
+let aiCarouselInterval;
+
+function safeAttributeString(value) {
+  return String(value || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
 async function loadProducts() {
+  const sampleProducts = [
+    {
+      name: 'Royal Chesterfield Sofa Set',
+      img: 'IDL_Product_branding/Chair_Royal.jpg',
+      desc: 'Elegant chesterfield sofa set with premium leather upholstery and classic design.',
+      price: 'NGN 2,800,000',
+      category: 'Chairs & Seating'
+    },
+    {
+      name: 'Mahogany Dining Table',
+      img: 'IDL_Product_branding/Dining_Set.jpg',
+      desc: 'Modern dining table with premium wood finish and glass top.',
+      price: 'NGN 3,200,000',
+      category: 'Dining & Tables'
+    },
+    {
+      name: 'Tufted Master Bedroom Suite',
+      img: 'IDL_Product_branding/IMG_20251216_WA0032.jpg',
+      desc: 'Luxury bedroom suite with plush headboard and bespoke finishes.',
+      price: 'NGN 4,800,000',
+      category: 'Bedroom'
+    },
+    {
+      name: 'Executive Reception Counter',
+      img: 'IDL_Product_branding/Reception_Counter.jpg',
+      desc: 'Statement reception counter perfect for high-end corporate spaces.',
+      price: 'NGN 2,900,000',
+      category: 'Office & Commercial'
+    },
+    {
+      name: 'Premium Mahogany Door',
+      img: 'IDL_Product_branding/Door_White.jpg',
+      desc: 'Hand-crafted mahogany door with elegant detailing and finish.',
+      price: 'NGN 750,000',
+      category: 'Doors'
+    }
+  ];
+
   try {
     const res = await fetch('/content');
     const data = await res.json();
-    heroPopupProducts = (data.products || []).map(p => ({
+    const products = Array.isArray(data.products) ? data.products : [];
+    heroPopupProducts = products.length ? products.map(p => ({
       name: p.name,
-      img: `/idl-images/${p.image}`,
+      img: `IDL_Product_branding/${p.image}`,
       desc: p.description,
       price: p.price,
       category: p.category
-    }));
-    initializeSliders();
-    if (heroPopupProducts.length > 0) {
-      renderHeroPopupSlides();
-      updateHeroPopupSlider();
-      startHeroPopupAuto();
-    }
+    })) : sampleProducts;
   } catch (e) {
     console.error('Failed to load products:', e);
-    // Fallback to empty
-    heroPopupProducts = [];
-    initializeSliders();
+    heroPopupProducts = sampleProducts;
   }
+
+  initializeSliders();
+  if (heroPopupProducts.length > 0) {
+    renderHeroPopupSlides();
+    updateHeroPopupSlider();
+    startHeroPopupAuto();
+  }
+  refreshAICarousel();
 }
 
 function initializeSliders() {
@@ -71,7 +120,10 @@ function renderSeatingSlides(products) {
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
         <div style="font-size:1.1rem;color:#7B5C3E;font-weight:600;margin-bottom:.5rem;">${p.price}</div>
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
-        <button class="btn btn-brown" style="margin-top:1.2rem;" onclick="openWhatsApp('${p.name}')">Request Quote</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -88,7 +140,10 @@ function renderDiningSlides(products) {
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
         <div style="font-size:1.1rem;color:#7B5C3E;font-weight:600;margin-bottom:.5rem;">${p.price}</div>
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
-        <button class="btn btn-brown" style="margin-top:1.2rem;" onclick="openWhatsApp('${p.name}')">Request Quote</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -105,7 +160,10 @@ function renderBedroomSlides(products) {
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
         <div style="font-size:1.1rem;color:#7B5C3E;font-weight:600;margin-bottom:.5rem;">${p.price}</div>
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
-        <button class="btn btn-brown" style="margin-top:1.2rem;" onclick="openWhatsApp('${p.name}')">Request Quote</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -122,7 +180,10 @@ function renderDoorsSlides(products) {
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
         <div style="font-size:1.1rem;color:#7B5C3E;font-weight:600;margin-bottom:.5rem;">${p.price}</div>
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
-        <button class="btn btn-brown" style="margin-top:1.2rem;" onclick="openWhatsApp('${p.name}')">Request Quote</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -139,7 +200,10 @@ function renderLivingSlides(products) {
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
         <div style="font-size:1.1rem;color:#7B5C3E;font-weight:600;margin-bottom:.5rem;">${p.price}</div>
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
-        <button class="btn btn-brown" style="margin-top:1.2rem;" onclick="openWhatsApp('${p.name}')">Request Quote</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -156,7 +220,10 @@ function renderOfficeSlides(products) {
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
         <div style="font-size:1.1rem;color:#7B5C3E;font-weight:600;margin-bottom:.5rem;">${p.price}</div>
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
-        <button class="btn btn-brown" style="margin-top:1.2rem;" onclick="openWhatsApp('${p.name}')">Request Quote</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -273,13 +340,16 @@ function renderHeroPopupSlides() {
   if (!track) return;
   track.innerHTML = heroPopupProducts.map((p, i) => `
     <div class="hero-popup-slide fade-up" style="min-width:100%;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,0.97);box-shadow:0 8px 32px rgba(27,58,107,0.12);border-radius:12px;transition:opacity 1.2s, transform 1.2s;max-height:420px;overflow:hidden;gap:2rem;flex-wrap:nowrap;">
-      <img src="${encodeURI(p.img)}" alt="${p.name}" style="max-width:220px;width:100%;max-height:220px;height:220px;object-fit:cover;border-radius:8px;flex-shrink:0;box-shadow:0 2px 12px rgba(13,27,42,0.08);cursor:pointer;" onclick="openProductModal('${p.name}', '${p.img}', '${p.price}', '${p.category}')">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" style="max-width:220px;width:100%;max-height:220px;height:220px;object-fit:cover;border-radius:8px;flex-shrink:0;box-shadow:0 2px 12px rgba(13,27,42,0.08);cursor:pointer;" onclick="openProductModal('${safeAttributeString(p.name)}', '${safeAttributeString(p.img)}', '${safeAttributeString(p.price)}', '${safeAttributeString(p.category)}')">
       <div class="hero-popup-content" style="flex:1;min-width:250px;">
         <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#1B3A6B;margin-bottom:.5rem;">${p.name}</div>
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
         <div style="font-size:1.1rem;color:#7B5C3E;font-weight:600;margin-bottom:.5rem;">${p.price}</div>
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
-        <button class="btn btn-brown" style="margin-top:1.2rem;" onclick="openWhatsApp('${p.name}')">Request Quote</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -453,22 +523,13 @@ function initAIChatButton() {
 
 function initAICarousel() {
   const track = document.getElementById('aiCarouselTrack');
+  if (!track) return;
   window.aiFeaturedProducts = heroPopupProducts.slice(0, 6);
   window.currentAIProductIndex = 0;
+  refreshAICarousel();
 
-  track.innerHTML = window.aiFeaturedProducts.map((p, i) => `
-    <div style="min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;cursor:pointer;transition:all 0.3s ease;" onclick="window.currentAIProductIndex=${i}; openWhatsApp(window.aiFeaturedProducts[${i}])">
-      <img src="${encodeURI(p.img)}" alt="${p.name}" style="width:180px;height:180px;object-fit:cover;border-radius:8px;margin-bottom:1rem;box-shadow:0 4px 12px rgba(13,27,42,0.15);">
-      <div style="text-align:center;">
-        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:#1B3A6B;margin-bottom:0.3rem;line-height:1.3;">${p.name}</div>
-        <div style="font-size:0.85rem;color:#7B5C3E;font-weight:600;margin-bottom:0.5rem;">${p.price}</div>
-        <div style="font-size:0.75rem;color:#999;text-transform:uppercase;">${p.category}</div>
-      </div>
-    </div>
-  `).join('');
-
-  // Auto-rotate carousel
-  setInterval(() => {
+  aiCarouselInterval = setInterval(() => {
+    if (!window.aiFeaturedProducts || window.aiFeaturedProducts.length === 0) return;
     window.currentAIProductIndex = (window.currentAIProductIndex + 1) % window.aiFeaturedProducts.length;
     track.style.transform = `translateX(-${window.currentAIProductIndex * 100}%)`;
     updateAIChatLink();
@@ -476,6 +537,31 @@ function initAICarousel() {
 
   updateAIChatLink();
 }
+
+function refreshAICarousel() {
+  const track = document.getElementById('aiCarouselTrack');
+  if (!track) return;
+  const products = (heroPopupProducts.length > 0 ? heroPopupProducts : [{
+    name: 'Loading products...',
+    img: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNGRkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxvYWRpbmcgLi4uPC90ZXh0Pjwvc3ZnPg=='
+  }]).slice(0, 6);
+  window.aiFeaturedProducts = products;
+  window.currentAIProductIndex = 0;
+
+  track.innerHTML = products.map((p, i) => `
+    <div style="min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;cursor:pointer;transition:all 0.3s ease;" onclick="window.currentAIProductIndex=${i}; openWhatsApp(window.aiFeaturedProducts[${i}])">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" style="width:180px;height:180px;object-fit:cover;border-radius:8px;margin-bottom:1rem;box-shadow:0 4px 12px rgba(13,27,42,0.15);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNGRkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxvYWRpbmcgLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <div style="text-align:center;">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:#1B3A6B;margin-bottom:0.3rem;line-height:1.3;">${p.name}</div>
+        <div style="font-size:0.85rem;color:#7B5C3E;font-weight:600;margin-bottom:0.5rem;">${p.price || ''}</div>
+        <div style="font-size:0.75rem;color:#999;text-transform:uppercase;">${p.category || 'Featured'}</div>
+      </div>
+    </div>
+  `).join('');
+
+  updateAIChatLink();
+}
+
 
 function toggleAIChat() {
   const container = document.getElementById('aiChatContainer');

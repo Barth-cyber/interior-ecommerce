@@ -9,8 +9,9 @@ import json
 import difflib
 import requests as http_requests
 
+ENV_FILE = os.path.join(os.path.dirname(__file__), '..', '.env')
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(ENV_FILE)
 
 # Import S3 storage
 try:
@@ -30,10 +31,90 @@ app.config.update({
 })
 
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD_HASH = os.environ.get(
-    'ADMIN_PASSWORD_HASH',
-    'scrypt:32768:8:1$yqcKe3f2fiH8izeD$e4d9d627698e8f6d14d569375589c1f2d7236e3ec875e0c9ded18542bbcd72b58853c8b187696d3d0d49b2e39d6501a43ce8469303dbb085ad34ec574382d74d'
-)
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+ADMIN_PASSWORD_HASH_ENV = os.environ.get('ADMIN_PASSWORD_HASH')
+ADMIN_ALLOW_DEFAULT_ADMIN = os.environ.get('ADMIN_ALLOW_DEFAULT_ADMIN', 'False').lower() in ('1', 'true', 'yes')
+
+
+def _looks_like_password_hash(value):
+    return isinstance(value, str) and ':' in value and '$' in value
+
+
+def _get_admin_password_hash():
+    if ADMIN_PASSWORD_HASH_ENV:
+        if _looks_like_password_hash(ADMIN_PASSWORD_HASH_ENV):
+            return ADMIN_PASSWORD_HASH_ENV
+        app.logger.warning(
+            'ADMIN_PASSWORD_HASH does not look like a valid hash. Treating the provided value as the raw password and hashing it.'
+        )
+        return generate_password_hash(ADMIN_PASSWORD_HASH_ENV)
+    if ADMIN_PASSWORD:
+        return generate_password_hash(ADMIN_PASSWORD)
+    if ADMIN_ALLOW_DEFAULT_ADMIN:
+        app.logger.warning(
+            'Using insecure default admin credentials because ADMIN_ALLOW_DEFAULT_ADMIN is enabled. Set ADMIN_PASSWORD or ADMIN_PASSWORD_HASH for production.'
+        )
+        return generate_password_hash('admin')
+
+    app.logger.warning(
+        'No admin password configured. Admin login will remain disabled until ADMIN_PASSWORD or ADMIN_PASSWORD_HASH is set.'
+    )
+    return None
+
+
+ADMIN_PASSWORD_HASH = _get_admin_password_hash()
+
+
+def _quote_env_value(value):
+    if value is None:
+        return ''
+    safe = str(value)
+    if any(ch.isspace() for ch in safe) or any(ch in safe for ch in '"\'"#'):
+        safe = safe.replace('"', '\\"')
+        return f'"{safe}"'
+    return safe
+
+
+def _write_env_var(key, value):
+    env_path = ENV_FILE
+    os.makedirs(os.path.dirname(env_path), exist_ok=True)
+    if not os.path.exists(env_path):
+        open(env_path, 'a', encoding='utf-8').close()
+    lines = []
+    with open(env_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    updated = False
+    normalized = _quote_env_value(value)
+    for index, line in enumerate(lines):
+        if line.strip().startswith(f'{key}='):
+            lines[index] = f'{key}={normalized}\n'
+            updated = True
+            break
+    if not updated:
+        lines.append(f'{key}={normalized}\n')
+    with open(env_path, 'w', encoding='utf-8') as f:
+        f.writelines(lines)
+
+
+def _remove_env_var(key):
+    env_path = ENV_FILE
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    lines = [line for line in lines if not line.strip().startswith(f'{key}=')]
+    with open(env_path, 'w', encoding='utf-8') as f:
+        f.writelines(lines)
+
+
+def _update_admin_settings(username, password=None):
+    _write_env_var('ADMIN_USERNAME', username)
+    if password:
+        hash_value = generate_password_hash(password)
+        _write_env_var('ADMIN_PASSWORD_HASH', hash_value)
+        _remove_env_var('ADMIN_PASSWORD')
+        return hash_value
+    return None
 
 # Fallback local upload folder
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'IDL_Product_branding')
@@ -66,7 +147,7 @@ GEMINI_URL     = f'https://generativelanguage.googleapis.com/v1beta/models/{GEMI
 
 # Ensure GEMINI_API_KEY is set
 if not GEMINI_API_KEY:
-    raise EnvironmentError("GEMINI_API_KEY is not set. Please configure it in the environment variables.")
+    app.logger.warning("GEMINI_API_KEY is not set. AI assistant responses will be disabled until the API key is configured.")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -97,9 +178,11 @@ def api_login():
     data = request.get_json(silent=True) or {}
     username = data.get('username')
     password = data.get('password')
-    if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password or ''):
+    if ADMIN_PASSWORD_HASH and username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password or ''):
         session['logged_in'] = True
         return jsonify({'logged_in': True})
+    if not ADMIN_PASSWORD_HASH:
+        return jsonify({'error': 'Admin login is not configured.'}), 503
     return jsonify({'error': 'Invalid credentials'}), 401
 
 
@@ -107,7 +190,7 @@ def api_login():
 def do_login():
     username = request.form.get('username')
     password = request.form.get('password')
-    if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password or ''):
+    if ADMIN_PASSWORD_HASH and username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password or ''):
         session['logged_in'] = True
         return redirect(url_for('admin'))
     return redirect(url_for('login') + '?error=1')
@@ -118,12 +201,44 @@ def api_session():
     return jsonify({'logged_in': bool(session.get('logged_in'))})
 
 
+@app.route('/api/admin-settings', methods=['GET', 'POST'])
+@login_required
+def api_admin_settings():
+    global ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_PASSWORD_HASH_ENV, ADMIN_PASSWORD_HASH
+    if request.method == 'GET':
+        return jsonify({
+            'username': ADMIN_USERNAME,
+            'admin_configured': bool(ADMIN_PASSWORD_HASH),
+        })
+
+    data = request.get_json(silent=True) or {}
+    username = (data.get('username') or '').strip()
+    password = data.get('password', '')
+    password_confirm = data.get('passwordConfirm', '')
+
+    if not username:
+        return jsonify({'error': 'Username is required.'}), 400
+    if password:
+        if password != password_confirm:
+            return jsonify({'error': 'Password confirmation does not match.'}), 400
+        if len(password) < 8:
+            return jsonify({'error': 'Password must be at least 8 characters.'}), 400
+        ADMIN_PASSWORD_HASH = _update_admin_settings(username, password)
+        ADMIN_PASSWORD_HASH_ENV = ADMIN_PASSWORD_HASH
+        ADMIN_PASSWORD = None
+    else:
+        _update_admin_settings(username, None)
+
+    ADMIN_USERNAME = username
+    return jsonify({'saved': True})
+
+
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.pop('logged_in', None)
     if request.method == 'POST':
         return jsonify({'logged_out': True})
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -219,6 +334,13 @@ def public_images():
 @app.route('/3dmodels')
 @login_required
 def list_3dmodels():
+    files = [f for f in os.listdir(UPLOAD_FOLDER) if '.' in f and f.rsplit('.', 1)[1].lower() in ALLOWED_3D]
+    files.sort()
+    return jsonify(files)
+
+
+@app.route('/public-3dmodels')
+def public_3dmodels():
     files = [f for f in os.listdir(UPLOAD_FOLDER) if '.' in f and f.rsplit('.', 1)[1].lower() in ALLOWED_3D]
     files.sort()
     return jsonify(files)

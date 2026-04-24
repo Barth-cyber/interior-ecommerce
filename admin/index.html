@@ -17,6 +17,7 @@
       <button onclick="window.open('/3d-demo','_blank')">3D Viewer Demo</button>
       <button onclick="window.open('/categories.html','_blank')">Organize Images by Category</button>
       <button onclick="showSection('faq-manager')">FAQ Manager</button>
+      <button onclick="showSection('settings')">Admin Settings</button>
       <button onclick="window.location.href='/logout'">Logout</button>
     </nav>
     <section id="images-section" class="admin-section">
@@ -51,6 +52,23 @@
         <button type="submit">Save Content</button>
         <span id="contentSaveMsg" style="margin-left:1rem;color:#27ae60;display:none;">Saved!</span>
       </form>
+    </section>
+    <section id="settings-section" class="admin-section" style="display:none;">
+      <h2>Admin Settings</h2>
+      <form id="adminSettingsForm">
+        <label>Admin Username:<br>
+          <input type="text" id="adminUsername" name="username" required style="width:100%;margin-bottom:1rem;">
+        </label><br>
+        <label>New Password:<br>
+          <input type="password" id="adminPassword" name="password" autocomplete="new-password" style="width:100%;margin-bottom:1rem;">
+        </label><br>
+        <label>Confirm Password:<br>
+          <input type="password" id="adminPasswordConfirm" name="passwordConfirm" autocomplete="new-password" style="width:100%;margin-bottom:1rem;">
+        </label><br>
+        <button type="submit">Save Settings</button>
+        <span id="settingsSaveMsg" style="margin-left:1rem;color:#27ae60;display:none;">Saved!</span>
+      </form>
+      <p style="color:#555;margin-top:1rem;">Updating these settings writes the login credentials into the server environment file so the change persists.</p>
     </section>
     <section id="products-section" class="admin-section" style="display:none;">
       <h2>Manage Products</h2>

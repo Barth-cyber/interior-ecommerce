@@ -25,7 +25,8 @@ def diagnose_s3_access(access_key, secret_key, bucket_name, region):
         # Test basic AWS credentials
         sts_client = boto3.client('sts', region_name=region)
         identity = sts_client.get_caller_identity()
-        print("✅ AWS credentials are valid"        print(f"   Account: {identity['Account']}")
+        print("✅ AWS credentials are valid")
+        print(f"   Account: {identity['Account']}")
         print(f"   User ARN: {identity['Arn']}")
 
     except NoCredentialsError:
@@ -85,8 +86,8 @@ def diagnose_s3_access(access_key, secret_key, bucket_name, region):
         print(f"⚠️  Could not verify bucket region: {e}")
 
     # Test basic S3 operations
-    print("
-🧪 Testing S3 operations..."    test_key = "diagnostic_test.txt"
+    print("\n🧪 Testing S3 operations...")
+    test_key = "diagnostic_test.txt"
     test_content = b"AWS S3 Diagnostic Test"
 
     # Test put object
@@ -123,8 +124,8 @@ def diagnose_s3_access(access_key, secret_key, bucket_name, region):
     except ClientError as e:
         print(f"⚠️  Delete object failed: {e.response['Error']['Code']}")
 
-    print("
-🎉 S3 Diagnostic Complete!"    print("✅ All basic S3 operations are working!")
+    print("\n🎉 S3 Diagnostic Complete!")
+    print("✅ All basic S3 operations are working!")
     return True
 
 def create_bucket_if_needed(access_key, secret_key, bucket_name, region):
@@ -176,23 +177,23 @@ def main():
     bucket_name = input("S3 Bucket Name [interior-ecommerce-uploads]: ").strip() or "interior-ecommerce-uploads"
     region = input("AWS Region [us-east-1]: ").strip() or "us-east-1"
 
-    print("
-🔧 Running diagnostics..."    success = diagnose_s3_access(access_key, secret_key, bucket_name, region)
+    print("\n🔧 Running diagnostics...")
+    success = diagnose_s3_access(access_key, secret_key, bucket_name, region)
 
     if not success:
-        print("
-❌ Diagnostics found issues. Attempting auto-fix..."        # Try to create bucket
+        print("\n❌ Diagnostics found issues. Attempting auto-fix...")
+        # Try to create bucket
         if create_bucket_if_needed(access_key, secret_key, bucket_name, region):
-            print("
-🔄 Re-running diagnostics after bucket creation..."            success = diagnose_s3_access(access_key, secret_key, bucket_name, region)
+            print("\n🔄 Re-running diagnostics after bucket creation...")
+            success = diagnose_s3_access(access_key, secret_key, bucket_name, region)
 
     if success:
-        print("
-🎉 SUCCESS! Your S3 setup is working correctly."        print("You can now run your application tests.")
+        print("\n🎉 SUCCESS! Your S3 setup is working correctly.")
+        print("You can now run your application tests.")
     else:
-        print("
-❌ DIAGNOSIS: S3 access issues persist."        print("
-🔧 Manual Solutions:"        print("1. Check IAM permissions - ensure your user has S3 full access")
+        print("\n❌ DIAGNOSIS: S3 access issues persist.")
+        print("\n🔧 Manual Solutions:")
+        print("1. Check IAM permissions - ensure your user has S3 full access")
         print("2. Verify bucket exists in the correct region")
         print("3. Check bucket policy if it has restrictive permissions")
         print("4. Try creating a new bucket with a unique name")

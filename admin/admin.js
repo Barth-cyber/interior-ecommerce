@@ -2,6 +2,7 @@ function showSection(section) {
   document.getElementById('images-section').style.display = section === 'images' ? '' : 'none';
   document.getElementById('models-section').style.display = section === 'models' ? '' : 'none';
   document.getElementById('content-section').style.display = section === 'content' ? '' : 'none';
+  document.getElementById('settings-section').style.display = section === 'settings' ? '' : 'none';
   document.getElementById('products-section').style.display = section === 'products' ? '' : 'none';
   var faqSection = document.getElementById('faq-manager');
   if (faqSection) faqSection.style.display = section === 'faq-manager' ? '' : 'none';
@@ -152,6 +153,11 @@ const homepageInput = document.getElementById('homepageInput');
 const aboutInput = document.getElementById('aboutInput');
 const contactInput = document.getElementById('contactInput');
 const contentSaveMsg = document.getElementById('contentSaveMsg');
+const adminSettingsForm = document.getElementById('adminSettingsForm');
+const adminUsernameInput = document.getElementById('adminUsername');
+const adminPasswordInput = document.getElementById('adminPassword');
+const adminPasswordConfirmInput = document.getElementById('adminPasswordConfirm');
+const settingsSaveMsg = document.getElementById('settingsSaveMsg');
 
 async function loadContent() {
   const res = await fetch('/content');
@@ -159,6 +165,14 @@ async function loadContent() {
   if (homepageInput) homepageInput.value = data.homepage || '';
   if (aboutInput) aboutInput.value = data.about || '';
   if (contactInput) contactInput.value = data.contact || '';
+}
+
+async function loadAdminSettings() {
+  if (!adminSettingsForm) return;
+  const res = await fetch('/api/admin-settings');
+  if (!res.ok) return;
+  const data = await res.json();
+  adminUsernameInput.value = data.username || '';
 }
 
 if (contentForm) {
@@ -185,28 +199,40 @@ if (contentForm) {
   loadContent();
 }
 
-// Product Management
-let products = [];
+  if (adminSettingsForm) {
+    adminSettingsForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = adminUsernameInput.value.trim();
+      const password = adminPasswordInput.value;
+      const passwordConfirm = adminPasswordConfirmInput.value;
 
-async function loadProducts() {
-  const res = await fetch('/content');
-  const data = await res.json();
-  products = data.products || [];
-  renderProducts();
-}
+      if (!username) {
+        alert('Username is required.');
+        return;
+      }
+      if (password && password !== passwordConfirm) {
+        alert('Password confirmation does not match.');
+        return;
+      }
 
-function renderProducts() {
-  const productsList = document.getElementById('productsList');
-  productsList.innerHTML = '';
-  products.forEach(product => {
-    const div = document.createElement('div');
-    div.className = 'product-item';
-    div.style = 'border:1px solid #ddd;padding:1rem;margin-bottom:1rem;border-radius:8px;';
-    div.innerHTML = `
-      <h3>${product.name}</h3>
-      <p><strong>Category:</strong> ${product.category}</p>
-      <p><strong>Price:</strong> ${product.price}</p>
-      <p><strong>Description:</strong> ${product.description}</p>
+      const res = await fetch('/api/admin-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, passwordConfirm })
+      });
+
+      if (res.ok) {
+        settingsSaveMsg.style.display = '';
+        setTimeout(() => { settingsSaveMsg.style.display = 'none'; }, 2000);
+        adminPasswordInput.value = '';
+        adminPasswordConfirmInput.value = '';
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Save failed.');
+      }
+    });
+    loadAdminSettings();
+  }
       <p><strong>Image:</strong> ${product.image}</p>
       <button onclick="editProduct(${product.id})">Edit</button>
       <button onclick="deleteProduct(${product.id})" style="background:#e74c3c;color:#fff;">Delete</button>

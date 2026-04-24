@@ -1353,11 +1353,12 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
           <div style="border:1px solid rgba(27,58,107,.18);border-radius:10px;padding:1rem;">
             <select id="modelSelect" onchange="changeModel()" style="margin-bottom:1rem;padding:.5rem;border:1px solid #ccc;border-radius:4px;">
               <option value="">Select a Model</option>
-              <option value="/idl-images/sample-model.glb">Sample Model</option>
-              <!-- Add more options dynamically if models are available -->
+              <option value="https://modelviewer.dev/shared-assets/models/Astronaut.glb">Astronaut</option>
+              <option value="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb">Robot Expressive</option>
+              <option value="https://modelviewer.dev/shared-assets/models/DamagedHelmet.glb">Damaged Helmet</option>
             </select>
             <div id="modelViewerContainer">
-              <model-viewer src="/idl-images/sample-model.glb" alt="3D Model Preview" ar auto-rotate camera-controls style="width:100%;height:320px;max-height:320px;border-radius:8px;background:#fff;"></model-viewer>
+              <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" alt="3D Model Preview" ar auto-rotate camera-controls style="width:100%;height:320px;max-height:320px;border-radius:8px;background:#fff;"></model-viewer>
             </div>
             <p style="margin-top:.6rem;font-size:.88rem;color:#33415b;">Tip: Upload GLB/GLTF in the admin panel (Manage 3D Models), then select from the dropdown to preview here.</p>
           </div>
@@ -1474,6 +1475,18 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
           <span class="curr-chip">3D Secure</span>
           <span class="curr-chip">TLS 1.3</span>
         </div>
+      </div>
+    </div>
+    <div class="pay-action-row" style="margin-top:2rem;display:grid;grid-template-columns:1fr;gap:1rem;">
+      <div style="padding:1.6rem;border:1px solid #e5e7eb;border-radius:16px;background:#f9fafb;">
+        <div style="font-size:1rem;font-weight:700;color:#1B3A6B;margin-bottom:.75rem;">Start a secure checkout</div>
+        <label style="display:block;font-size:.9rem;color:#555;margin-bottom:.5rem;">Amount in NGN</label>
+        <input id="idt-custom-amount" type="number" min="1000" value="250000" style="width:100%;padding:.9rem 1rem;border:1.5px solid #d1d5db;border-radius:12px;font-size:.95rem;outline:none;box-sizing:border-box;margin-bottom:1rem;" />
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+          <button class="btn btn-brown" onclick="IDTPayment.open('Custom Interior Order', Number(document.getElementById('idt-custom-amount').value), window.location.origin + '/IDL_Product_branding/IDL_Cover_Photo.jpg')" style="flex:1;min-width:180px;">Checkout with Paystack / Stripe</button>
+          <button class="btn btn-outline-navy" onclick="IDTPayment.open('Custom Interior Order', Number(document.getElementById('idt-custom-amount').value), window.location.origin + '/IDL_Product_branding/IDL_Cover_Photo.jpg')" style="flex:1;min-width:180px;">Open Checkout Modal</button>
+        </div>
+        <p style="margin-top:.85rem;font-size:.85rem;color:#555;line-height:1.5;">Enter your order amount and choose the gateway inside the checkout modal. Paystack is for NGN; Stripe supports USD, GBP, EUR.</p>
       </div>
     </div>
   </div>
@@ -2020,19 +2033,40 @@ function addQuickReplies(reply) {
 }
 // Load models for 3D previewer
 function loadModels() {
-  fetch('/admin/3dmodels')
+  const sampleModels = [
+    { name: 'Astronaut', src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb' },
+    { name: 'Robot Expressive', src: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' },
+    { name: 'Damaged Helmet', src: 'https://modelviewer.dev/shared-assets/models/DamagedHelmet.glb' }
+  ];
+
+  const select = document.getElementById('modelSelect');
+  select.innerHTML = '<option value="">Select a Model</option>';
+
+  sampleModels.forEach(model => {
+    const option = document.createElement('option');
+    option.value = model.src;
+    option.textContent = model.name;
+    select.appendChild(option);
+  });
+
+  fetch('/public-3dmodels')
     .then(r => r.json())
     .then(models => {
-      const select = document.getElementById('modelSelect');
-      select.innerHTML = '<option value="">Select a Model</option><option value="/idl-images/sample-model.glb">Sample Model</option>';
+      if (!Array.isArray(models)) return;
       models.forEach(model => {
+        const filename = typeof model === 'string' ? model : model.filename || model.name || '';
+        if (!filename) return;
+        const value = filename.startsWith('http') ? filename : '/idl-images/' + filename;
+        const label = typeof model === 'string' ? filename : model.name || filename;
         const option = document.createElement('option');
-        option.value = '/idl-images/' + model.filename;
-        option.textContent = model.name || model.filename;
+        option.value = value;
+        option.textContent = label;
         select.appendChild(option);
       });
     })
-    .catch(() => {}); // Fallback to sample
+    .catch(() => {
+      // Leave sample models available if server models cannot be loaded
+    });
 }
 function changeModel() {
   const select = document.getElementById('modelSelect');
@@ -2490,6 +2524,7 @@ loadContent();
 </script>
 <script src="hero-popup-slider.js"></script>
 <script src="duct-ai-assistant.js"></script>
+<script src="/static/payment.js"></script>
 
 <!-- WHATSAPP FLOATING BUTTONS (side by side) -->
 <!-- WhatsApp Floating Buttons on Opposite Sides -->
@@ -2683,8 +2718,9 @@ function openWhatsAppProductSlider() {
       <div id="modalProductCategory"></div>
       <div id="modalProductName"></div>
       <div id="modalProductPrice"></div>
-      <div class="modal-actions">
+      <div class="modal-actions" style="display:flex;gap:.75rem;flex-wrap:wrap;">
         <button class="btn-primary" onclick="openWhatsApp(window.currentProduct?.name || 'Product')">Request Quote via WhatsApp</button>
+        <button class="btn btn-brown" onclick="openPayment(window.currentProduct?.name || 'Interior Product', Number(String(window.currentProduct?.price || '').replace(/[^0-9]/g, '')) || 0, window.currentProduct?.image)">Checkout</button>
         <button class="btn-secondary" onclick="closeProductModal()">Close</button>
       </div>
     </div>

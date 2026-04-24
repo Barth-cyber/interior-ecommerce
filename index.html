@@ -1353,11 +1353,13 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
           <div style="border:1px solid rgba(27,58,107,.18);border-radius:10px;padding:1rem;">
             <select id="modelSelect" onchange="changeModel()" style="margin-bottom:1rem;padding:.5rem;border:1px solid #ccc;border-radius:4px;">
               <option value="">Select a Model</option>
-              <option value="/idl-images/sample-model.glb">Sample Model</option>
+              <option value="https://modelviewer.dev/shared-assets/models/Astronaut.glb">Astronaut</option>
+              <option value="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb">Robot Expressive</option>
+              <option value="https://modelviewer.dev/shared-assets/models/DamagedHelmet.glb">Damaged Helmet</option>
               <!-- Add more options dynamically if models are available -->
             </select>
             <div id="modelViewerContainer">
-              <model-viewer src="/idl-images/sample-model.glb" alt="3D Model Preview" ar auto-rotate camera-controls style="width:100%;height:320px;max-height:320px;border-radius:8px;background:#fff;"></model-viewer>
+              <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" alt="3D Model Preview" ar auto-rotate camera-controls style="width:100%;height:320px;max-height:320px;border-radius:8px;background:#fff;"></model-viewer>
             </div>
             <p style="margin-top:.6rem;font-size:.88rem;color:#33415b;">Tip: Upload GLB/GLTF in the admin panel (Manage 3D Models), then select from the dropdown to preview here.</p>
           </div>
@@ -2020,19 +2022,40 @@ function addQuickReplies(reply) {
 }
 // Load models for 3D previewer
 function loadModels() {
-  fetch('/admin/3dmodels')
+  const sampleModels = [
+    { name: 'Astronaut', src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb' },
+    { name: 'Robot Expressive', src: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' },
+    { name: 'Damaged Helmet', src: 'https://modelviewer.dev/shared-assets/models/DamagedHelmet.glb' }
+  ];
+
+  const select = document.getElementById('modelSelect');
+  select.innerHTML = '<option value="">Select a Model</option>';
+
+  sampleModels.forEach(model => {
+    const option = document.createElement('option');
+    option.value = model.src;
+    option.textContent = model.name;
+    select.appendChild(option);
+  });
+
+  fetch('/public-3dmodels')
     .then(r => r.json())
     .then(models => {
-      const select = document.getElementById('modelSelect');
-      select.innerHTML = '<option value="">Select a Model</option><option value="/idl-images/sample-model.glb">Sample Model</option>';
+      if (!Array.isArray(models)) return;
       models.forEach(model => {
+        const filename = typeof model === 'string' ? model : model.filename || model.name || '';
+        if (!filename) return;
+        const value = filename.startsWith('http') ? filename : '/idl-images/' + filename;
+        const label = typeof model === 'string' ? filename : model.name || filename;
         const option = document.createElement('option');
-        option.value = '/idl-images/' + model.filename;
-        option.textContent = model.name || model.filename;
+        option.value = value;
+        option.textContent = label;
         select.appendChild(option);
       });
     })
-    .catch(() => {}); // Fallback to sample
+    .catch(() => {
+      // Leave sample models available if server models cannot be loaded
+    });
 }
 function changeModel() {
   const select = document.getElementById('modelSelect');

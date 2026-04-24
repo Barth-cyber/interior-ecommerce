@@ -431,10 +431,28 @@
     // If no error, Stripe redirects to return_url
   }
 
+  function parseOrderPrice(priceValue) {
+    if (typeof priceValue === 'number') return priceValue;
+    if (!priceValue) return 0;
+    const cleaned = String(priceValue).replace(/[^0-9.]/g, '');
+    return cleaned ? Number(cleaned) : 0;
+  }
+
+  function openProductCheckout(productDetails) {
+    if (!productDetails) return;
+
+    const name = productDetails.name || 'Interior Product';
+    const priceNgn = parseOrderPrice(productDetails.price);
+    const image = productDetails.img || productDetails.image || window.location.origin + '/IDL_Product_branding/IDL_Cover_Photo.jpg';
+
+    openCheckout(name, priceNgn, image);
+  }
+
   // ── Public API ─────────────────────────────────────────────────────────────
   window.IDTPayment = {
     open: openCheckout,
     close: closeCheckout,
+    openProduct: openProductCheckout,
     selectPaystack,
     selectStripe,
     selectCurrency,
@@ -442,5 +460,6 @@
     processStripe,
     _showView,
   };
+  window.openCheckoutForProduct = openProductCheckout;
 
 })();
