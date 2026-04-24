@@ -1,7 +1,7 @@
 const e = React.createElement;
 
 function AdminLogin() {
-  const [username, setUsername] = React.useState('admin');
+  const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
   const [busy, setBusy] = React.useState(false);

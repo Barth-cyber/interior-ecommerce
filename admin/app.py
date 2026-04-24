@@ -31,8 +31,14 @@ app.config.update({
 })
 
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+if isinstance(ADMIN_USERNAME, str):
+    ADMIN_USERNAME = ADMIN_USERNAME.strip()
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+if isinstance(ADMIN_PASSWORD, str):
+    ADMIN_PASSWORD = ADMIN_PASSWORD.strip() or None
 ADMIN_PASSWORD_HASH_ENV = os.environ.get('ADMIN_PASSWORD_HASH')
+if isinstance(ADMIN_PASSWORD_HASH_ENV, str):
+    ADMIN_PASSWORD_HASH_ENV = ADMIN_PASSWORD_HASH_ENV.strip() or None
 ADMIN_ALLOW_DEFAULT_ADMIN = os.environ.get('ADMIN_ALLOW_DEFAULT_ADMIN', 'False').lower() in ('1', 'true', 'yes')
 
 

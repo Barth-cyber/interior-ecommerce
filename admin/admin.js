@@ -222,8 +222,11 @@ if (contentForm) {
       });
 
       if (res.ok) {
+        settingsSaveMsg.textContent = password
+          ? 'Admin username and password updated successfully.'
+          : 'Admin username updated successfully.';
         settingsSaveMsg.style.display = '';
-        setTimeout(() => { settingsSaveMsg.style.display = 'none'; }, 2000);
+        setTimeout(() => { settingsSaveMsg.style.display = 'none'; }, 3000);
         adminPasswordInput.value = '';
         adminPasswordConfirmInput.value = '';
       } else {

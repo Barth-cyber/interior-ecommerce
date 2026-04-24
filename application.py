@@ -1,7 +1,6 @@
 import os
 from admin.app import app
 from werkzeug.security import generate_password_hash
-import boto3
 
 # Securely fetch environment variables
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
@@ -25,13 +24,17 @@ AWS_S3_REGION = os.getenv('AWS_S3_REGION')
 
 # Initialize S3 client
 if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_S3_BUCKET_NAME and AWS_S3_REGION:
-    s3_client = boto3.client(
-        's3',
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        region_name=AWS_S3_REGION
-    )
-    print("AWS S3 client initialized successfully.")
+    try:
+        import boto3
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_S3_REGION
+        )
+        print("AWS S3 client initialized successfully.")
+    except Exception as e:
+        print(f"AWS S3 client initialization skipped: {e}")
 else:
     print("AWS S3 configuration is incomplete. Please check your environment variables.")
 
