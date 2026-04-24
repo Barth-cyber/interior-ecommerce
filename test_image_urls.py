@@ -1,9 +1,11 @@
+import os
 import urllib.request
 
+BASE_URL = os.getenv('ECOMMERCE_TEST_BASE_URL', 'http://localhost:5000')
 urls = [
-    'http://localhost:8000/IDL_Product_branding/Door.jpg',
-    'http://localhost:8000/IDL_Product_branding/Door_Vent_mahony.jpg',
-    'http://localhost:8000/IDL_Product_branding/door_milk_color.jpg',
+    f'{BASE_URL}/IDL_Product_branding/Door.jpg',
+    f'{BASE_URL}/IDL_Product_branding/Door_Vent_mahony.jpg',
+    f'{BASE_URL}/IDL_Product_branding/door_milk_color.jpg',
 ]
 for url in urls:
     try:
