@@ -1,20 +1,27 @@
-// Duct AI Assistant: Chat, escalation, and self-learn logic
+// Duct AI Assistant: Chat, escalation, recommender, and payment integration
 let chatHistory = [];
+
 async function askDuctAI(query, imageUrl) {
-  chatHistory.push({role:'user', content:query, image:imageUrl||null});
-  const res = await fetch('/ai-query', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({query})
-  });
-  const data = await res.json();
-  if (data.answer) {
-    chatHistory.push({role:'ai', content:data.answer});
+  chatHistory.push({ role: 'user', content: query, image: imageUrl || null });
+  try {
+    const res = await fetch('/ai-query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    });
+    const data = await res.json();
+    if (data.answer) {
+      chatHistory.push({ role: 'ai', content: data.answer });
+      renderChat();
+    } else if (data.escalate) {
+      escalateToHuman(query, imageUrl);
+    }
+  } catch (e) {
+    chatHistory.push({ role: 'ai', content: 'Sorry, I could not connect right now. Please try again or contact us on WhatsApp.' });
     renderChat();
-  } else if (data.escalate) {
-    escalateToHuman(query, imageUrl);
   }
 }
+
 function renderChat() {
   const chatBox = document.getElementById('duct-ai-chat');
   if (!chatBox) return;
@@ -22,6 +29,13 @@ function renderChat() {
   chatHistory.forEach(msg => {
     const div = document.createElement('div');
     div.className = msg.role;
+    div.style.cssText = msg.role === 'user'
+      ? 'text-align:right;margin:.4rem 0;'
+      : 'text-align:left;margin:.4rem 0;';
+    const bubble = document.createElement('span');
+    bubble.style.cssText = msg.role === 'user'
+      ? 'background:#1B3A6B;color:#fff;padding:.45rem .8rem;border-radius:12px 12px 2px 12px;font-size:.88rem;display:inline-block;max-width:85%;'
+      : 'background:#f0f2f7;color:#222;padding:.45rem .8rem;border-radius:12px 12px 12px 2px;font-size:.88rem;display:inline-block;max-width:85%;';
     if (msg.image) {
       const img = document.createElement('img');
       img.src = msg.image;
@@ -34,12 +48,13 @@ function renderChat() {
     chatBox.appendChild(div);
   });
 }
+
 async function escalateToHuman(query, imageUrl) {
   // Send to backend for logging, then redirect to WhatsApp
   await fetch('/escalate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({query, imageUrl})
+    body: JSON.stringify({ query, imageUrl }),
   });
   let waMsg = encodeURIComponent('User query: ' + query);
   if (imageUrl) waMsg += '%0A[Image attached]';

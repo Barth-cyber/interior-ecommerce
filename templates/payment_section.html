@@ -1,0 +1,38 @@
+<!--
+  INTERIOR DUCT LTD  SECURE PAYMENT SECTION
+  Paste this block into interior.html wherever you want the payment section.
+  Also add these two lines to your <head>:
+    <script src="/static/payment.js" defer></script>
+    <script src="/static/duct-ai.js" defer></script>
+-->
+
+<section id="payment-section" style="
+  background: linear-gradient(135deg, #0d1b2a 0%, #1B3A6B 60%, #2d5fa3 100%);
+  padding: 5rem 1.5rem;
+  font-family: 'Inter', sans-serif;
+">
+  <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+
+    <!-- Heading -->
+    <div style="display:inline-block;background:rgba(196,168,130,0.15);border:1px solid rgba(196,168,130,0.3);
+      border-radius:50px;padding:.4rem 1.2rem;margin-bottom:1.2rem;">
+      <span style="color:#C4A882;font-size:.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+        Secure Payments
+      </span>
+    </div>
+    <h2 style="color:#fff;font-family:'Playfair Display',serif;font-size:2.3rem;
+      font-weight:700;margin:0 0 .6rem;">Pay Your Way</h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:1rem;max-width:560px;margin:0 auto 3rem;">
+      Choose your preferred payment method  instant confirmation on every order.
+    </p>
+
+    <!-- Gateway cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-bottom:2.5rem;">
+
+      <!-- Paystack card -->
+      <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);
+        border-radius:16px;padding:2rem 1.5rem;text-align:left;transition:transform .2s,box-shadow .2s;"
+        onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 48px rgba(0,185,79,0.2)'"
+        onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+          <div style="width:48px;height:48px;background:rgba(0,185,79,0.15);border-radius:12px;

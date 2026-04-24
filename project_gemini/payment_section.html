@@ -1,0 +1,151 @@
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  INTERIOR DUCT LTD — SECURE PAYMENT SECTION
+  Paste this block into interior.html wherever you want the payment section.
+  Also add these two lines to your <head>:
+    <script src="/static/payment.js" defer></script>
+    <script src="/static/duct-ai.js" defer></script>
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+
+<section id="payment-section" style="
+  background: linear-gradient(135deg, #0d1b2a 0%, #1B3A6B 60%, #2d5fa3 100%);
+  padding: 5rem 1.5rem;
+  font-family: 'Inter', sans-serif;
+">
+  <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+
+    <!-- Heading -->
+    <div style="display:inline-block;background:rgba(196,168,130,0.15);border:1px solid rgba(196,168,130,0.3);
+      border-radius:50px;padding:.4rem 1.2rem;margin-bottom:1.2rem;">
+      <span style="color:#C4A882;font-size:.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+        Secure Payments
+      </span>
+    </div>
+    <h2 style="color:#fff;font-family:'Playfair Display',serif;font-size:2.3rem;
+      font-weight:700;margin:0 0 .6rem;">Pay Your Way</h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:1rem;max-width:560px;margin:0 auto 3rem;">
+      Choose your preferred payment method — instant confirmation on every order.
+    </p>
+
+    <!-- Gateway cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-bottom:2.5rem;">
+
+      <!-- Paystack card -->
+      <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);
+        border-radius:16px;padding:2rem 1.5rem;text-align:left;transition:transform .2s,box-shadow .2s;"
+        onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 48px rgba(0,185,79,0.2)'"
+        onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+          <div style="width:48px;height:48px;background:rgba(0,185,79,0.15);border-radius:12px;
+            display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🇳🇬</div>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:1rem;">Nigeria — Paystack</div>
+            <div style="background:#00b94f;color:#fff;font-size:.68rem;font-weight:700;
+              padding:.15rem .5rem;border-radius:4px;display:inline-block;margin-top:.2rem;">NGN ₦</div>
+          </div>
+        </div>
+        <p style="color:rgba(255,255,255,0.7);font-size:.85rem;line-height:1.6;margin:0 0 1.2rem;">
+          Bank transfer, USSD, card, and mobile money. Instant payment confirmation and factory notification.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+          <span style="background:rgba(0,185,79,0.15);color:#4ade80;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">Bank Transfer</span>
+          <span style="background:rgba(0,185,79,0.15);color:#4ade80;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">USSD *737#</span>
+          <span style="background:rgba(0,185,79,0.15);color:#4ade80;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">Card</span>
+          <span style="background:rgba(0,185,79,0.15);color:#4ade80;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">Mobile Money</span>
+        </div>
+      </div>
+
+      <!-- Stripe card -->
+      <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);
+        border-radius:16px;padding:2rem 1.5rem;text-align:left;transition:transform .2s,box-shadow .2s;"
+        onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 48px rgba(103,114,229,0.25)'"
+        onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+          <div style="width:48px;height:48px;background:rgba(103,114,229,0.15);border-radius:12px;
+            display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🌎</div>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:1rem;">International — Stripe</div>
+            <div style="display:flex;gap:.3rem;margin-top:.2rem;">
+              <span style="background:#6772e5;color:#fff;font-size:.68rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">$ USD</span>
+              <span style="background:#6772e5;color:#fff;font-size:.68rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">£ GBP</span>
+              <span style="background:#6772e5;color:#fff;font-size:.68rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">€ EUR</span>
+            </div>
+          </div>
+        </div>
+        <p style="color:rgba(255,255,255,0.7);font-size:.85rem;line-height:1.6;margin:0 0 1.2rem;">
+          Visa, Mastercard, Apple Pay, Google Pay, and bank debits. PCI-DSS Level 1 compliant for your security.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+          <span style="background:rgba(103,114,229,0.15);color:#a5b4fc;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">Visa</span>
+          <span style="background:rgba(103,114,229,0.15);color:#a5b4fc;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">Mastercard</span>
+          <span style="background:rgba(103,114,229,0.15);color:#a5b4fc;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">Apple Pay</span>
+          <span style="background:rgba(103,114,229,0.15);color:#a5b4fc;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">Google Pay</span>
+        </div>
+      </div>
+
+      <!-- Security card -->
+      <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);
+        border-radius:16px;padding:2rem 1.5rem;text-align:left;">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+          <div style="width:48px;height:48px;background:rgba(196,168,130,0.15);border-radius:12px;
+            display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🔒</div>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:1rem;">Safe &amp; Secure</div>
+            <div style="background:rgba(196,168,130,0.3);color:#C4A882;font-size:.68rem;font-weight:700;
+              padding:.15rem .5rem;border-radius:4px;display:inline-block;margin-top:.2rem;">PCI-DSS L1</div>
+          </div>
+        </div>
+        <p style="color:rgba(255,255,255,0.7);font-size:.85rem;line-height:1.6;margin:0 0 1.2rem;">
+          All transactions are encrypted and verified. Your data is protected with industry-leading security standards throughout every purchase.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+          <span style="background:rgba(196,168,130,0.15);color:#C4A882;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">3D Secure</span>
+          <span style="background:rgba(196,168,130,0.15);color:#C4A882;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">TLS 1.3</span>
+          <span style="background:rgba(196,168,130,0.15);color:#C4A882;font-size:.72rem;padding:.25rem .6rem;border-radius:4px;">256-bit AES</span>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+
+    <!-- Demo checkout trigger (remove or adapt once products have real prices) -->
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+      border-radius:12px;padding:1.5rem;display:inline-block;max-width:460px;width:100%;">
+      <p style="color:rgba(255,255,255,0.8);font-size:.9rem;margin:0 0 1rem;">
+        Ready to order? Select any product and click <strong style="color:#C4A882;">Buy Now</strong>,
+        or contact us for a custom quote.
+      </p>
+      <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+        <button onclick="IDTPayment.open('Custom Quote Request', 100000, '')"
+          style="padding:.75rem 1.5rem;background:linear-gradient(135deg,#00b94f,#00963e);color:#fff;
+          border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;
+          transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          Pay with Paystack (NGN)
+        </button>
+        <button onclick="IDTPayment.open('Custom Quote Request', 100000, '')"
+          style="padding:.75rem 1.5rem;background:linear-gradient(135deg,#6772e5,#4e5ac8);color:#fff;
+          border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;
+          transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          Pay Internationally
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  HOW TO ADD "BUY NOW" TO PRODUCT CARDS
+  ─────────────────────────────────────────────────────────────────────────
+  In hero-popup-slider.js (or wherever you render product slides), add this
+  button alongside the existing "Request Quote" button:
+
+    <button class="btn btn-primary" style="margin-top:.5rem;"
+      onclick="openPayment('${p.name}', ${parseFloat(p.price.replace(/[^0-9.]/g,''))}, '${p.img}')">
+      Buy Now
+    </button>
+
+  The openPayment() function lives in duct-ai.js and calls IDTPayment.open().
+  ═══════════════════════════════════════════════════════════════════════════
+-->
