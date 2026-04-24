@@ -11,15 +11,15 @@ services:
         generateValue: true
       - key: ADMIN_COOKIE_SECURE
         value: "true"
-      # Admin credentials
+      # ── Admin credentials ──────────────────────────────────────────────────
       - key: ADMIN_USERNAME
         value: "admin"
       - key: ADMIN_PASSWORD_HASH
         sync: false   # Set manually in Render dashboard
-      # Google Gemini AI  FREE tier (Chat Agent + Recommender)
-      - key: GEMINI_API_KEY
+      # ── Anthropic AI (Chat Agent + Recommender) ───────────────────────────
+      - key: ANTHROPIC_API_KEY
         sync: false   # Set manually in Render dashboard
-      # AWS S3 (Image & 3D model storage)
+      # ── AWS S3 (Image & 3D model storage) ────────────────────────────────
       - key: AWS_ACCESS_KEY_ID
         sync: false
       - key: AWS_SECRET_ACCESS_KEY
@@ -28,13 +28,15 @@ services:
         sync: false
       - key: AWS_S3_REGION
         value: "us-east-1"
-      # Paystack (Nigeria NGN payments)
+      # ── Paystack (Nigeria NGN payments) ──────────────────────────────────
       - key: PAYSTACK_SECRET_KEY
         sync: false   # sk_live_... or sk_test_...
       - key: PAYSTACK_PUBLIC_KEY
         sync: false   # pk_live_... or pk_test_...
-      # Stripe (International USD/GBP/EUR payments)
+      # ── Stripe (International USD/GBP/EUR payments) ───────────────────────
       - key: STRIPE_SECRET_KEY
         sync: false   # sk_live_... or sk_test_...
       - key: STRIPE_PUBLISHABLE_KEY
         sync: false   # pk_live_... or pk_test_...
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false   # whsec_... (from Stripe dashboard webhooks)

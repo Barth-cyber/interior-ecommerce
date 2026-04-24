@@ -40,17 +40,17 @@ function renderChat() {
       const img = document.createElement('img');
       img.src = msg.image;
       img.alt = 'User image';
-      img.style.maxWidth = '80px';
-      img.style.display = 'block';
-      div.appendChild(img);
+      img.style.cssText = 'max-width:80px;display:block;margin-bottom:.3rem;border-radius:6px;';
+      bubble.appendChild(img);
     }
-    div.appendChild(document.createTextNode(msg.content));
+    bubble.appendChild(document.createTextNode(msg.content));
+    div.appendChild(bubble);
     chatBox.appendChild(div);
   });
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function escalateToHuman(query, imageUrl) {
-  // Send to backend for logging, then redirect to WhatsApp
   await fetch('/escalate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -58,34 +58,26 @@ async function escalateToHuman(query, imageUrl) {
   });
   let waMsg = encodeURIComponent('User query: ' + query);
   if (imageUrl) waMsg += '%0A[Image attached]';
-  let waUrl = 'https://wa.me/2348036850229?text=' + waMsg;
-  window.open(waUrl, '_blank');
+  window.open('https://wa.me/2348036850229?text=' + waMsg, '_blank');
 }
 
-// Product Modal & WhatsApp Integration
+// ── Product Modal & WhatsApp ───────────────────────────────────────────────
+
 function openProductModal(productName, productImage, productPrice, productCategory) {
   const modal = document.getElementById('productModal');
-  if (!modal) {
-    console.warn('Product modal not found');
-    return;
-  }
-  
-  // Store current product for escalation
-  window.currentProduct = {
-    name: productName,
-    image: productImage,
-    price: productPrice,
-    category: productCategory
-  };
-  
-  // Update modal content
-  document.getElementById('modalProductImage').src = productImage;
-  document.getElementById('modalProductImage').alt = productName;
-  document.getElementById('modalProductName').textContent = productName;
-  document.getElementById('modalProductPrice').textContent = productPrice;
-  document.getElementById('modalProductCategory').textContent = productCategory;
-  
-  // Show modal
+  if (!modal) return;
+
+  window.currentProduct = { name: productName, image: productImage, price: productPrice, category: productCategory };
+
+  const imgEl = document.getElementById('modalProductImage');
+  if (imgEl) { imgEl.src = productImage; imgEl.alt = productName; }
+  const nameEl = document.getElementById('modalProductName');
+  if (nameEl) nameEl.textContent = productName;
+  const priceEl = document.getElementById('modalProductPrice');
+  if (priceEl) priceEl.textContent = productPrice;
+  const catEl = document.getElementById('modalProductCategory');
+  if (catEl) catEl.textContent = productCategory;
+
   modal.style.display = 'flex';
 }
 
@@ -98,24 +90,73 @@ function closeProductModal() {
 function openWhatsApp(productName) {
   const whatsappNumber = '2348036850229';
   let message = `Hi, I'm interested in the ${productName}. Can you provide more details and a quote?`;
-  
   if (window.currentProduct && window.currentProduct.name === productName) {
-    message = `Hi, I'm interested in the **${window.currentProduct.name}** (₦${window.currentProduct.price}). This is from the ${window.currentProduct.category} category. Can you provide more details and a customized quote?`;
+    message = `Hi, I'm interested in the ${window.currentProduct.name} (${window.currentProduct.price}). Category: ${window.currentProduct.category}. Please provide more details and a customized quote.`;
   }
-  
-  const encodedMsg = encodeURIComponent(message);
-  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodedMsg}`;
-  window.open(waUrl, '_blank');
-  
-  // Close modal if it's open
+  window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   closeProductModal();
 }
 
-// Self-learn: log all queries for future improvement
+// ── Payment trigger ────────────────────────────────────────────────────────
+// Call this from product cards to open checkout:
+//   openPayment('Royal Chesterfield Sofa', 2800000, '/idl-images/Chair_Royal.jpg')
+function openPayment(productName, priceNgn, productImage) {
+  if (window.IDTPayment) {
+    window.IDTPayment.open(productName, priceNgn, productImage);
+  } else {
+    // Fallback to WhatsApp if payment.js not loaded
+    openWhatsApp(productName);
+  }
+}
+
+// ── Product Recommender ────────────────────────────────────────────────────
+async function getRecommendations(preferences, budget, room) {
+  try {
+    const res = await fetch('/api/recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ preferences, budget, room }),
+    });
+    const data = await res.json();
+    return data.recommendations || [];
+  } catch (e) {
+    console.error('Recommender error:', e);
+    return [];
+  }
+}
+
+function renderRecommendations(containerId, recommendations) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  if (!recommendations.length) {
+    container.innerHTML = '<p style="color:#888;font-size:.9rem;">No recommendations found. Try different preferences.</p>';
+    return;
+  }
+  container.innerHTML = recommendations.map(r => `
+    <div style="display:flex;gap:1rem;align-items:center;padding:.9rem;background:#f8f9fb;
+      border-radius:10px;margin-bottom:.6rem;border:1px solid #eee;">
+      <img src="/idl-images/${r.image}" alt="${r.name}"
+        style="width:64px;height:64px;object-fit:cover;border-radius:7px;flex-shrink:0;"
+        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI0YyRjRGNSIvPjwvc3ZnPg=='">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;color:#1B3A6B;font-size:.93rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
+        <div style="font-size:.78rem;color:#7B5C3E;font-weight:600;">${r.price}</div>
+        <div style="font-size:.76rem;color:#666;margin-top:.2rem;">${r.reason}</div>
+      </div>
+      <button onclick="openWhatsApp('${r.name.replace(/'/g,"\\'")}');"
+        style="flex-shrink:0;padding:.4rem .8rem;background:#1B3A6B;color:#fff;border:none;
+        border-radius:6px;font-size:.78rem;cursor:pointer;">Quote</button>
+    </div>
+  `).join('');
+}
+
+// ── Query logging ──────────────────────────────────────────────────────────
 async function logUserQuery(query, answer) {
-  await fetch('/user-log', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({query, answer, time:Date.now()})
-  });
+  try {
+    await fetch('/user-log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, answer, time: Date.now() }),
+    });
+  } catch (_) {}
 }
