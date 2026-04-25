@@ -1,42 +1,10 @@
 services:
   - type: web
     name: interior-ecommerce
-    runtime: python311
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn -w 2 -b 0.0.0.0:$PORT application:app"
+    runtime: python
+    pythonVersion: "3.11.9"
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT application:app
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11.9"
-      - key: ADMIN_SECRET_KEY
-        generateValue: true
-      - key: ADMIN_COOKIE_SECURE
-        value: "true"
-      # ── Admin credentials ──────────────────────────────────────────────────
-      - key: ADMIN_USERNAME
-        value: "admin"
-      - key: ADMIN_PASSWORD_HASH
-        sync: false   # Set manually in Render dashboard
-      # ── Google Gemini AI — FREE tier (Chat Agent + Recommender) ───────────────────────────
-      - key: GEMINI_API_KEY
-        sync: false   # Set manually in Render dashboard
-      # ── AWS S3 (Image & 3D model storage) ────────────────────────────────
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: AWS_S3_BUCKET_NAME
-        sync: false
-      - key: AWS_S3_REGION
-        value: "us-east-1"
-      # ── Paystack (Nigeria NGN payments) ──────────────────────────────────
-      - key: PAYSTACK_SECRET_KEY
-        sync: false   # sk_live_... or sk_test_...
-      - key: PAYSTACK_PUBLIC_KEY
-        sync: false   # pk_live_... or pk_test_...
-      # ── Stripe (International USD/GBP/EUR payments) ───────────────────────
-      - key: STRIPE_SECRET_KEY
-        sync: false   # sk_live_... or sk_test_...
-      - key: STRIPE_PUBLISHABLE_KEY
-        sync: false   # pk_live_... or pk_test_...
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false   # whsec_... (from Stripe dashboard webhooks)
+        value: 3.11.9
