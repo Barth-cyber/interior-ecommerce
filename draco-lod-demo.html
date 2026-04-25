@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draco & LOD Demo — Interior Duct</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      overflow: hidden;
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(135deg, #f5f0e8 0%, #e8dcc8 100%);
+    }
+
+    #info-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 350px;
+      font-size: 0.9rem;
+    }
+
+    .info-title {
+      font-weight: 600;
+      color: #1B3A6B;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: #1B3A6B;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    .status-loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-lores {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .status-hires {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .performance-graph {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
+    }
+
+    .graph-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .graph-label {
+      width: 80px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .graph-fill {
+      flex: 1;
+      height: 20px;
+      background: linear-gradient(90deg, #1B3A6B 0%, #2A5298 100%);
+      border-radius: 2px;
+      position: relative;
+      margin: 0 0.5rem;
+    }
+
+    .graph-value {
+      width: 50px;
+      text-align: right;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #1B3A6B;
+    }
+
+    #draco-status {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 6px;
+      padding: 1rem;
+      max-width: 300px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 0.9rem;
+      z-index: 100;
+    }
+
+    .draco-ready {
+      color: #155724;
+      font-weight: 600;
+    }
+
+    .draco-loading {
+      color: #856404;
+      font-weight: 600;
+    }
+
+    .draco-error {
+      color: #721c24;
+      font-weight: 600;
+    }
+
+    #controls-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 320px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .controls-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1B3A6B;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: #1B3A6B;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #2A5298;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #C4A882 0%, #7B5C3E 100%);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    @media (max-width: 768px) {
+      #info-panel {
+        bottom: 10px;
+        left: 10px;
+        max-width: calc(100vw - 20px);
+      }
+
+      #controls-panel {
+        top: 10px;
+        right: 10px;
+        max-width: calc(100vw - 20px);
+      }
+
+      #draco-status {
+        top: 10px;
+        left: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="draco-status">
+  <div id="draco-state" class="draco-loading">🔄 Initializing Draco decoder...</div>
+</div>
+
+<div id="controls-panel">
+  <div class="controls-title">Load Models</div>
+  
+  <button onclick="loadDemoModel('astronaut')">👨‍🚀 Astronaut (Demo)</button>
+  <button onclick="loadDemoModel('robot')">🤖 Robot (Demo)</button>
+  <button onclick="loadDemoModel('avocado')">🥑 Avocado (Demo)</button>
+  
+  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+    <button onclick="window.furnitureScene?.clearScene()" style="background: #d9534f;">Clear Scene</button>
+  </div>
+
+  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; font-size: 0.85rem; color: #666;">
+    <strong style="color: #1B3A6B;">Info:</strong>
+    <div style="margin-top: 0.5rem; line-height: 1.6;">
+      <div>• Draco automatically decompresses</div>
+      <div>• LOD loads low-res then high-res</div>
+      <div>• Click model to speed up high-res load</div>
+      <div>• Check Draco status above ↑</div>
+    </div>
+  </div>
+</div>
+
+<div id="info-panel">
+  <div class="info-title">📊 Performance Metrics</div>
+  
+  <div id="model-count" class="info-row">
+    <span class="info-label">Models:</span>
+    <span class="info-value">0</span>
+  </div>
+
+  <div id="lod-status" class="info-row">
+    <span class="info-label">Active LOD:</span>
+    <span class="info-value">—</span>
+  </div>
+
+  <div id="load-time" class="info-row">
+    <span class="info-label">Load Time:</span>
+    <span class="info-value">—</span>
+  </div>
+
+  <div id="camera-distance" class="info-row">
+    <span class="info-label">Distance:</span>
+    <span class="info-value">—</span>
+  </div>
+
+  <div id="progress-container" style="display: none; margin-top: 1rem;">
+    <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Loading...</div>
+    <div class="progress-bar">
+      <div id="progress-fill" class="progress-fill"></div>
+    </div>
+  </div>
+
+  <div id="status-badge" class="status-badge status-lores">
+    🟦 Low-Res Loaded
+  </div>
+
+  <div class="performance-graph">
+    <div style="font-size: 0.85rem; font-weight: 600; color: #1B3A6B; margin-bottom: 0.75rem;">LOD Timeline</div>
+    <div class="graph-bar">
+      <span class="graph-label">Low-Res:</span>
+      <div class="graph-fill" id="graph-lores" style="background: #d1ecf1; width: 0%;"></div>
+      <span class="graph-value" id="lores-time">—</span>
+    </div>
+    <div class="graph-bar">
+      <span class="graph-label">High-Res:</span>
+      <div class="graph-fill" id="graph-hires" style="background: #d4edda; width: 0%;"></div>
+      <span class="graph-value" id="hires-time">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- THREE.js Addons -->
+<script src="https://cdn.jsdelivr.net/npm/three@r128/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@r128/examples/js/loaders/DRACOLoader.js"></script>
+
+<!-- Furniture Placement -->
+<script src="/static/furniture-placement-scene.js"></script>
+<script src="/static/lod-helpers.js"></script>
+
+<script>
+  let scene = null;
+  let monitor = null;
+  const demoModels = {
+    astronaut: {
+      name: 'Astronaut',
+      url: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'
+    },
+    robot: {
+      name: 'Robot',
+      url: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb'
+    },
+    avocado: {
+      name: 'Avocado',
+      url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb'
+    }
+  };
+
+  // Initialize scene
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      // Show Draco loading status
+      updateDracoStatus('loading');
+
+      scene = new FurniturePlacementScene('#canvas-container', {
+        gridSize: 0.5,
+        snapEnabled: true,
+        cameraDistance: 15,
+        lightingPreset: 'studio',
+        backgroundColor: 0xf5f0e8,
+        lodEnabled: true,
+        lodFocusDistance: 10,
+        lodUpgradeDelay: 500
+      });
+
+      monitor = new LODPerformanceMonitor();
+      window.furnitureScene = scene;
+
+      // Setup event listeners
+      setupEventListeners();
+
+      // Draco ready
+      updateDracoStatus('ready');
+
+    } catch (error) {
+      console.error('Initialization failed:', error);
+      updateDracoStatus('error');
+    }
+  });
+
+  function setupEventListeners() {
+    // Model loading progress
+    window.addEventListener('model-loading-progress', (e) => {
+      const { progress } = e.detail;
+      updateProgress(progress);
+    });
+
+    // Models loaded
+    window.addEventListener('models-loaded', () => {
+      const progContainer = document.getElementById('progress-container');
+      if (progContainer) progContainer.style.display = 'none';
+    });
+
+    // Loading errors
+    window.addEventListener('model-loading-error', (e) => {
+      console.error('Load error:', e.detail.url);
+      updateProgress(0);
+    });
+
+    // Update info panel on each frame
+    const updateInfoLoop = () => {
+      updateInfoPanel();
+      requestAnimationFrame(updateInfoLoop);
+    };
+    updateInfoLoop();
+  }
+
+  function updateDracoStatus(state) {
+    const statusEl = document.getElementById('draco-state');
+    const states = {
+      loading: '🔄 Initializing Draco decoder...',
+      ready: '✅ Draco decoder ready',
+      error: '⚠️ Draco initialization failed (non-blocking)'
+    };
+    
+    statusEl.textContent = states[state] || states.loading;
+    statusEl.className = `draco-${state}`;
+
+    // Hide after a few seconds if ready
+    if (state === 'ready') {
+      setTimeout(() => {
+        const statusDiv = document.getElementById('draco-status');
+        statusDiv.style.opacity = '0.5';
+        statusDiv.style.cursor = 'pointer';
+        statusDiv.title = 'Click to show Draco status';
+        statusDiv.onclick = () => {
+          statusDiv.style.opacity = '1';
+        };
+      }, 2000);
+    }
+  }
+
+  function updateProgress(progress) {
+    const progContainer = document.getElementById('progress-container');
+    const progFill = document.getElementById('progress-fill');
+    
+    if (progress > 0 && progress < 100) {
+      progContainer.style.display = 'block';
+      progFill.style.width = progress + '%';
+    }
+  }
+
+  function updateInfoPanel() {
+    if (!scene) return;
+
+    const modelCount = scene.models.length;
+    document.querySelector('#model-count .info-value').textContent = modelCount;
+
+    if (modelCount > 0) {
+      const model = scene.models[modelCount - 1];
+      
+      // LOD Status
+      const lodLevel = model.lodLevel || 0;
+      const lodText = lodLevel === 0 ? 'Low-Res (LOD 0)' : 'High-Res (LOD 1)';
+      document.querySelector('#lod-status .info-value').textContent = lodText;
+
+      // Status badge
+      const badge = document.getElementById('status-badge');
+      if (model.isLoading) {
+        badge.textContent = '🟨 Upgrading...';
+        badge.className = 'status-badge status-loading';
+      } else if (model.lodLevel === 0) {
+        badge.textContent = '🟦 Low-Res Loaded';
+        badge.className = 'status-badge status-lores';
+      } else {
+        badge.textContent = '🟩 High-Res Loaded';
+        badge.className = 'status-badge status-hires';
+      }
+
+      // Distance
+      const distance = scene.camera.position.distanceTo(model.object.position);
+      document.querySelector('#camera-distance .info-value').textContent = 
+        distance.toFixed(1) + 'm';
+
+      // Check if in focus
+      const inFocus = scene.isModelInFocus(model);
+      if (inFocus && !model.isLoading && model.upgradePending) {
+        console.log('Model in focus, will upgrade to high-res');
+      }
+    }
+  }
+
+  async function loadDemoModel(type) {
+    if (!scene) {
+      alert('Scene not initialized');
+      return;
+    }
+
+    const model = demoModels[type];
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = 'Loading...';
+
+    try {
+      monitor.startMonitoring();
+
+      const position = {
+        x: (Math.random() - 0.5) * 8,
+        y: 0,
+        z: (Math.random() - 0.5) * 8
+      };
+
+      // Load with LOD metadata
+      const metadata = {
+        cameraOrbit: '0deg 75deg 2.5m',
+        exposure: 1,
+        shadowIntensity: 1
+      };
+
+      await scene.loadModel(model.url, position, metadata);
+      
+      monitor.recordLowResLoad();
+      updateLoadTimeDisplay();
+
+      console.log(`✓ ${model.name} loaded`);
+    } catch (error) {
+      console.error('Load failed:', error);
+      alert('Failed to load model: ' + error.message);
+    } finally {
+      button.disabled = false;
+      button.textContent = `Load ${model.name}`;
+    }
+  }
+
+  function updateLoadTimeDisplay() {
+    const report = monitor.getReport();
+    
+    if (report.lowResLoadTime > 0) {
+      document.querySelector('#load-time .info-value').textContent = 
+        report.lowResLoadTime.toFixed(0) + 'ms';
+
+      const maxTime = Math.max(1500, report.highResLoadTime || 0);
+      const loresPercent = (report.lowResLoadTime / maxTime) * 100;
+      const hiresPercent = (report.highResLoadTime / maxTime) * 100;
+
+      document.getElementById('graph-lores').style.width = loresPercent + '%';
+      document.getElementById('lores-time').textContent = 
+        report.lowResLoadTime.toFixed(0) + 'ms';
+
+      if (report.highResLoadTime > 0) {
+        document.getElementById('graph-hires').style.width = hiresPercent + '%';
+        document.getElementById('hires-time').textContent = 
+          report.highResLoadTime.toFixed(0) + 'ms';
+      }
+    }
+  }
+
+  // Log keyboard shortcuts
+  console.log('%cDraco & LOD Demo Controls', 'font-size: 14px; font-weight: bold; color: #1B3A6B;');
+  console.log('%cClick models to focus and trigger high-res upgrade\nScroll to zoom\nDrag to move models\nWASD/Arrows to move (when selected)\nQ/E to rotate\nDelete to remove', 'font-size: 12px; color: #666;');
+</script>
+
+</body>
+</html>

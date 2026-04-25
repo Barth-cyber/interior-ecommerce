@@ -56,8 +56,16 @@ async function escalateToHuman(query, imageUrl) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, imageUrl }),
   });
-  let waMsg = encodeURIComponent('User query: ' + query);
-  if (imageUrl) waMsg += '%0A[Image attached]';
+
+  const message = `Hello Interior Duct! I am interested in ${query}.
+Please send me a quote and availability.`;
+
+  if (imageUrl && typeof window.shareProductImageToWhatsApp === 'function') {
+    shareProductImageToWhatsApp(imageUrl, message);
+    return;
+  }
+
+  const waMsg = encodeURIComponent(message + (imageUrl ? '\n\nImage: ' + imageUrl : ''));
   window.open('https://wa.me/2348036850229?text=' + waMsg, '_blank');
 }
 
@@ -92,6 +100,11 @@ function openWhatsApp(productName) {
   let message = `Hi, I'm interested in the ${productName}. Can you provide more details and a quote?`;
   if (window.currentProduct && window.currentProduct.name === productName) {
     message = `Hi, I'm interested in the ${window.currentProduct.name} (${window.currentProduct.price}). Category: ${window.currentProduct.category}. Please provide more details and a customized quote.`;
+    if (window.currentProduct.image && typeof window.shareProductImageToWhatsApp === 'function') {
+      window.shareProductImageToWhatsApp(window.currentProduct.image, message);
+      closeProductModal();
+      return;
+    }
   }
   window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   closeProductModal();
@@ -143,7 +156,7 @@ function renderRecommendations(containerId, recommendations) {
         <div style="font-size:.78rem;color:#7B5C3E;font-weight:600;">${r.price}</div>
         <div style="font-size:.76rem;color:#666;margin-top:.2rem;">${r.reason}</div>
       </div>
-      <button onclick="openWhatsApp('${r.name.replace(/'/g,"\\'")}');"
+      <button onclick="openWhatsApp({name:'${r.name.replace(/'/g,"\\'")}',price:'${(r.price||'').replace(/'/g,"\\'")}',desc:'${(r.reason||'').replace(/'/g,"\\'")}',img:'/idl-images/${(r.image||'').replace(/'/g,"\\'")}'})"
         style="flex-shrink:0;padding:.4rem .8rem;background:#1B3A6B;color:#fff;border:none;
         border-radius:6px;font-size:.78rem;cursor:pointer;">Quote</button>
     </div>

@@ -8,6 +8,9 @@ import os
 import json
 import difflib
 import requests as http_requests
+from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
+import io
 
 ENV_FILE = os.path.join(os.path.dirname(__file__), '..', '.env')
 # Load environment variables from .env file
@@ -157,6 +160,104 @@ if not GEMINI_API_KEY:
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def generate_model_thumbnail(model_filename, thumbnail_filename, model_path):
+    """
+    Generate a PNG thumbnail for a 3D model.
+    Creates a placeholder image with model name and metadata.
+    
+    Args:
+        model_filename: Name of the uploaded GLB/GLTF file
+        thumbnail_filename: Name to save the thumbnail as
+        model_path: Path to the uploaded model file
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # Get model file size
+        file_size = os.path.getsize(model_path)
+        size_mb = file_size / (1024 * 1024)
+        
+        # Create a placeholder thumbnail image (400x300)
+        img = Image.new('RGB', (400, 300), color=(30, 58, 107))  # Navy background
+        draw = ImageDraw.Draw(img)
+        
+        # Try to use default font, fallback to default if unavailable
+        try:
+            title_font = ImageFont.truetype("arial.ttf", 24)
+            text_font = ImageFont.truetype("arial.ttf", 14)
+        except:
+            title_font = ImageFont.load_default()
+            text_font = ImageFont.load_default()
+        
+        # Extract model name without extension
+        model_name = model_filename.rsplit('.', 1)[0]
+        
+        # Draw model name (truncate if too long)
+        if len(model_name) > 30:
+            model_name = model_name[:27] + "..."
+        draw.text((20, 50), model_name, fill=(196, 168, 130), font=title_font)
+        
+        # Draw model info
+        draw.text((20, 100), "3D Model Preview", fill=(255, 255, 255), font=text_font)
+        draw.text((20, 130), f"Format: {model_filename.rsplit('.', 1)[1].upper()}", fill=(196, 168, 130), font=text_font)
+        draw.text((20, 160), f"Size: {size_mb:.2f} MB", fill=(196, 168, 130), font=text_font)
+        draw.text((20, 190), f"Uploaded: {datetime.now().strftime('%Y-%m-%d')}", fill=(196, 168, 130), font=text_font)
+        draw.text((20, 240), "Click to view in 3D", fill=(212, 184, 150), font=text_font)
+        
+        # Save thumbnail
+        img.save(thumbnail_filename, 'PNG')
+        app.logger.info(f"Generated thumbnail: {thumbnail_filename}")
+        return True
+    except Exception as e:
+        app.logger.error(f"Failed to generate thumbnail: {e}")
+        return False
+
+
+def create_model_metadata(model_filename, thumbnail_filename, model_url=None):
+    """
+    Create a metadata JSON file for the 3D model.
+    Stores thumbnail path, cameraOrbit, and other model information.
+    
+    Args:
+        model_filename: Name of the GLB/GLTF file
+        thumbnail_filename: Name of the thumbnail PNG file
+        model_url: URL to the model if using cloud storage
+    
+    Returns:
+        Metadata dictionary
+    """
+    try:
+        model_name = model_filename.rsplit('.', 1)[0]
+        thumbnail_name = thumbnail_filename.rsplit('/', 1)[-1] if '/' in thumbnail_filename else thumbnail_filename
+        
+        metadata = {
+            "filename": model_filename,
+            "thumbnail": f"/idl-images/{thumbnail_name}",
+            "url": model_url or f"/idl-images/{model_filename}",
+            "cameraOrbit": "0deg 75deg 2.5m",  # Default camera position (azimuth, elevation, distance)
+            "environmentImage": "https://modelviewer.dev/shared-assets/environments/neutral.hdr",
+            "exposure": 1,
+            "shadowIntensity": 1,
+            "name": model_name,
+            "uploadDate": datetime.now().isoformat(),
+            "arModes": ["webxr", "scene-viewer", "quick-look"],
+            "autoRotate": True,
+            "reveal": "interaction"
+        }
+        
+        # Save metadata alongside the model with .json extension
+        metadata_filename = os.path.join(UPLOAD_FOLDER, f"{model_name}.json")
+        with open(metadata_filename, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
+        
+        app.logger.info(f"Created metadata: {metadata_filename}")
+        return metadata
+    except Exception as e:
+        app.logger.error(f"Failed to create metadata: {e}")
+        return None
 
 
 def login_required(f):
@@ -349,7 +450,17 @@ def list_3dmodels():
 def public_3dmodels():
     files = [f for f in os.listdir(UPLOAD_FOLDER) if '.' in f and f.rsplit('.', 1)[1].lower() in ALLOWED_3D]
     files.sort()
-    return jsonify(files)
+    # Provide a few hosted demo models so the storefront has working samples
+    demo_models = [
+        'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+        'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb',
+        'https://modelviewer.dev/shared-assets/models/DamagedHelmet.glb',
+        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb',
+        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb'
+    ]
+    # Combine local filenames and demo URLs; front-end knows to prefix local names with /idl-images/
+    combined = files + demo_models
+    return jsonify(combined)
 
 
 @app.route('/upload', methods=['POST'])
@@ -387,18 +498,58 @@ def upload_model():
     for file in files:
         if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_3D:
             filename = secure_filename(file.filename)
+            model_path = os.path.join(UPLOAD_FOLDER, filename)
+            
+            # Generate thumbnail filename
+            model_name_base = filename.rsplit('.', 1)[0]
+            thumbnail_filename = f"{model_name_base}_thumb.png"
+            thumbnail_path = os.path.join(UPLOAD_FOLDER, thumbnail_filename)
+            
             if s3_storage:
                 try:
                     url = s3_storage.upload_file(file, filename, 'models/')
-                    saved.append({'filename': filename, 'url': url, 'storage': 'S3'})
+                    file.seek(0)
+                    file.save(model_path)  # Also save locally for thumbnail generation
+                    
+                    # Generate thumbnail and metadata
+                    generate_model_thumbnail(filename, thumbnail_path, model_path)
+                    metadata = create_model_metadata(filename, thumbnail_filename, url)
+                    
+                    saved.append({
+                        'filename': filename,
+                        'url': url,
+                        'thumbnail': f"/idl-images/{thumbnail_filename}",
+                        'storage': 'S3',
+                        'metadata': metadata
+                    })
                 except Exception as e:
                     app.logger.error(f"S3 model upload failed: {e}, using local storage")
                     file.seek(0)
-                    file.save(os.path.join(UPLOAD_FOLDER, filename))
-                    saved.append({'filename': filename, 'storage': 'local'})
+                    file.save(model_path)
+                    
+                    # Generate thumbnail and metadata
+                    generate_model_thumbnail(filename, thumbnail_path, model_path)
+                    metadata = create_model_metadata(filename, thumbnail_filename)
+                    
+                    saved.append({
+                        'filename': filename,
+                        'thumbnail': f"/idl-images/{thumbnail_filename}",
+                        'storage': 'local',
+                        'metadata': metadata
+                    })
             else:
-                file.save(os.path.join(UPLOAD_FOLDER, filename))
-                saved.append({'filename': filename, 'storage': 'local'})
+                file.save(model_path)
+                
+                # Generate thumbnail and metadata
+                generate_model_thumbnail(filename, thumbnail_path, model_path)
+                metadata = create_model_metadata(filename, thumbnail_filename)
+                
+                saved.append({
+                    'filename': filename,
+                    'thumbnail': f"/idl-images/{thumbnail_filename}",
+                    'storage': 'local',
+                    'metadata': metadata
+                })
     return jsonify({'uploaded': saved})
 
 
@@ -427,14 +578,30 @@ def delete_model():
     filename = data.get('filename')
     if not filename or '.' not in filename or filename.rsplit('.', 1)[1].lower() not in ALLOWED_3D:
         return 'Invalid filename', 400
+    
+    model_name_base = filename.rsplit('.', 1)[0]
+    
     if s3_storage:
         try:
             s3_storage.delete_file(filename, 'models/')
         except Exception as e:
             app.logger.error(f"S3 delete failed: {e}")
+    
+    # Delete model file
     path = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.exists(path):
         os.remove(path)
+    
+    # Delete associated thumbnail
+    thumbnail_path = os.path.join(UPLOAD_FOLDER, f"{model_name_base}_thumb.png")
+    if os.path.exists(thumbnail_path):
+        os.remove(thumbnail_path)
+    
+    # Delete associated metadata JSON
+    metadata_path = os.path.join(UPLOAD_FOLDER, f"{model_name_base}.json")
+    if os.path.exists(metadata_path):
+        os.remove(metadata_path)
+    
     return jsonify({'deleted': filename})
 
 
@@ -446,9 +613,67 @@ def serve_image(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Content / categories / knowledge base
-# ─────────────────────────────────────────────────────────────────────────────
+@app.route('/api/model-metadata/<model_filename>', methods=['GET'])
+def get_model_metadata(model_filename):
+    """
+    Retrieve metadata for a 3D model.
+    Returns thumbnail path, camera settings, and other model information.
+    """
+    if '.' not in model_filename or model_filename.rsplit('.', 1)[1].lower() not in ALLOWED_3D:
+        return jsonify({'error': 'Invalid model file'}), 400
+    
+    model_name_base = model_filename.rsplit('.', 1)[0]
+    metadata_path = os.path.join(UPLOAD_FOLDER, f"{model_name_base}.json")
+    
+    if not os.path.exists(metadata_path):
+        return jsonify({'error': 'Metadata not found'}), 404
+    
+    try:
+        with open(metadata_path, 'r', encoding='utf-8') as f:
+            metadata = json.load(f)
+        return jsonify(metadata)
+    except Exception as e:
+        app.logger.error(f"Failed to read metadata: {e}")
+        return jsonify({'error': 'Failed to read metadata'}), 500
+
+
+@app.route('/api/model-metadata/<model_filename>', methods=['PUT'])
+@login_required
+def update_model_metadata(model_filename):
+    """
+    Update metadata for a 3D model.
+    Allows customizing camera orbit, exposure, shadow intensity, etc.
+    """
+    if '.' not in model_filename or model_filename.rsplit('.', 1)[1].lower() not in ALLOWED_3D:
+        return jsonify({'error': 'Invalid model file'}), 400
+    
+    model_name_base = model_filename.rsplit('.', 1)[0]
+    metadata_path = os.path.join(UPLOAD_FOLDER, f"{model_name_base}.json")
+    
+    if not os.path.exists(metadata_path):
+        return jsonify({'error': 'Metadata not found'}), 404
+    
+    try:
+        data = request.get_json()
+        with open(metadata_path, 'r', encoding='utf-8') as f:
+            metadata = json.load(f)
+        
+        # Update allowed fields
+        allowed_fields = ['cameraOrbit', 'exposure', 'shadowIntensity', 'name', 'autoRotate', 'reveal', 'environmentImage']
+        for field in allowed_fields:
+            if field in data:
+                metadata[field] = data[field]
+        
+        with open(metadata_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
+        
+        return jsonify({'updated': True, 'metadata': metadata})
+    except Exception as e:
+        app.logger.error(f"Failed to update metadata: {e}")
+        return jsonify({'error': 'Failed to update metadata'}), 500
+
+
+
 
 @app.route('/content', methods=['GET'])
 def get_content():

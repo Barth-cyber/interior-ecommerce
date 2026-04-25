@@ -17,39 +17,50 @@ function safeAttributeString(value) {
     .replace(/>/g, '&gt;');
 }
 
+function getProductImagePath(image) {
+  if (!image) return '';
+  const src = String(image).trim();
+  if (/^(https?:)?\/\//i.test(src)) return src;
+  // Normalize paths to be relative (no leading slash) so they work
+  // when the site is served from a subpath or opened as a file.
+  if (src.startsWith('/')) return src.replace(/^\/+/, '');
+  if (/^(idl-images|IDL_Product_branding)\//.test(src)) return src;
+  return 'IDL_Product_branding/' + src;
+}
+
 async function loadProducts() {
   const sampleProducts = [
     {
       name: 'Royal Chesterfield Sofa Set',
-      img: 'IDL_Product_branding/Chair_Royal.jpg',
+      img: getProductImagePath('IDL_Product_branding/Chair_Royal.jpg'),
       desc: 'Elegant chesterfield sofa set with premium leather upholstery and classic design.',
       price: 'NGN 2,800,000',
       category: 'Chairs & Seating'
     },
     {
       name: 'Mahogany Dining Table',
-      img: 'IDL_Product_branding/Dining_Set.jpg',
+      img: getProductImagePath('IDL_Product_branding/Dining_Set.jpg'),
       desc: 'Modern dining table with premium wood finish and glass top.',
       price: 'NGN 3,200,000',
       category: 'Dining & Tables'
     },
     {
       name: 'Tufted Master Bedroom Suite',
-      img: 'IDL_Product_branding/IMG_20251216_WA0032.jpg',
+      img: getProductImagePath('IDL_Product_branding/IMG_20251216_WA0032.jpg'),
       desc: 'Luxury bedroom suite with plush headboard and bespoke finishes.',
       price: 'NGN 4,800,000',
       category: 'Bedroom'
     },
     {
       name: 'Executive Reception Counter',
-      img: 'IDL_Product_branding/Reception_Counter.jpg',
+      img: getProductImagePath('IDL_Product_branding/Reception_Counter.jpg'),
       desc: 'Statement reception counter perfect for high-end corporate spaces.',
       price: 'NGN 2,900,000',
       category: 'Office & Commercial'
     },
     {
       name: 'Premium Mahogany Door',
-      img: 'IDL_Product_branding/Door_White.jpg',
+      img: getProductImagePath('IDL_Product_branding/Door_White.jpg'),
       desc: 'Hand-crafted mahogany door with elegant detailing and finish.',
       price: 'NGN 750,000',
       category: 'Doors'
@@ -62,8 +73,8 @@ async function loadProducts() {
     const products = Array.isArray(data.products) ? data.products : [];
     heroPopupProducts = products.length ? products.map(p => ({
       name: p.name,
-      img: `IDL_Product_branding/${p.image}`,
-      desc: p.description,
+      img: getProductImagePath(p.image || p.img || ''),
+      desc: p.description || p.desc || '',
       price: p.price,
       category: p.category
     })) : sampleProducts;
@@ -114,7 +125,7 @@ function renderSeatingSlides(products) {
   if (!track) return;
   track.innerHTML = products.map((p, i) => `
     <div class="hero-popup-slide fade-up" style="min-width:100%;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,0.97);box-shadow:0 8px 32px rgba(27,58,107,0.12);border-radius:12px;transition:opacity 1.2s, transform 1.2s;min-height:320px;gap:2rem;flex-wrap:nowrap;">
-      <img src="${p.img}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#1B3A6B;margin-bottom:.5rem;">${p.name}</div>
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
@@ -122,7 +133,7 @@ function renderSeatingSlides(products) {
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
           <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
-          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',desc:'${safeAttributeString(p.desc)}',img:'${safeAttributeString(p.img)}'})">Quote</button>
         </div>
       </div>
     </div>
@@ -134,7 +145,7 @@ function renderDiningSlides(products) {
   if (!track) return;
   track.innerHTML = products.map((p, i) => `
     <div class="hero-popup-slide fade-up" style="min-width:100%;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,0.97);box-shadow:0 8px 32px rgba(27,58,107,0.12);border-radius:12px;transition:opacity 1.2s, transform 1.2s;min-height:320px;gap:2rem;flex-wrap:nowrap;">
-      <img src="${p.img}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#1B3A6B;margin-bottom:.5rem;">${p.name}</div>
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
@@ -142,7 +153,7 @@ function renderDiningSlides(products) {
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
           <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
-          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',desc:'${safeAttributeString(p.desc)}',img:'${safeAttributeString(p.img)}'})">Quote</button>
         </div>
       </div>
     </div>
@@ -154,7 +165,7 @@ function renderBedroomSlides(products) {
   if (!track) return;
   track.innerHTML = products.map((p, i) => `
     <div class="hero-popup-slide fade-up" style="min-width:100%;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,0.97);box-shadow:0 8px 32px rgba(27,58,107,0.12);border-radius:12px;transition:opacity 1.2s, transform 1.2s;min-height:320px;gap:2rem;flex-wrap:nowrap;">
-      <img src="${p.img}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#1B3A6B;margin-bottom:.5rem;">${p.name}</div>
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
@@ -162,7 +173,7 @@ function renderBedroomSlides(products) {
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
           <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
-          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',desc:'${safeAttributeString(p.desc)}',img:'${safeAttributeString(p.img)}'})">Quote</button>
         </div>
       </div>
     </div>
@@ -174,7 +185,7 @@ function renderDoorsSlides(products) {
   if (!track) return;
   track.innerHTML = products.map((p, i) => `
     <div class="hero-popup-slide fade-up" style="min-width:100%;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,0.97);box-shadow:0 8px 32px rgba(27,58,107,0.12);border-radius:12px;transition:opacity 1.2s, transform 1.2s;min-height:320px;gap:2rem;flex-wrap:nowrap;">
-      <img src="${p.img}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#1B3A6B;margin-bottom:.5rem;">${p.name}</div>
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
@@ -182,7 +193,7 @@ function renderDoorsSlides(products) {
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
           <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
-          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',desc:'${safeAttributeString(p.desc)}',img:'${safeAttributeString(p.img)}'})">Quote</button>
         </div>
       </div>
     </div>
@@ -194,7 +205,7 @@ function renderLivingSlides(products) {
   if (!track) return;
   track.innerHTML = products.map((p, i) => `
     <div class="hero-popup-slide fade-up" style="min-width:100%;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,0.97);box-shadow:0 8px 32px rgba(27,58,107,0.12);border-radius:12px;transition:opacity 1.2s, transform 1.2s;min-height:320px;gap:2rem;flex-wrap:nowrap;">
-      <img src="${p.img}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#1B3A6B;margin-bottom:.5rem;">${p.name}</div>
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
@@ -202,7 +213,7 @@ function renderLivingSlides(products) {
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
           <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
-          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',desc:'${safeAttributeString(p.desc)}',img:'${safeAttributeString(p.img)}'})">Quote</button>
         </div>
       </div>
     </div>
@@ -214,7 +225,7 @@ function renderOfficeSlides(products) {
   if (!track) return;
   track.innerHTML = products.map((p, i) => `
     <div class="hero-popup-slide fade-up" style="min-width:100%;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,0.97);box-shadow:0 8px 32px rgba(27,58,107,0.12);border-radius:12px;transition:opacity 1.2s, transform 1.2s;min-height:320px;gap:2rem;flex-wrap:nowrap;">
-      <img src="${p.img}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" loading="lazy" style="max-width:220px;width:100%;height:220px;object-fit:cover;border-radius:8px;margin-right:2.2rem;box-shadow:0 2px 12px rgba(13,27,42,0.08);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5QUE1QjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBMb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#1B3A6B;margin-bottom:.5rem;">${p.name}</div>
         <div style="font-size:.98rem;color:#3D4F63;margin-bottom:.7rem;">${p.desc}</div>
@@ -222,7 +233,7 @@ function renderOfficeSlides(products) {
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
           <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
-          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',desc:'${safeAttributeString(p.desc)}',img:'${safeAttributeString(p.img)}'})">Quote</button>
         </div>
       </div>
     </div>
@@ -348,7 +359,7 @@ function renderHeroPopupSlides() {
         <div style="font-size:.78rem;color:#C4A882;text-transform:uppercase;">${p.category}</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
           <button class="btn btn-brown" style="flex:1;min-width:120px;" onclick="window.openCheckoutForProduct({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',img:'${safeAttributeString(p.img)}'})">Checkout</button>
-          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp('${safeAttributeString(p.name)}')">Quote</button>
+          <button class="btn btn-outline-navy" style="flex:1;min-width:120px;" onclick="openWhatsApp({name:'${safeAttributeString(p.name)}',price:'${safeAttributeString(p.price)}',desc:'${safeAttributeString(p.desc)}',img:'${safeAttributeString(p.img)}'})">Quote</button>
         </div>
       </div>
     </div>
@@ -504,10 +515,9 @@ function initAIChatButton() {
         </div>
       </div>
       <div style="padding:1rem;text-align:center;background:#fff;border-top:1px solid #e0e0e0;">
-        <a id="aiChatLink" target="_blank"
+        <a id="aiChatLink" href="javascript:void(0);" onclick="openAIConversation(); return false;"
            class="btn"
-           style="width:100%;background:#C9956B;color:#fff;border:none;text-decoration:none;display:inline-block;box-sizing:border-box;padding:0.75rem 1.5rem;border-radius:4px;font-weight:600;font-size:0.9rem;transition:all 0.3s ease;"
-           href="https://wa.me/2348036850229?text=Hello%20Interior%20Duct%21%20I%20am%20interested%20in%20your%20products">
+           style="width:100%;background:#C9956B;color:#fff;border:none;text-decoration:none;display:inline-block;box-sizing:border-box;padding:0.75rem 1.5rem;border-radius:4px;font-weight:600;font-size:0.9rem;transition:all 0.3s ease;">
           Chat with AI
         </a>
       </div>
@@ -593,22 +603,38 @@ function updateAIChatLink() {
   if (!link) return;
 
   const product = getCurrentAIProduct();
+  link.href = 'javascript:void(0);';
+  link.onclick = () => {
+    openAIConversation();
+    return false;
+  };
+
   if (!product) {
-    link.href = 'https://wa.me/2348036850229?text=' + encodeURIComponent('Hello, I am interested in your sales services');
+    link.title = 'Chat with AI sales assistant';
     return;
   }
 
-  const text = `Hello Interior Duct! I am interested in ${product.name}. Price: ${product.price}. Description: ${product.desc}. Image: ${product.img}. Please send me a quote and availability.`;
-  link.href = 'https://wa.me/2348036850229?text=' + encodeURIComponent(text);
+  link.title = `Chat with AI about ${product.name}`;
+}
+
+const inspirationalQuotes = [
+  "Design is not just what it looks like; it's how it feels.",
+  "Your home should tell the story of who you are, and be a collection of what you love.",
+  "Great design is a multi-layered relationship between human life and its environment.",
+  "Small details make big spaces feel luxurious — let's help you find the perfect piece."
+];
+
+function getInspirationalQuote() {
+  return inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
 }
 
 function openAIConversation() {
-  updateAIChatLink();
-  const link = document.getElementById('aiChatLink');
-  if (link) {
-    link.click();
+  const product = getCurrentAIProduct();
+  if (product && product.img) {
+    openWhatsApp(product);
   } else {
-    const message = "Hi! I'm interested in your furniture and interior design products. Can you help me find the perfect piece?";
+    const quote = getInspirationalQuote();
+    const message = `Hello Interior Duct! I'm looking for interior design inspiration today. ${quote}`;
     openWhatsApp(message);
   }
   closeAIChat();
