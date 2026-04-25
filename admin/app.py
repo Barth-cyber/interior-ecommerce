@@ -379,6 +379,11 @@ def interior():
     return send_from_directory('..', 'interior.html')
 
 
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(ROOT_DIR, 'robots.txt')
+
+
 @app.route('/hero-popup-slider.js')
 def hero_popup_slider_js():
     return send_from_directory(ROOT_DIR, 'hero-popup-slider.js')
@@ -444,6 +449,31 @@ def list_3dmodels():
     files = [f for f in os.listdir(UPLOAD_FOLDER) if '.' in f and f.rsplit('.', 1)[1].lower() in ALLOWED_3D]
     files.sort()
     return jsonify(files)
+
+
+@app.route('/admin/3dmodels')
+@login_required
+def admin_3dmodels():
+    glb_files = [
+        f for f in os.listdir(UPLOAD_FOLDER)
+        if f.lower().endswith('.glb')
+    ]
+    glb_files.sort()
+    models = []
+    for filename in glb_files:
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        size_kb = None
+        try:
+            size_kb = round(os.path.getsize(file_path) / 1024, 2)
+        except OSError:
+            size_kb = None
+        models.append({
+            'filename': filename,
+            'name': os.path.splitext(filename)[0],
+            'url': f'/idl-images/{filename}',
+            'size_kb': size_kb,
+        })
+    return jsonify(models)
 
 
 @app.route('/public-3dmodels')

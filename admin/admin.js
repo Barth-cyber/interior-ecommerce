@@ -19,10 +19,15 @@ async function fetchImages() {
 }
 
 async function fetchModels() {
-  const res = await fetch('/3dmodels');
-  const files = await res.json();
-  renderModels(files);
+  const res = await fetch('/admin/3dmodels');
+  const models = await res.json();
+  renderModels(models);
 }
+
+// Example client-side fetch for the new admin endpoint:
+// fetch('/admin/3dmodels')
+//   .then(r => r.json())
+//   .then(models => console.log(models));
 
 async function deleteModel(filename) {
   const res = await fetch('/delete-model', {
@@ -45,13 +50,21 @@ function renderModels(models) {
     modelList.innerHTML = '<p style="grid-column:1/-1;color:#555;">No 3D models uploaded yet.</p>';
     return;
   }
-  models.forEach(name => {
+  models.forEach(model => {
+    const filename = typeof model === 'string' ? model : model.filename;
+    const name = typeof model === 'string' ? filename.replace(/\.glb$/i, '') : model.name;
+    const url = typeof model === 'string' ? `/idl-images/${encodeURIComponent(filename)}` : model.url;
+    const sizeText = model && model.size_kb ? `Size: ${model.size_kb} KB` : '';
+
     const card = document.createElement('div');
     card.style = 'border:1px solid #ddd;padding:.7rem;border-radius:8px;display:flex;flex-direction:column;gap:.6rem;';
     const title = document.createElement('strong');
     title.textContent = name;
+    const subtitle = document.createElement('div');
+    subtitle.style = 'color:#666;font-size:.9rem;';
+    subtitle.textContent = filename + (sizeText ? ` • ${sizeText}` : '');
     const viewer = document.createElement('model-viewer');
-    viewer.setAttribute('src', `/idl-images/${encodeURIComponent(name)}`);
+    viewer.setAttribute('src', url);
     viewer.setAttribute('alt', name);
     viewer.setAttribute('ar', '');
     viewer.setAttribute('auto-rotate', '');
@@ -62,14 +75,15 @@ function renderModels(models) {
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'Delete';
     deleteBtn.style = 'flex:1;padding:.5rem;background:#e74c3c;color:#fff;border:none;border-radius:5px;cursor:pointer;';
-    deleteBtn.addEventListener('click', () => deleteModel(name));
+    deleteBtn.addEventListener('click', () => deleteModel(filename));
     btnRow.appendChild(deleteBtn);
     const openBtn = document.createElement('button');
     openBtn.textContent = 'Open Demo';
     openBtn.style = 'flex:1;padding:.5rem;background:#1b3a6b;color:#fff;border:none;border-radius:5px;cursor:pointer;';
-    openBtn.addEventListener('click', () => window.open(`/3d-demo?model=${encodeURIComponent(name)}`, '_blank'));
+    openBtn.addEventListener('click', () => window.open(`/3d-demo?model=${encodeURIComponent(filename)}`, '_blank'));
     btnRow.appendChild(openBtn);
     card.appendChild(title);
+    card.appendChild(subtitle);
     card.appendChild(viewer);
     card.appendChild(btnRow);
     modelList.appendChild(card);
@@ -251,7 +265,7 @@ function addProduct() {
     category: 'Chairs & Seating',
     price: 'NGN 0',
     description: 'Description',
-    image: 'placeholder.jpg'
+    image: 'IDL_Cover_Photo.jpg'
   };
   products.push(product);
   renderProducts();

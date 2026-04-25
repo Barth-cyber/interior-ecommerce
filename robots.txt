@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin/content.json
+Sitemap: https://interiorductltd.com/sitemap.xml

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <meta charset="UTF-8">
   <title>3D Viewer Demo - Interior Duct Ltd</title>
   <script src="/static/3d-viewer.js"></script>
@@ -8,15 +9,31 @@
 </head>
 <body>
   <h1>3D Product Viewer Demo</h1>
-  <model-viewer id="demoViewer" src="/idl-images/sample-model.glb" alt="3D Model" auto-rotate camera-controls style="width:100%;max-width:600px;height:400px;display:block;margin:2rem auto;background:#fff;border-radius:10px;"></model-viewer>
+  <model-viewer id="demoViewer" alt="3D Model" auto-rotate camera-controls style="width:100%;max-width:600px;height:400px;display:block;margin:2rem auto;background:#fff;border-radius:10px;"></model-viewer>
   <p id="demoHint" style="text-align:center;">This is a demo of the 3D viewer. Upload model files in the admin panel and use the "Open Demo" button to preview here.</p>
   <script>
+    const viewer = document.getElementById('demoViewer');
     const params = new URLSearchParams(window.location.search);
     const modelName = params.get('model');
+    const sampleModelUrl = '/idl-images/sample-model.glb';
+
+    function setModelSource(url, hint) {
+      viewer.setAttribute('src', url);
+      document.getElementById('demoHint').textContent = hint;
+    }
+
     if (modelName) {
-      const viewer = document.getElementById('demoViewer');
-      viewer.setAttribute('src', '/idl-images/' + encodeURIComponent(modelName));
-      document.getElementById('demoHint').textContent = 'Showing the selected model: ' + modelName;
+      setModelSource('/idl-images/' + encodeURIComponent(modelName), 'Showing the selected model: ' + modelName);
+    } else {
+      fetch(sampleModelUrl, { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            setModelSource(sampleModelUrl, 'Showing the sample model if it exists.');
+          }
+        })
+        .catch(() => {
+          console.warn('sample-model.glb not available');
+        });
     }
   </script>
 </body>
