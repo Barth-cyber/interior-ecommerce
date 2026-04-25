@@ -1,12 +1,12 @@
 services:
   - type: web
     name: interior-ecommerce
-    runtime: python310
+    runtime: python311
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn -w 2 -b 0.0.0.0:$PORT application:app"
     envVars:
       - key: PYTHON_VERSION
-        value: "3.10"
+        value: "3.11.9"
       - key: ADMIN_SECRET_KEY
         generateValue: true
       - key: ADMIN_COOKIE_SECURE
