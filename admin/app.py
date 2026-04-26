@@ -1,3 +1,9 @@
+from flask import send_from_directory
+
+@app.route('/')
+def home():
+    return send_from_directory('static', 'index.html')
+
 from flask import Flask, request, redirect, url_for, send_from_directory, jsonify, session
 from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
