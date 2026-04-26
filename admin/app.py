@@ -162,6 +162,46 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def sanitize_filename(filename):
+    filename = secure_filename(filename)
+    filename = filename.replace(' ', '_')
+    return filename
+
+
+def is_data_uri(value):
+    return isinstance(value, str) and value.strip().lower().startswith('data:image/')
+
+
+def normalize_product_image_value(image_value):
+    if not isinstance(image_value, str):
+        return image_value
+    image = image_value.strip().replace('\\', '/')
+    if is_data_uri(image):
+        return ''
+    if image.lower().startswith('http://') or image.lower().startswith('https://'):
+        return image
+    for prefix in ('/idl-images/', 'idl-images/', '/IDL_Product_branding/', 'IDL_Product_branding/'):
+        if image.startswith(prefix):
+            image = image[len(prefix):]
+            break
+    image = image.split('/')[-1]
+    return sanitize_filename(image)
+
+
+def normalize_content_image_paths(data):
+    if isinstance(data, dict):
+        normalized = {}
+        for key, value in data.items():
+            if key == 'image':
+                normalized[key] = normalize_product_image_value(value)
+            else:
+                normalized[key] = normalize_content_image_paths(value)
+        return normalized
+    if isinstance(data, list):
+        return [normalize_content_image_paths(item) for item in data]
+    return data
+
+
 def generate_model_thumbnail(model_filename, thumbnail_filename, model_path):
     """
     Generate a PNG thumbnail for a 3D model.
@@ -502,7 +542,7 @@ def upload_image():
     saved = []
     for file in files:
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+            filename = sanitize_filename(file.filename)
             if s3_storage:
                 try:
                     url = s3_storage.upload_file(file, filename, 'images/')
@@ -527,7 +567,7 @@ def upload_model():
     saved = []
     for file in files:
         if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_3D:
-            filename = secure_filename(file.filename)
+            filename = sanitize_filename(file.filename)
             model_path = os.path.join(UPLOAD_FOLDER, filename)
             
             # Generate thumbnail filename
@@ -719,6 +759,7 @@ def save_content():
     data = request.get_json()
     if not isinstance(data, dict):
         return 'Invalid content', 400
+    data = normalize_content_image_paths(data)
     with open(CONTENT_PATH, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     return jsonify({'saved': True})

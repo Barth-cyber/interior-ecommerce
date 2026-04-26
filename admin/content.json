@@ -39,7 +39,7 @@
       "category": "Bedroom",
       "description": "Contemporary master bedroom with elegant design and modern aesthetics.",
       "id": 5,
-      "image": "IMG_20251229_WA0006.jpg",
+      "image": "IMG_20251216_WA0033.jpg",
       "name": "Elegance Master Bedroom - Contemporary Style",
       "price": "NGN 3,900,000"
     },
@@ -79,7 +79,7 @@
       "category": "Doors",
       "description": "Modern geometric door design in sophisticated grey tones.",
       "id": 10,
-      "image": "Door_black.jpg",
+      "image": "Door.jpg",
       "name": "Modern Grey Geometric Door",
       "price": "NGN 650,000"
     },
@@ -87,7 +87,7 @@
       "category": "Doors",
       "description": "Heritage-style carved double door with traditional craftsmanship.",
       "id": 11,
-      "image": "Door_Pattern.jpg",
+      "image": "Door_Patterned.jpg",
       "name": "Heritage Carved Double Door",
       "price": "NGN 850,000"
     },
@@ -95,7 +95,7 @@
       "category": "Storage & Media",
       "description": "Premium TV media wall unit for elegant entertainment setups.",
       "id": 12,
-      "image": "IMG_20251216_WA0033.jpg",
+      "image": "tvconsole3.jpg",
       "name": "TV Media Wall Unit - Premium Display",
       "price": "NGN 1,800,000"
     },
@@ -111,7 +111,7 @@
       "category": "Kitchen",
       "description": "Vibrant red modern kitchen cabinet with contemporary design.",
       "id": 14,
-      "image": "Kitchen_Cabinet.jpg",
+      "image": "Red_Kitchen_Cab.jpg",
       "name": "Red Modern Kitchen Cabinet",
       "price": "NGN 1,850,000"
     },
@@ -127,7 +127,7 @@
       "category": "Doors",
       "description": "Modern white composite door with sleek design.",
       "id": 16,
-      "image": "Door White Composite.jpg",
+      "image": "Door_White.jpg",
       "name": "White Composite Door — Modern Style",
       "price": "NGN 320,000"
     },
@@ -135,7 +135,7 @@
       "category": "Doors",
       "description": "Elegant black mahogany entry door for grand entrances.",
       "id": 17,
-      "image": "Door Black Mahogany.jpg",
+      "image": "Door_Black_Mahogany.jpg",
       "name": "Black Mahogany Entry Door",
       "price": "NGN 580,000"
     },
@@ -143,7 +143,7 @@
       "category": "Doors",
       "description": "Intricately patterned wooden door with traditional appeal.",
       "id": 18,
-      "image": "Door Patterned.jpg",
+      "image": "Door_Patterned.jpg",
       "name": "Patterned Wooden Door",
       "price": "NGN 750,000"
     },
@@ -196,20 +196,12 @@
       "price": "NGN 1,350,000"
     },
     {
-      "category": "Tables",
-      "description": "Description",
-      "id": 1776756764390,
-      "image": "placeholder.jpg",
-      "name": "Office_Desk.jpg",
-      "price": "NGN 9999.99"
-    },
-    {
-      "category": "Office Furnture",
-      "description": "Executive Office Desk — Solid Hardwood with Steel Accents",
+      "category": "Office & Commercial",
+      "description": "Solid hardwood executive office desk with steel accents",
       "id": 1776756938277,
       "image": "Office_Desk.jpg",
-      "name": "Executive Office Desk — Solid Hardwood with Steel Accents",
-      "price": "NGN 9999.99"
+      "name": "Executive Office Desk",
+      "price": "NGN 2,200,000"
     }
   ]
 }

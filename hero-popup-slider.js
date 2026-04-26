@@ -21,12 +21,40 @@ function getProductImagePath(image) {
   if (!image) return '';
   const src = String(image).trim();
   if (/^(https?:)?\/\//i.test(src)) return src;
-  // Normalize paths to be relative (no leading slash) so they work
-  // when the site is served from a subpath or opened as a file.
   if (src.startsWith('/')) return src.replace(/^\/+/, '');
-  if (/^(idl-images|IDL_Product_branding)\//.test(src)) return src;
-  return 'IDL_Product_branding/' + src;
+  if (/^(idl-images|IDL_Product_branding)\//.test(src)) return normalizeProductImagePath(src);
+  return 'IDL_Product_branding/' + normalizeProductImagePath(src);
 }
+
+function normalizeProductImagePath(image) {
+  if (!image) return '';
+  let src = String(image).trim();
+  if (/^(https?:)?\/\//i.test(src)) return src;
+  src = src.replace(/\\/g, '/').replace(/^\/+/, '');
+  const parts = src.split('/');
+  const filename = parts.pop().replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
+  return [...parts, filename].filter(Boolean).join('/');
+}
+
+function handleImageError(img) {
+  if (!img || img.dataset.fallback) return;
+  const original = img.dataset.original || img.getAttribute('src') || '';
+  const normalized = normalizeProductImagePath(decodeURIComponent(original));
+  if (normalized && normalized !== original) {
+    img.dataset.original = original;
+    img.dataset.fallback = '1';
+    img.src = encodeURI(normalized);
+    return;
+  }
+  img.dataset.fallback = '1';
+  img.src = 'https://via.placeholder.com/300x200?text=Image+Unavailable';
+}
+
+document.addEventListener('error', function(e) {
+  if (e.target && e.target.tagName === 'IMG') {
+    handleImageError(e.target);
+  }
+}, true);
 
 async function loadProducts() {
   const sampleProducts = [
@@ -466,8 +494,8 @@ const heroCollageSets = [
   [
     "IDL_Product_branding/Reception_Counter.jpg",
     "IDL_Product_branding/Dining_Sets.jpg",
-    "IDL_Product_branding/Door_black.jpg",
-    "IDL_Product_branding/Table_cofee_mahogany.jpg"
+    "IDL_Product_branding/Door_Black_Mahogany.jpg",
+    "IDL_Product_branding/Table_coffee_mahogany.jpg"
   ]
 ];
 
