@@ -1229,5 +1229,16 @@ def stripe_webhook():
 
 # ─────────────────────────────────────────────────────────────────────────────
 
+@app.route('/3d-demo')
+@login_required
+def three_d_demo():
+    return send_from_directory('.', '3d-demo.html')
+
+
+@app.route('/categories.html')
+@login_required
+def categories_html():
+    return send_from_directory('.', 'categories.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)

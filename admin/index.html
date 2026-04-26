@@ -6,96 +6,135 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - Interior Duct Ltd</title>
   <link rel="stylesheet" href="admin.css">
+
+  <!-- 3D MODEL VIEWER -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
-<body>
+
+<body style="display:none;">
+
   <div class="admin-container">
     <h1>Admin Panel</h1>
+
     <nav>
       <button onclick="showSection('images')">Manage Images</button>
       <button onclick="showSection('content')">Edit Content</button>
       <button onclick="showSection('products')">Manage Products</button>
       <button onclick="showSection('models')">Manage 3D Models</button>
       <button onclick="window.open('/3d-demo','_blank')">3D Viewer Demo</button>
-      <button onclick="window.open('/categories.html','_blank')">Organize Images by Category</button>
+      <button onclick="window.open('/categories.html','_blank')">Organize Images</button>
       <button onclick="showSection('faq-manager')">FAQ Manager</button>
       <button onclick="showSection('settings')">Admin Settings</button>
       <button onclick="window.location.href='/logout'">Logout</button>
     </nav>
+
+    <!-- IMAGES -->
     <section id="images-section" class="admin-section">
       <h2>Manage Images</h2>
       <form id="uploadForm" enctype="multipart/form-data">
         <input type="file" id="imageUpload" name="images" multiple accept="image/*">
         <button type="submit">Upload Images</button>
       </form>
-      <div id="imageList"></div>
-      <script>if(typeof fetchImages==='function'){fetchImages();}</script>
+      <div id="uploadMsg" style="margin-top:0.5rem;color:#27ae60;display:none;">Uploaded successfully!</div>
+      <div id="imageList" style="margin-top:1rem;"></div>
     </section>
+
+    <!-- MODELS -->
     <section id="models-section" class="admin-section" style="display:none;">
       <h2>Manage 3D Models</h2>
       <form id="modelUploadForm" enctype="multipart/form-data">
         <input type="file" id="modelUpload" name="models" accept=".glb,.gltf" multiple>
         <button type="submit">Upload 3D Model(s)</button>
       </form>
+      <div id="modelUploadMsg" style="margin-top:0.5rem;color:#27ae60;display:none;">Model uploaded!</div>
       <div id="modelList" style="margin-top:1rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;"></div>
     </section>
+
+    <!-- CONTENT -->
     <section id="content-section" class="admin-section" style="display:none;">
       <h2>Edit Content</h2>
       <form id="contentForm">
-        <label>Homepage Message:<br>
-          <input type="text" id="homepageInput" name="homepage" style="width:100%;margin-bottom:1rem;">
-        </label><br>
-        <label>About:<br>
-          <textarea id="aboutInput" name="about" rows="3" style="width:100%;margin-bottom:1rem;"></textarea>
-        </label><br>
-        <label>Contact:<br>
-          <input type="text" id="contactInput" name="contact" style="width:100%;margin-bottom:1rem;">
-        </label><br>
-        <button type="submit">Save Content</button>
+        <input type="text" id="homepageInput" placeholder="Homepage message" style="width:100%;margin-bottom:1rem;">
+        <textarea id="aboutInput" rows="3" placeholder="About text" style="width:100%;margin-bottom:1rem;"></textarea>
+        <input type="text" id="contactInput" placeholder="Contact info" style="width:100%;margin-bottom:1rem;">
+        <button type="submit">Save</button>
         <span id="contentSaveMsg" style="margin-left:1rem;color:#27ae60;display:none;">Saved!</span>
       </form>
     </section>
+
+    <!-- SETTINGS -->
     <section id="settings-section" class="admin-section" style="display:none;">
       <h2>Admin Settings</h2>
       <form id="adminSettingsForm">
-        <label>Admin Username:<br>
-          <input type="text" id="adminUsername" name="username" required style="width:100%;margin-bottom:1rem;">
-        </label><br>
-        <label>New Password:<br>
-          <input type="password" id="adminPassword" name="password" autocomplete="new-password" style="width:100%;margin-bottom:1rem;">
-        </label><br>
-        <label>Confirm Password:<br>
-          <input type="password" id="adminPasswordConfirm" name="passwordConfirm" autocomplete="new-password" style="width:100%;margin-bottom:1rem;">
-        </label><br>
+        <input type="text" id="adminUsername" placeholder="Username" required style="width:100%;margin-bottom:1rem;">
+        <input type="password" id="adminPassword" placeholder="New password" style="width:100%;margin-bottom:1rem;">
+        <input type="password" id="adminPasswordConfirm" placeholder="Confirm password" style="width:100%;margin-bottom:1rem;">
         <button type="submit">Save Settings</button>
-        <span id="settingsSaveMsg" style="margin-left:1rem;color:#27ae60;display:none;">Admin settings saved successfully.</span>
+        <span id="settingsSaveMsg" style="margin-left:1rem;color:#27ae60;display:none;">Saved!</span>
       </form>
-      <p style="color:#555;margin-top:1rem;">Updating these settings writes the login credentials into the server environment file so the change persists.</p>
     </section>
+
+    <!-- PRODUCTS -->
     <section id="products-section" class="admin-section" style="display:none;">
       <h2>Manage Products</h2>
-      <button onclick="addProduct()">Add New Product</button>
+      <button onclick="addProduct()">Add Product</button>
       <div id="productsList" style="margin-top:1rem;"></div>
     </section>
-    <section id="faq-manager" class="admin-section" style="display:none;"></section>
+
+    <!-- FAQ -->
+    <section id="faq-manager" class="admin-section" style="display:none;">
+      <h2>FAQ Manager</h2>
+      <button onclick="loadFAQs()">Load FAQs</button>
+      <div id="faqList"></div>
+
+      <h3>Add FAQ</h3>
+      <input id="faqQuestion" placeholder="Question" style="width:100%;margin-bottom:0.5rem;">
+      <textarea id="faqAnswer" placeholder="Answer" style="width:100%;margin-bottom:0.5rem;"></textarea>
+      <button onclick="addFAQ()">Add FAQ</button>
+      <span id="faqSaveMsg" style="color:#27ae60;display:none;">Saved!</span>
+    </section>
+
   </div>
+
+  <!-- SESSION + NAV -->
   <script>
-    (async function() {
+    (async function () {
       try {
-        const response = await fetch('/api/session', { credentials: 'same-origin' });
-        if (!response.ok) {
-          window.location.href = '/login';
-          return;
-        }
-        const data = await response.json();
+        const res = await fetch('/api/session', { credentials: 'same-origin' });
+        const data = await res.json();
+
         if (!data.logged_in) {
           window.location.href = '/login';
+        } else {
+          document.body.style.display = 'block'; // show page after auth
         }
-      } catch (err) {
+      } catch {
         window.location.href = '/login';
       }
     })();
+
+    function showSection(name) {
+      document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
+      const target = document.getElementById(name + '-section') || document.getElementById(name);
+      if (target) target.style.display = 'block';
+
+      if (name === 'images' && window.fetchImages) fetchImages();
+      if (name === 'models' && window.fetchModels) fetchModels();
+      if (name === 'content' && window.loadContent) loadContent();
+      if (name === 'products' && window.loadProducts) loadProducts();
+      if (name === 'faq-manager' && window.loadFAQs) loadFAQs();
+      if (name === 'settings' && window.loadAdminSettings) loadAdminSettings();
+    }
   </script>
+
+  <!-- MAIN LOGIC -->
   <script src="admin.js"></script>
   <script src="faq_manager.js"></script>
+
+  <!-- DEFAULT VIEW -->
+  <script>
+    showSection('images');
+  </script>
+
 </body>
 </html>

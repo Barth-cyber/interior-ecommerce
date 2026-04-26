@@ -1,147 +1,52 @@
+// ================= SECTION SWITCHING =================
 function showSection(section) {
-  document.getElementById('images-section').style.display = section === 'images' ? '' : 'none';
-  document.getElementById('models-section').style.display = section === 'models' ? '' : 'none';
-  document.getElementById('content-section').style.display = section === 'content' ? '' : 'none';
-  document.getElementById('settings-section').style.display = section === 'settings' ? '' : 'none';
-  document.getElementById('products-section').style.display = section === 'products' ? '' : 'none';
-  var faqSection = document.getElementById('faq-manager');
-  if (faqSection) faqSection.style.display = section === 'faq-manager' ? '' : 'none';
+  const sections = [
+    'images',
+    'models',
+    'content',
+    'settings',
+    'products',
+    'faq-manager'
+  ];
+
+  sections.forEach(sec => {
+    const el = document.getElementById(`${sec}-section`) || document.getElementById(sec);
+    if (el) el.style.display = sec === section ? '' : 'none';
+  });
 }
 
-// Image and 3D Model Management
+// ================= IMAGE MANAGEMENT =================
 const imageList = document.getElementById('imageList');
 const uploadForm = document.getElementById('uploadForm');
 
 async function fetchImages() {
-  const res = await fetch('/images');
-  const files = await res.json();
-  renderImages(files.map(f => `/idl-images/${encodeURIComponent(f)}`));
-}
-
-async function fetchModels() {
-  const res = await fetch('/admin/3dmodels');
-  const models = await res.json();
-  renderModels(models);
-}
-
-// Example client-side fetch for the new admin endpoint:
-// fetch('/admin/3dmodels')
-//   .then(r => r.json())
-//   .then(models => console.log(models));
-
-async function deleteModel(filename) {
-  const res = await fetch('/delete-model', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename })
-  });
-  if (res.ok) {
-    await fetchModels();
-  } else {
-    alert('3D model delete failed.');
+  try {
+    const res = await fetch('/images');
+    const files = await res.json();
+    renderImages(files.map(f => `/idl-images/${encodeURIComponent(f)}`));
+  } catch (err) {
+    console.error('Failed to fetch images:', err);
   }
 }
-
-function renderModels(models) {
-  const modelList = document.getElementById('modelList');
-  if (!modelList) return;
-  modelList.innerHTML = '';
-  if (!models.length) {
-    modelList.innerHTML = '<p style="grid-column:1/-1;color:#555;">No 3D models uploaded yet.</p>';
-    return;
-  }
-  models.forEach(model => {
-    const filename = typeof model === 'string' ? model : model.filename;
-    const name = typeof model === 'string' ? filename.replace(/\.glb$/i, '') : model.name;
-    const url = typeof model === 'string' ? `/idl-images/${encodeURIComponent(filename)}` : model.url;
-    const sizeText = model && model.size_kb ? `Size: ${model.size_kb} KB` : '';
-
-    const card = document.createElement('div');
-    card.style = 'border:1px solid #ddd;padding:.7rem;border-radius:8px;display:flex;flex-direction:column;gap:.6rem;';
-    const title = document.createElement('strong');
-    title.textContent = name;
-    const subtitle = document.createElement('div');
-    subtitle.style = 'color:#666;font-size:.9rem;';
-    subtitle.textContent = filename + (sizeText ? ` • ${sizeText}` : '');
-    const viewer = document.createElement('model-viewer');
-    viewer.setAttribute('src', url);
-    viewer.setAttribute('alt', name);
-    viewer.setAttribute('ar', '');
-    viewer.setAttribute('auto-rotate', '');
-    viewer.setAttribute('camera-controls', '');
-    viewer.style = 'width:100%;height:160px;border-radius:6px;overflow:hidden;background:#eee;';
-    const btnRow = document.createElement('div');
-    btnRow.style = 'display:flex;gap:.5rem;';
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.style = 'flex:1;padding:.5rem;background:#e74c3c;color:#fff;border:none;border-radius:5px;cursor:pointer;';
-    deleteBtn.addEventListener('click', () => deleteModel(filename));
-    btnRow.appendChild(deleteBtn);
-    const openBtn = document.createElement('button');
-    openBtn.textContent = 'Open Demo';
-    openBtn.style = 'flex:1;padding:.5rem;background:#1b3a6b;color:#fff;border:none;border-radius:5px;cursor:pointer;';
-    openBtn.addEventListener('click', () => window.open(`/3d-demo?model=${encodeURIComponent(filename)}`, '_blank'));
-    btnRow.appendChild(openBtn);
-    card.appendChild(title);
-    card.appendChild(subtitle);
-    card.appendChild(viewer);
-    card.appendChild(btnRow);
-    modelList.appendChild(card);
-  });
-}
-
-if (uploadForm) {
-  uploadForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const files = document.getElementById('imageUpload').files;
-    if (!files.length) return;
-    const formData = new FormData();
-    for (const file of files) formData.append('images', file);
-    const res = await fetch('/upload', { method: 'POST', body: formData });
-    if (res.ok) {
-      await fetchImages();
-      uploadForm.reset();
-    } else {
-      alert('Upload failed.');
-    }
-  });
-  fetchImages();
-}
-
-const modelUploadForm = document.getElementById('modelUploadForm');
-if (modelUploadForm) {
-  modelUploadForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const files = document.getElementById('modelUpload').files;
-    if (!files.length) return;
-    const formData = new FormData();
-    for (const file of files) formData.append('models', file);
-    const res = await fetch('/upload-model', { method: 'POST', body: formData });
-    if (res.ok) {
-      await fetchModels();
-      modelUploadForm.reset();
-    } else {
-      alert('3D model upload failed.');
-    }
-  });
-  fetchModels();
-}
-
 
 function renderImages(images) {
+  if (!imageList) return;
   imageList.innerHTML = '';
+
   images.forEach(img => {
     const div = document.createElement('div');
     div.className = 'img-item';
+
     const imageEl = document.createElement('img');
     imageEl.src = img;
-    imageEl.alt = 'Admin Image';
-    imageEl.onerror = function() { this.src = 'https://via.placeholder.com/120?text=No+Image'; };
-    div.appendChild(imageEl);
+    imageEl.onerror = () => imageEl.src = 'https://via.placeholder.com/120?text=No+Image';
+
     const delBtn = document.createElement('button');
-    delBtn.className = 'delete-btn';
     delBtn.innerHTML = '&times;';
+    delBtn.className = 'delete-btn';
     delBtn.onclick = () => deleteImage(img);
+
+    div.appendChild(imageEl);
     div.appendChild(delBtn);
     imageList.appendChild(div);
   });
@@ -149,142 +54,207 @@ function renderImages(images) {
 
 async function deleteImage(imgUrl) {
   const filename = decodeURIComponent(imgUrl.split('/').pop());
+
   const res = await fetch('/delete', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ filename })
   });
-  if (res.ok) {
-    await fetchImages();
-  } else {
-    alert('Delete failed.');
+
+  if (res.ok) fetchImages();
+  else alert('Delete failed');
+}
+
+if (uploadForm) {
+  uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const files = document.getElementById('imageUpload').files;
+    if (!files.length) return;
+
+    const formData = new FormData();
+    for (const f of files) formData.append('images', f);
+
+    const res = await fetch('/upload', { method: 'POST', body: formData });
+
+    if (res.ok) {
+      fetchImages();
+      uploadForm.reset();
+    } else {
+      alert('Upload failed');
+    }
+  });
+
+  fetchImages();
+}
+
+// ================= 3D MODELS =================
+const modelUploadForm = document.getElementById('modelUploadForm');
+
+async function fetchModels() {
+  try {
+    const res = await fetch('/admin/3dmodels');
+    const models = await res.json();
+    renderModels(models);
+  } catch (err) {
+    console.error(err);
   }
 }
 
-// Content Management
+function renderModels(models) {
+  const list = document.getElementById('modelList');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  if (!models.length) {
+    list.innerHTML = '<p>No models uploaded.</p>';
+    return;
+  }
+
+  models.forEach(model => {
+    const filename = typeof model === 'string' ? model : model.filename;
+    const url = `/idl-images/${encodeURIComponent(filename)}`;
+
+    const card = document.createElement('div');
+
+    const title = document.createElement('strong');
+    title.textContent = filename;
+
+    const viewer = document.createElement('model-viewer');
+    viewer.src = url;
+    viewer.setAttribute('camera-controls', '');
+    viewer.style.height = '150px';
+
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.onclick = () => deleteModel(filename);
+
+    card.appendChild(title);
+    card.appendChild(viewer);
+    card.appendChild(del);
+
+    list.appendChild(card);
+  });
+}
+
+async function deleteModel(filename) {
+  const res = await fetch('/delete-model', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ filename })
+  });
+
+  if (res.ok) fetchModels();
+  else alert('Delete failed');
+}
+
+if (modelUploadForm) {
+  modelUploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const files = document.getElementById('modelUpload').files;
+    const formData = new FormData();
+
+    for (const f of files) formData.append('models', f);
+
+    const res = await fetch('/upload-model', { method: 'POST', body: formData });
+
+    if (res.ok) {
+      fetchModels();
+      modelUploadForm.reset();
+    } else {
+      alert('Upload failed');
+    }
+  });
+
+  fetchModels();
+}
+
+// ================= CONTENT =================
 const contentForm = document.getElementById('contentForm');
-const homepageInput = document.getElementById('homepageInput');
-const aboutInput = document.getElementById('aboutInput');
-const contactInput = document.getElementById('contactInput');
-const contentSaveMsg = document.getElementById('contentSaveMsg');
-const adminSettingsForm = document.getElementById('adminSettingsForm');
-const adminUsernameInput = document.getElementById('adminUsername');
-const adminPasswordInput = document.getElementById('adminPassword');
-const adminPasswordConfirmInput = document.getElementById('adminPasswordConfirm');
-const settingsSaveMsg = document.getElementById('settingsSaveMsg');
 
 async function loadContent() {
   const res = await fetch('/content');
   const data = await res.json();
-  if (homepageInput) homepageInput.value = data.homepage || '';
-  if (aboutInput) aboutInput.value = data.about || '';
-  if (contactInput) contactInput.value = data.contact || '';
-}
 
-async function loadAdminSettings() {
-  if (!adminSettingsForm) return;
-  const res = await fetch('/api/admin-settings');
-  if (!res.ok) return;
-  const data = await res.json();
-  adminUsernameInput.value = data.username || '';
+  document.getElementById('homepageInput').value = data.homepage || '';
+  document.getElementById('aboutInput').value = data.about || '';
+  document.getElementById('contactInput').value = data.contact || '';
 }
 
 if (contentForm) {
-  contentForm.addEventListener('submit', async function(e) {
+  contentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = {
-      homepage: homepageInput.value.trim(),
-      about: aboutInput.value.trim(),
-      contact: contactInput.value.trim()
+
+    const payload = {
+      homepage: homepageInput.value,
+      about: aboutInput.value,
+      contact: contactInput.value
     };
+
     const res = await fetch('/content', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
     });
+
     if (res.ok) {
       contentSaveMsg.style.display = '';
-      setTimeout(() => { contentSaveMsg.style.display = 'none'; }, 2000);
-      await loadContent();
-    } else {
-      alert('Save failed.');
+      setTimeout(()=>contentSaveMsg.style.display='none',2000);
     }
   });
+
   loadContent();
 }
 
-  if (adminSettingsForm) {
-    adminSettingsForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const username = adminUsernameInput.value.trim();
-      const password = adminPasswordInput.value;
-      const passwordConfirm = adminPasswordConfirmInput.value;
+// ================= PRODUCTS (FIXED) =================
+let products = [];
 
-      if (!username) {
-        alert('Username is required.');
-        return;
-      }
-      if (password && password !== passwordConfirm) {
-        alert('Password confirmation does not match.');
-        return;
-      }
+async function loadProducts() {
+  const res = await fetch('/content');
+  const data = await res.json();
+  products = data.products || [];
+  renderProducts();
+}
 
-      const res = await fetch('/api/admin-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, passwordConfirm })
-      });
+function renderProducts() {
+  const list = document.getElementById('productsList');
+  if (!list) return;
 
-      if (res.ok) {
-        settingsSaveMsg.textContent = password
-          ? 'Admin username and password updated successfully.'
-          : 'Admin username updated successfully.';
-        settingsSaveMsg.style.display = '';
-        setTimeout(() => { settingsSaveMsg.style.display = 'none'; }, 3000);
-        adminPasswordInput.value = '';
-        adminPasswordConfirmInput.value = '';
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Save failed.');
-      }
-    });
-    loadAdminSettings();
-  }
-      <p><strong>Image:</strong> ${product.image}</p>
-      <button onclick="editProduct(${product.id})">Edit</button>
-      <button onclick="deleteProduct(${product.id})" style="background:#e74c3c;color:#fff;">Delete</button>
+  list.innerHTML = '';
+
+  products.forEach(p => {
+    const div = document.createElement('div');
+
+    div.innerHTML = `
+      <strong>${p.name}</strong><br>
+      ${p.price}<br>
+      <button onclick="editProduct(${p.id})">Edit</button>
+      <button onclick="deleteProduct(${p.id})">Delete</button>
     `;
-    productsList.appendChild(div);
+
+    list.appendChild(div);
   });
 }
 
 function addProduct() {
-  const product = {
+  const p = {
     id: Date.now(),
     name: 'New Product',
-    category: 'Chairs & Seating',
-    price: 'NGN 0',
-    description: 'Description',
-    image: 'IDL_Cover_Photo.jpg'
+    price: '0'
   };
-  products.push(product);
-  renderProducts();
-  editProduct(product.id);
+  products.push(p);
+  saveProducts();
 }
 
 function editProduct(id) {
-  const product = products.find(p => p.id === id);
-  if (!product) return;
-  const newName = prompt('Name:', product.name);
-  if (newName) product.name = newName;
-  const newCategory = prompt('Category:', product.category);
-  if (newCategory) product.category = newCategory;
-  const newPrice = prompt('Price:', product.price);
-  if (newPrice) product.price = newPrice;
-  const newDesc = prompt('Description:', product.description);
-  if (newDesc) product.description = newDesc;
-  const newImage = prompt('Image:', product.image);
-  if (newImage) product.image = newImage;
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+
+  p.name = prompt('Name', p.name) || p.name;
+  p.price = prompt('Price', p.price) || p.price;
+
   saveProducts();
 }
 
@@ -296,12 +266,15 @@ function deleteProduct(id) {
 async function saveProducts() {
   const res = await fetch('/content');
   const data = await res.json();
+
   data.products = products;
+
   await fetch('/content', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
     body: JSON.stringify(data)
   });
+
   renderProducts();
 }
 
