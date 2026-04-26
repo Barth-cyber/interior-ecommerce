@@ -9,7 +9,6 @@ import json
 import difflib
 import requests as http_requests
 from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont
 import io
 
 ENV_FILE = os.path.join(os.path.dirname(__file__), '..', '.env')
@@ -216,6 +215,12 @@ def generate_model_thumbnail(model_filename, thumbnail_filename, model_path):
         True if successful, False otherwise
     """
     try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        app.logger.warning('Pillow is not installed. Thumbnail generation is disabled.')
+        return False
+
+    try:
         # Get model file size
         file_size = os.path.getsize(model_path)
         size_mb = file_size / (1024 * 1024)
@@ -228,7 +233,7 @@ def generate_model_thumbnail(model_filename, thumbnail_filename, model_path):
         try:
             title_font = ImageFont.truetype("arial.ttf", 24)
             text_font = ImageFont.truetype("arial.ttf", 14)
-        except:
+        except Exception:
             title_font = ImageFont.load_default()
             text_font = ImageFont.load_default()
         
@@ -411,12 +416,12 @@ def admin():
 
 @app.route('/')
 def home():
-    return send_from_directory('..', 'interior.html')
+    return send_from_directory(ROOT_DIR, 'interior.html')
 
 
 @app.route('/interior.html')
 def interior():
-    return send_from_directory('..', 'interior.html')
+    return send_from_directory(ROOT_DIR, 'interior.html')
 
 
 @app.route('/robots.txt')
@@ -447,16 +452,6 @@ def admin_css():
 @app.route('/admin.js')
 def admin_js():
     return send_from_directory('.', 'admin.js')
-
-
-@app.route('/3d-demo')
-def three_d_demo():
-    return send_from_directory('.', '3d-demo.html')
-
-
-@app.route('/categories.html')
-def categories_html():
-    return send_from_directory('.', 'categories.html')
 
 
 @app.route('/faq_manager.js')
@@ -1156,7 +1151,7 @@ def payment_verify_callback():
     """Paystack redirect callback after payment."""
     reference = request.args.get('reference', '')
     if reference:
-        return send_from_directory('..', 'interior.html')
+        return send_from_directory(ROOT_DIR, 'interior.html')
     return redirect('/')
 
 
