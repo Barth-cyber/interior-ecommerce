@@ -2561,18 +2561,27 @@ function saveContent() {
 // WHATSAPP
 const whatsappNumber = '2348036850229';
 
+function getWhatsAppProductImage(item) {
+  return item?.img || item?.image || item?.productImg || item?.productImage || '';
+}
+
 function buildWhatsAppProductMessage(product) {
-  const name = product.name || product.productName || 'your product';
-  const desc = product.desc || product.productDesc || '';
-  const price = product.price || product.productPrice || '';
-  return `Hello Interior Duct! I am interested in ${name}.\n${price ? 'Price: ' + price + '\n' : ''}${desc ? 'Description: ' + desc + '\n' : ''}Please send me a quote and availability.`;
+  const name = product?.name || product?.productName || 'your product';
+  const desc = product?.desc || product?.productDesc || product?.description || '';
+  const price = product?.price || product?.productPrice || '';
+  let message = `Hello Interior Duct! I am interested in ${name}.`;
+  if (price) message += `\nPrice: ${price}`;
+  if (desc) message += `\nDescription: ${desc}`;
+  message += `\nPlease send me a quote and availability.`;
+  return message;
 }
 
 async function openWhatsApp(item) {
   if (item && typeof item === 'object') {
+    const imageUrl = getWhatsAppProductImage(item);
     const message = buildWhatsAppProductMessage(item);
-    if (item.img) {
-      await shareProductImageToWhatsApp(item.img, message);
+    if (imageUrl) {
+      await shareProductImageToWhatsApp(imageUrl, message);
       return;
     }
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
@@ -2614,17 +2623,20 @@ function openWhatsAppForCurrentProduct() {
     name: product.name || product.productName || "Product",
     desc: product.description || product.desc || product.productDesc || "",
     price: product.price || product.productPrice || "",
-    img: product.image || product.img || product.productImg || ""
+    img: product.image || product.img || product.productImg || product.productImage || ""
   });
 }
 
 async function shareProductImageToWhatsApp(imgUrl, message) {
-  const productImageUrl = imgUrl.startsWith('http') ? imgUrl : `${window.location.origin}/${imgUrl.replace(/^\//, '')}`;
-  const safeProductImageUrl = encodeURI(productImageUrl);
+  const imagePath = String(imgUrl || '').trim();
+  const productImageUrl = /^(https?:)?\/\//i.test(imagePath)
+    ? imagePath
+    : `${window.location.origin}/${imagePath.replace(/^\//, '')}`;
+  const fallbackText = `${message}\n\nImage: ${productImageUrl}`;
 
   if (navigator.share) {
     try {
-      const file = await fetchImageAsFile(safeProductImageUrl);
+      const file = await fetchImageAsFile(productImageUrl);
       if (!navigator.canShare || navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], text: message });
         return;
@@ -2634,7 +2646,6 @@ async function shareProductImageToWhatsApp(imgUrl, message) {
     }
   }
 
-  const fallbackText = `${message}\n\nImage: ${safeProductImageUrl}`;
   window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(fallbackText)}`, '_blank');
 }
 
