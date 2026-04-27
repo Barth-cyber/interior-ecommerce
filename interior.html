@@ -1906,111 +1906,72 @@ function aiLuxuryTone(reply) {
 }
 
 // Self-learning AI - log queries for improvement
-function logQueryForLearning(query) {
+function logQueryForLearning(query, response) {
   const logs = JSON.parse(localStorage.getItem('aiQueryLogs') || '[]');
   logs.push({
     query: query,
+    response: response || null,
     timestamp: new Date().toISOString(),
     userAgent: navigator.userAgent
   });
   // Keep only last 1000 queries
   if (logs.length > 1000) logs.shift();
   localStorage.setItem('aiQueryLogs', JSON.stringify(logs));
-  
-  // In production, send to server for analysis
-  // fetch('/log-query', { method: 'POST', body: JSON.stringify({query}), headers: {'Content-Type': 'application/json'} });
 }
 
-function sendMsg() {
-  const inp = document.getElementById('chatInp');
+function getSessionId() {
+  let sessionId = localStorage.getItem('chatSessionId');
+  if (!sessionId) {
+    sessionId = 'session-' + Math.random().toString(36).slice(2) + '-' + Date.now();
+    localStorage.setItem('chatSessionId', sessionId);
+  }
+  return sessionId;
+}
+
+function addMessage(role, message) {
   const msgs = document.getElementById('chatMsgs');
-  if (!inp.value.trim()) return;
-  const um = document.createElement('div');
-  um.className = 'cmsg user'; um.textContent = inp.value;
-  msgs.appendChild(um);
-  const ty = document.createElement('div');
-  ty.className = 'typing'; ty.innerHTML = '<span class="td"></span><span class="td"></span><span class="td"></span>';
-  msgs.appendChild(ty); msgs.scrollTop = msgs.scrollHeight; inp.value = '';
-  
-  // Log query for self-learning
-  logQueryForLearning(um.textContent);
-  
-  setTimeout(() => {
-    msgs.removeChild(ty);
-    let reply = '';
-    const lower = um.textContent.toLowerCase();
-    
-    // Smart category filtering for non-tech users
-    if (lower.includes('show me sofas') || lower.includes('sofas') || lower.includes('seating')) {
-      scrollTo('seating');
-      reply = "Certainly! I've scrolled to our exquisite chairs and seating options. Explore premium pieces perfect for your space.";
-    } else if (lower.includes('show me tables') || lower.includes('tables') || lower.includes('dining')) {
-      scrollTo('dining');
-      reply = "Excellent choice! Our dining and coffee tables are now displayed. Each piece is crafted with premium materials for timeless elegance.";
-    } else if (lower.includes('show me') && (lower.includes('door') || lower.includes('entrance'))) {
-      scrollTo('doors');
-      reply = "Our premium door collection is now displayed. Each entrance tells a story with our custom-crafted designs.";
-    } else if (lower.includes('show me') && (lower.includes('kitchen') || lower.includes('sink') || lower.includes('cabinet'))) {
-      scrollTo('collection');
-      reply = "Perfect! Our modern kitchen collection is displayed below. Explore cabinets, sinks, and custom kitchen solutions.";
-    } else if (lower.includes('show me') && (lower.includes('bedroom') || lower.includes('bed'))) {
-      scrollTo('bedroom');
-      reply = "Our bedroom furniture collection is now displayed. Find the perfect pieces for your serene sanctuary.";
-    } else if (lower.includes('show me') && (lower.includes('living') || lower.includes('lounge'))) {
-      scrollTo('living');
-      reply = "Great! Our living room collections are displayed. Complete room sets for style and comfort.";
-    } else if (lower.includes('show me') && (lower.includes('office') || lower.includes('corporate') || lower.includes('reception'))) {
-      scrollTo('office');
-      reply = "Our professional office and commercial furniture is now displayed. Perfect for corporate spaces.";
-    } else if (lower.includes('show me') && (lower.includes('storage') || lower.includes('console') || lower.includes('tv'))) {
-      scrollTo('living');
-      reply = "Our storage and media solutions are displayed below. TV consoles, shelving, and organizational pieces.";
-    } else if (lower.includes('preview in 3d') || lower.includes('3d preview') || lower.includes('see in 3d')) {
-      scrollTo('3d-viewer');
-      reply = "I've taken you to our 3D previewer. Select a model from the dropdown to visualize it in your space.";
-    } else if (lower.includes('contact for quote') || lower.includes('get a quote') || lower.includes('pricing')) {
-      reply = "Perfect! I'm connecting you with our sales team. They'll prepare a bespoke quote tailored to your preferences.";
-      setTimeout(() => openWhatsApp('Quote Request'), 1500);
-    } else if (lower.includes('upload my room') || lower.includes('upload room')) {
-      scrollTo('3d-viewer');
-      reply = "To visualize our furniture in your space, visit our 3D viewer section below and explore our sample models.";
-    } else if (lower.includes('ask designer') || lower.includes('design help') || lower.includes('design advice')) {
-      reply = "Connecting you to our design consultant for personalized interior design assistance.";
-      setTimeout(() => openWhatsApp('Design Consultation'), 1200);
-    } else if (lower.includes('call now') || lower.includes('phone')) {
-      reply = "I'm initiating a call to our concierge team now at +234 803 685 0229.";
-      setTimeout(() => window.open('tel:+2348036850229', '_self'), 1000);
-    } else if (lower.includes('email')) {
-      reply = "You can reach us at hello@interiorductltd.com. We respond within 24 hours with white-glove service.";
-    } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
-      // Onboarding for new users
-      reply = "Welcome to Interior Duct Ltd! I'm your Duct AI Assistant. I'm here to guide you through our luxury furniture collection. You can ask me to:  \n• Show you product categories (sofas, tables, doors, kitchen, bedrooms, living room, office furniture)  \n• Preview items in 3D  \n• Connect you with our sales team for quotes  \n• Share design recommendations  \n\nWhat would you like to explore today?";
-    } else if (lower.includes('help') || lower.includes('how to') || lower.includes('how do i') || lower.includes('what can')) {
-      // Smart recommendations for lost users
-      reply = "I can help you in many ways:  \n• 'Show me [product type]' — Browse sofas, tables, doors, kitchens, bedrooms, living room, office furniture & more  \n• 'Preview in 3D' — Visualize furniture in real-time  \n• 'Get a quote' — Speak with our sales team  \n• 'Design help' — Connect with our design consultant  \n• 'Call us' — Dial our concierge  \n\nWhat would you like to do?";
-    } else if (lower.includes('recommend') || lower.includes('suggest') || lower.includes('what should i get')) {
-      reply = "Allow me to curate a selection tailored to your exquisite taste. Could you share:  \n• What room you're furnishing (bedroom, kitchen, living room, office)?  \n• Your style preference (modern, classic, luxury)?  \n• Your budget range?  \n\nI'll prepare luxury recommendations just for you!";
-    } else if (lower.includes('order') || lower.includes('buy') || lower.includes('purchase')) {
-      reply = "We would be delighted to assist with your order! You can:  \n• Click 'Order Now' on any product card  \n• Click 'Request Quote' for custom orders  \n• Contact our sales team for volume discounts  \n\nWould you like me to show you a specific category first?";
-    } else if (lower.includes('track') || lower.includes('delivery') || lower.includes('shipping')) {
-      reply = "Certainly! Kindly provide your order reference, and I will update you with real-time manufacturing and delivery status via WhatsApp.";
-      setTimeout(() => openWhatsApp('Track Order'), 1200);
-    } else if (lower.includes('whatsapp')) {
-      reply = "Connecting you to our WhatsApp concierge for instant, luxury support. One moment please.";
-      setTimeout(() => openWhatsApp('AI Concierge'), 1200);
-    } else if (lower.includes('escalate') || lower.includes('human') || lower.includes('manager') || lower.includes('speak to someone')) {
-      reply = "I'm escalating your request to a senior consultant for the utmost attention. You will be contacted shortly via WhatsApp or phone.";
-      setTimeout(() => openWhatsApp('Escalation'), 1200);
-    } else {
-      reply = aiLuxuryTone(aiDetectIntent(um.textContent));
-    }
-    const am = document.createElement('div');
-    am.className = 'cmsg ai';
-    am.innerHTML = '<div class="mn">Duct AI</div>' + reply;
-    msgs.appendChild(am); msgs.scrollTop = msgs.scrollHeight;
-    // Add quick replies
-    addQuickReplies(reply);
-  }, 1100);
+  if (!msgs) return;
+  const msgEl = document.createElement('div');
+  msgEl.className = role === 'bot' ? 'cmsg ai' : 'cmsg user';
+  if (role === 'bot') {
+    msgEl.innerHTML = '<div class="mn">Duct AI</div>' + (message || '');
+  } else {
+    msgEl.textContent = message;
+  }
+  msgs.appendChild(msgEl);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chatInp');
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage('user', message);
+  input.value = '';
+
+  try {
+    const res = await fetch('https://YOUR-RENDER-URL.onrender.com/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: message,
+        session_id: getSessionId()
+      })
+    });
+
+    const data = await res.json();
+
+    addMessage('bot', data.reply || 'No response');
+
+    logQueryForLearning(message, data.reply);
+
+  } catch (err) {
+    console.error(err);
+    addMessage('bot', '⚠️ Server error. Try again.');
+  }
 }
 function handleKey(e) { if (e.key === 'Enter') sendMsg(); }
 function addQuickReplies(reply) {
