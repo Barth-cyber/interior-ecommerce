@@ -1109,6 +1109,11 @@ def _parse_recommendations_json(answer_text):
     return None
 
 
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok'})
+
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json() or {}
@@ -1173,10 +1178,13 @@ def track():
     return jsonify({'tracked': True})
 
 
-@app.route('/recommendations', methods=['POST'])
+@app.route('/recommendations', methods=['POST', 'GET'])
 def recommendations():
-    data = request.get_json() or {}
-    session_id = str(data.get('session_id', '')).strip()
+    if request.method == 'GET':
+        session_id = str(request.args.get('session_id', '')).strip()
+    else:
+        data = request.get_json() or {}
+        session_id = str(data.get('session_id', '')).strip()
     if not session_id:
         return jsonify({'error': 'session_id is required'}), 400
 
@@ -1206,6 +1214,14 @@ def recommendations():
     return jsonify({'recommendations': recommendations})
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Duct AI API Endpoints (Public)
+# ─────────────────────────────────────────────────────────────────────────────
+# GET  /health                              → {"status": "ok"}
+# POST /chat                                → {"reply": "..."}  
+# POST /track                               → {"tracked": true}
+# GET  /recommendations?session_id=<uuid>  → {"recommendations": [...]}
+# POST /recommendations (body: session_id)  → {"recommendations": [...]}
 # ─────────────────────────────────────────────────────────────────────────────
 # AI Chat endpoint
 # ─────────────────────────────────────────────────────────────────────────────
