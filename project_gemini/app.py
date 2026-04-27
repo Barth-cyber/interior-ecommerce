@@ -21,7 +21,24 @@ except Exception as e:
     s3_storage = None
 
 app = Flask(__name__, static_folder=None)
-CORS(app)
+
+# ✅ REQUIRED for sessions + auth
+app.secret_key = os.environ.get("SECRET_KEY", os.environ.get('ADMIN_SECRET_KEY', 'change-me-in-production'))
+
+# ✅ FIX CORS — VERY IMPORTANT - Allow frontend URLs to connect
+CORS(app, resources={r"/api/*": {"origins": [
+    "https://interiorductltd.com",
+    "https://www.interiorductltd.com",
+    "https://duct-ai-backend.onrender.com",
+    "https://api.interiorductltd.com",
+    "https://main.d3v5c9s0p0.amplifyapp.com",
+    "https://your-app.netlify.app",
+    "https://your-app.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5500",
+    "http://localhost:3000"
+]}})
+
 app.config.update({
     'SECRET_KEY': os.environ.get('ADMIN_SECRET_KEY', 'change-me-in-production'),
     'SESSION_COOKIE_HTTPONLY': True,
@@ -81,11 +98,12 @@ def login_required(f):
     return wrapper
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Auth routes
-# ─────────────────────────────────────────────────────────────────────────────
+# ✅ Health check endpoint (TEST THIS)
+@app.route("/api/health")
+def health():
+    return jsonify({"status": "ok", "message": "Duct AI backend live"}), 200
 
-@app.route('/login')
+
 def login():
     if session.get('logged_in'):
         return redirect(url_for('admin'))
