@@ -2308,11 +2308,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Admin Modal Functions
 function getAdminApiBase() {
-  const origin = window.location.origin;
-  if (origin && origin !== 'null') {
-    return origin;
-  }
-  return 'http://127.0.0.1:5000';
+  // Auto-detect environment: use production URL if not localhost
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5000'                                    // local dev
+    : 'https://interior-ecommerce-backend.onrender.com';         // production
 }
 
 function apiUrl(path) {
