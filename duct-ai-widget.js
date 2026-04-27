@@ -21,6 +21,7 @@
   container.className = 'duct-ai-widget-container';
   container.innerHTML = `
     <button class="duct-ai-widget-toggle" aria-label="Open Duct AI Chat">💬 Ask Duct AI</button>
+    <div class="duct-ai-widget-overlay"></div>
     <div class="duct-ai-widget-panel">
       <div class="duct-ai-widget-header">
         <h3>Duct AI Assistant</h3>
@@ -45,6 +46,7 @@
   document.body.appendChild(container);
 
   const panel = container.querySelector('.duct-ai-widget-panel');
+  const overlay = container.querySelector('.duct-ai-widget-overlay');
   const toggle = container.querySelector('.duct-ai-widget-toggle');
   const closeBtn = container.querySelector('.duct-ai-widget-close');
   const messages = container.querySelector('#ductAiMessages');
@@ -54,18 +56,17 @@
   const quoteBtn = container.querySelector('#ductAiQuote');
 
   toggle.addEventListener('click', () => {
-    panel.classList.toggle('visible');
-    if (panel.classList.contains('visible')) {
-      input.focus();
-      if (messages.children.length === 0) {
-        addMessage('Welcome to Interior Duct Ltd! I\'m Duct AI, your design advisor. Tell me what room you\'re furnishing or what style interests you.', 'assistant');
-      }
+    container.classList.add('panel-open');
+    panel.classList.add('visible');
+    overlay.classList.add('visible');
+    input.focus();
+    if (messages.children.length === 0) {
+      addMessage('Welcome to Interior Duct Ltd! I\'m Duct AI, your design advisor. Tell me what room you\'re furnishing or what style interests you.', 'assistant');
     }
   });
 
-  closeBtn.addEventListener('click', () => {
-    panel.classList.remove('visible');
-  });
+  closeBtn.addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
 
   whatsappBtn.addEventListener('click', escalateToWhatsApp);
   quoteBtn.addEventListener('click', requestQuote);
@@ -102,6 +103,12 @@
       `Hello! I'd like to request a formal quote for products discussed:\n\n${query}\n\nPlease send me a PDF quote.`
     );
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+  }
+
+  function closePanel() {
+    container.classList.remove('panel-open');
+    panel.classList.remove('visible');
+    overlay.classList.remove('visible');
   }
 
   async function sendMessage() {
