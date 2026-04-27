@@ -2908,6 +2908,11 @@ function openWhatsAppProductSlider() {
   // Use the dedicated backend subdomain for Duct AI API calls.
   // Update this URL when the backend is deployed to Render.
   window.DUCT_AI_BACKEND_URL = 'https://api.interiorductltd.com';
+  
+  // Hide old embedded chat panel - use new floating widget instead
+  const style = document.createElement('style');
+  style.textContent = '.ai-grid { display: none !important; }';
+  document.head.appendChild(style);
 </script>
 <link rel="stylesheet" href="duct-ai-widget.css">
 <script src="duct-ai-widget.js" defer></script>

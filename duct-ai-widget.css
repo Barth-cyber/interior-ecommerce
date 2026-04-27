@@ -124,6 +124,43 @@
   border: 1px solid rgba(27, 58, 107, 0.08);
 }
 
+.duct-ai-widget-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  background: var(--navy-pale, #EAF0FB);
+  border-bottom: 1px solid rgba(27, 58, 107, 0.1);
+  flex-wrap: wrap;
+}
+
+.duct-ai-action-btn {
+  flex: 1;
+  min-width: 80px;
+  background: var(--brown, #7B5C3E);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.duct-ai-action-btn:hover {
+  background: var(--brown-light, #A07850);
+  box-shadow: 0 0 12px rgba(196, 168, 130, 0.25);
+  transform: translateY(-1px);
+}
+
+.duct-ai-action-btn:active {
+  transform: translateY(0);
+}
+
 .duct-ai-widget-footer {
   display: flex;
   gap: 0.6rem;
