@@ -138,6 +138,9 @@ IDL_BRANDING_DIR = os.path.join(ROOT_DIR, 'IDL_Product_branding')
 CATEGORIES_PATH = os.path.join(os.path.dirname(__file__), 'categories.json')
 KB_PATH = os.path.join(os.path.dirname(__file__), 'knowledge_base.json')
 USER_LOG_PATH = os.path.join(os.path.dirname(__file__), 'user_log.json')
+CONVERSATION_LOG_DIR = os.path.join(ROOT_DIR, 'logs')
+CONVERSATION_LOG_PATH = os.path.join(CONVERSATION_LOG_DIR, 'conversations.json')
+BEHAVIOUR_LOG_PATH = os.path.join(CONVERSATION_LOG_DIR, 'behaviour.json')
 
 # ── Payment gateway config ───────────────────────────────────────────────────
 PAYSTACK_SECRET_KEY    = os.environ.get('PAYSTACK_SECRET_KEY', '')
@@ -789,6 +792,69 @@ def admin_content():
     return get_content()
 
 
+def _get_conversation_summary(session_id, history):
+    if not history:
+        return None
+    pages = set()
+    for msg in history:
+        if msg.get('page'):
+            pages.add(msg['page'])
+    return {
+        'session_id': session_id,
+        'message_count': len(history),
+        'first_message': history[0].get('text', '')[:100] if history else '',
+        'last_activity': history[-1].get('timestamp', '') if history else '',
+        'pages_visited': list(pages)
+    }
+
+
+@app.route('/admin/conversations')
+@login_required
+def admin_conversations():
+    if not os.path.exists(CONVERSATION_LOG_PATH):
+        return jsonify({'conversations': []})
+    try:
+        with open(CONVERSATION_LOG_PATH, 'r', encoding='utf-8') as f:
+            all_conversations = json.load(f)
+        summaries = []
+        for session_id, history in all_conversations.items():
+            summary = _get_conversation_summary(session_id, history)
+            if summary:
+                summaries.append(summary)
+        summaries.sort(key=lambda x: x['last_activity'], reverse=True)
+        return jsonify({'conversations': summaries})
+    except Exception as e:
+        app.logger.error(f"Error reading conversations: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/admin/conversations/<session_id>')
+@login_required
+def admin_conversation_detail(session_id):
+    if not os.path.exists(CONVERSATION_LOG_PATH):
+        return jsonify({'error': 'No conversations found'}), 404
+    try:
+        with open(CONVERSATION_LOG_PATH, 'r', encoding='utf-8') as f:
+            all_conversations = json.load(f)
+        history = all_conversations.get(session_id)
+        if not history:
+            return jsonify({'error': 'Session not found'}), 404
+        return jsonify({
+            'session_id': session_id,
+            'history': history,
+            'summary': _get_conversation_summary(session_id, history)
+        })
+    except Exception as e:
+        app.logger.error(f"Error reading conversation detail: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/admin/conversations.html')
+@login_required
+def conversations_html():
+    return send_from_directory('.', 'conversations.html')
+
+
 @app.route('/kb', methods=['GET'])
 def get_kb():
     if not os.path.exists(KB_PATH):
@@ -926,6 +992,218 @@ YOUR ROLE:
 - If you cannot help, say so honestly and offer to connect them to the human team"""
 
     return _call_gemini(query, system_instruction=system_instruction, max_tokens=512)
+
+
+def _build_product_summary(products):
+    if not products:
+        return 'No current products are available.'
+    lines = []
+    for product in products[:80]:
+        name = product.get('name', 'Unknown product')
+        category = product.get('category', 'Uncategorized')
+        price = product.get('price', 'N/A')
+        lines.append(f'- {name} | {category} | {price}')
+    return '\n'.join(lines)
+
+
+def _build_drogram_prompt(products):
+    product_summary = _build_product_summary(products)
+    return (
+        'You are Duct AI, the intelligent assistant for Interior Duct Ltd, a premium Nigerian furniture and interior design company. '
+        'You help visitors explore products, get design advice, receive personalized recommendations, and place orders. '
+        'You remember what users have discussed in this session and provide context-aware responses. '
+        'You should make specific product recommendations from the current catalog when users ask about furniture, design, or purchase decisions. '
+        'Current product catalog:\n'
+        f'{product_summary}\n'
+        'When making recommendations, refer to actual product names, categories, and prices from this catalog. '
+        'If a requested item is not available, explain that it is unavailable and offer a suitable alternative from the catalog.'
+    )
+
+
+def _load_conversation_history(session_id):
+    if not os.path.exists(CONVERSATION_LOG_PATH):
+        return []
+    try:
+        with open(CONVERSATION_LOG_PATH, 'r', encoding='utf-8') as f:
+            all_conversations = json.load(f)
+        return all_conversations.get(session_id, [])
+    except Exception as e:
+        app.logger.warning(f"Unable to load conversation history: {e}")
+        return []
+
+
+def _save_conversation_history(session_id, history):
+    os.makedirs(CONVERSATION_LOG_DIR, exist_ok=True)
+    all_conversations = {}
+    if os.path.exists(CONVERSATION_LOG_PATH):
+        try:
+            with open(CONVERSATION_LOG_PATH, 'r', encoding='utf-8') as f:
+                all_conversations = json.load(f)
+        except Exception as e:
+            app.logger.warning(f"Unable to read existing conversation log file: {e}")
+    all_conversations[session_id] = history
+    with open(CONVERSATION_LOG_PATH, 'w', encoding='utf-8') as f:
+        json.dump(all_conversations, f, indent=2, ensure_ascii=False)
+
+
+def _append_behaviour_event(event):
+    os.makedirs(CONVERSATION_LOG_DIR, exist_ok=True)
+    behaviour_log = []
+    if os.path.exists(BEHAVIOUR_LOG_PATH):
+        try:
+            with open(BEHAVIOUR_LOG_PATH, 'r', encoding='utf-8') as f:
+                behaviour_log = json.load(f)
+        except Exception as e:
+            app.logger.warning(f"Unable to read existing behaviour log: {e}")
+    behaviour_log.append(event)
+    with open(BEHAVIOUR_LOG_PATH, 'w', encoding='utf-8') as f:
+        json.dump(behaviour_log, f, indent=2, ensure_ascii=False)
+
+
+def _call_gemini_conversation(history, system_instruction=None, max_tokens=512):
+    if not GEMINI_API_KEY:
+        return None, True
+
+    body = {
+        'contents': [
+            {'role': message['role'], 'parts': [{'text': message['text']}]}
+            for message in history
+        ],
+        'generationConfig': {
+            'maxOutputTokens': max_tokens,
+            'temperature': 0.7,
+        },
+    }
+
+    if system_instruction:
+        body['systemInstruction'] = {
+            'parts': [{'text': system_instruction}]
+        }
+
+    try:
+        response = http_requests.post(
+            GEMINI_URL,
+            params={'key': GEMINI_API_KEY},
+            headers={'Content-Type': 'application/json'},
+            json=body,
+            timeout=20,
+        )
+        response.raise_for_status()
+        data = response.json()
+        answer = data['candidates'][0]['content']['parts'][0]['text'].strip()
+        return answer, False
+    except Exception as e:
+        app.logger.error(f"Gemini conversation API error: {e}")
+        return None, True
+
+
+def _parse_recommendations_json(answer_text):
+    try:
+        parsed = json.loads(answer_text)
+        if isinstance(parsed, dict) and 'recommendations' in parsed:
+            parsed = parsed['recommendations']
+        if isinstance(parsed, list):
+            return parsed
+    except json.JSONDecodeError:
+        pass
+    return None
+
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json() or {}
+    message = str(data.get('message', '')).strip()
+    session_id = str(data.get('session_id', '')).strip()
+    page = str(data.get('page', ''))
+    user_agent = str(data.get('user_agent', ''))
+
+    if not message or not session_id:
+        return jsonify({'error': 'message and session_id are required'}), 400
+
+    history = _load_conversation_history(session_id)
+    history.append({
+        'role': 'user',
+        'text': message,
+        'page': page,
+        'user_agent': user_agent,
+        'timestamp': datetime.utcnow().isoformat() + 'Z'
+    })
+
+    system_prompt = (
+        "You are Duct AI, the intelligent assistant for Interior Duct Ltd, a premium Nigerian furniture and interior design company. "
+        "You help visitors explore products, get design advice, receive personalized recommendations, and place orders. "
+        "You remember what users have discussed in this session and provide context-aware responses."
+    )
+
+    products = _load_products()
+    system_prompt = _build_drogram_prompt(products)
+
+    answer, error = _call_gemini_conversation(history, system_instruction=system_prompt, max_tokens=512)
+    if error or answer is None:
+        return jsonify({'error': 'Unable to get a response from Gemini'}), 503
+
+    history.append({
+        'role': 'assistant',
+        'text': answer,
+        'timestamp': datetime.utcnow().isoformat() + 'Z'
+    })
+    _save_conversation_history(session_id, history)
+
+    return jsonify({'reply': answer})
+
+
+@app.route('/track', methods=['POST'])
+def track():
+    data = request.get_json() or {}
+    event = data.get('event')
+    session_id = str(data.get('session_id', '')).strip()
+    if not event or not session_id:
+        return jsonify({'error': 'event and session_id are required'}), 400
+
+    record = {
+        'event': event,
+        'session_id': session_id,
+        'page': data.get('page'),
+        'product_name': data.get('product_name'),
+        'seconds': data.get('seconds'),
+        'user_agent': data.get('user_agent') or request.headers.get('User-Agent'),
+        'timestamp': datetime.utcnow().isoformat() + 'Z'
+    }
+    _append_behaviour_event(record)
+    return jsonify({'tracked': True})
+
+
+@app.route('/recommendations', methods=['POST'])
+def recommendations():
+    data = request.get_json() or {}
+    session_id = str(data.get('session_id', '')).strip()
+    if not session_id:
+        return jsonify({'error': 'session_id is required'}), 400
+
+    history = _load_conversation_history(session_id)
+    if not history:
+        return jsonify({'error': 'No conversation history found for this session'}), 404
+
+    products = _load_products()
+    system_prompt = (
+        _build_drogram_prompt(products) +
+        ' Analyze the conversation and return exactly 3 product recommendations as JSON. '
+        'Provide only a JSON array of recommendation objects with the fields: name, price, category, reason, image_path. '
+        'Do not include any additional narrative outside the JSON array.'
+    )
+
+    answer, error = _call_gemini_conversation(history, system_instruction=system_prompt, max_tokens=512)
+    if error or answer is None:
+        return jsonify({'error': 'Unable to get a response from Gemini'}), 503
+
+    recommendations = _parse_recommendations_json(answer)
+    if recommendations is None:
+        return jsonify({
+            'error': 'Gemini response could not be parsed as recommendation JSON',
+            'raw': answer
+        }), 502
+
+    return jsonify({'recommendations': recommendations})
 
 
 # ─────────────────────────────────────────────────────────────────────────────

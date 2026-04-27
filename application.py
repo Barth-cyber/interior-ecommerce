@@ -1,6 +1,19 @@
 import os
+from flask_cors import CORS
 from admin.app import app
 from werkzeug.security import generate_password_hash
+
+# Enable CORS for the frontend domains
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://interiorductltd.com",
+            "https://www.interiorductltd.com"
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Securely fetch environment variables
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
