@@ -1,0 +1,16 @@
+{
+  "name": "duct-ai-backend",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2",
+    "express": "^4",
+    "node-fetch": "^3"
+  }
+}

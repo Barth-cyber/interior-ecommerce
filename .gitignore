@@ -7,6 +7,8 @@ node_modules/
 venv/
 ENV/
 env/
+duct-ai-backend/env_test/
+duct-ai-backend-git-backup/
 
 # Python
 __pycache__/
