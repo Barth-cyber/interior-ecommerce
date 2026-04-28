@@ -490,6 +490,16 @@ def duct_ai_assistant_js():
     return send_from_directory(ROOT_DIR, 'duct-ai-assistant.js')
 
 
+@app.route('/duct-ai-widget.js')
+def duct_ai_widget_js():
+    return send_from_directory(ROOT_DIR, 'duct-ai-widget.js')
+
+
+@app.route('/duct-ai-widget.css')
+def duct_ai_widget_css():
+    return send_from_directory(ROOT_DIR, 'duct-ai-widget.css')
+
+
 @app.route('/IDL_Product_branding/<path:filename>')
 def idl_product_branding(filename):
     return send_from_directory(IDL_BRANDING_DIR, filename)

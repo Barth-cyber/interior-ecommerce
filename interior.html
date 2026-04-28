@@ -2664,12 +2664,12 @@ async function loadContent() {
 
 loadContent();
 </script>
-<script src="hero-popup-slider.js"></script>
-<script src="duct-ai-assistant.js"></script>
+<script src="/hero-popup-slider.js"></script>
+<script src="/duct-ai-assistant.js"></script>
 <script src="/static/payment.js"></script>
 <!-- Duct AI Chat Widget (deprecated old versions removed - using new production widget) -->
 
-<!-- Duct AI floating button replacement removed; using the built-in right-side AI widget toggle instead -->
+<!-- Duct AI floating button replacement removed; using the new floating AI widget instead -->
 <script>
 // Floating WhatsApp button for product image slider
 function openWhatsAppProductSlider() {
@@ -2865,15 +2865,15 @@ function openWhatsAppProductSlider() {
   // Use the dedicated backend subdomain for Duct AI API calls.
   // Update this URL when the backend is deployed to Render.
   window.DUCT_AI_BACKEND_URL = 'https://api.interiorductltd.com';
-  window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
+  window.DUCT_AI_AVATAR_URL = '/static/duct-ai-agent.jpg';
   
   // Hide old embedded chat panel - use new floating widget instead
   const style = document.createElement('style');
   style.textContent = '.ai-grid { display: none !important; }';
   document.head.appendChild(style);
 </script>
-<link rel="stylesheet" href="duct-ai-widget.css">
-<script src="duct-ai-widget.js" defer></script>
+<link rel="stylesheet" href="/duct-ai-widget.css">
+<script src="/duct-ai-widget.js" defer></script>
 
 </body>
 </html>
