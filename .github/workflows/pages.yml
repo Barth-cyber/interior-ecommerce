@@ -25,9 +25,12 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: ./
+        - name: Upload artifact for GitHub Pages
+  uses: actions/upload-pages-artifact), update any usage of actions/upload-artifact@v3 to at least actions/upload-artifact@v4.
+
+Example:
+```yaml
+- uses: actions/upload-artifact@v4
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
