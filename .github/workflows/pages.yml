@@ -4,14 +4,18 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pages: write
       id-token: write
-      contents: read
 
     steps:
       - name: Checkout repository
@@ -23,7 +27,7 @@ jobs:
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v1
         with:
-          path: '.'
+          path: ./
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
