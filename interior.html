@@ -1951,7 +1951,8 @@ async function sendMsg() {
   input.value = '';
 
   try {
-    const res = await fetch('https://YOUR-RENDER-URL.onrender.com/chat', {
+    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+    const res = await fetch(`${backendUrl}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -2668,14 +2669,7 @@ loadContent();
 <script src="/static/payment.js"></script>
 <!-- Duct AI Chat Widget (deprecated old versions removed - using new production widget) -->
 
-<!-- WHATSAPP FLOATING BUTTONS (side by side) -->
-<!-- WhatsApp Floating Buttons on Opposite Sides -->
-<!-- WhatsApp Floating Button (Text Inquiry) moved to left side -->
-<a class="wa-fab" style="left:2rem;right:auto;bottom:2rem;position:fixed;z-index:400; background:linear-gradient(135deg,#25D366,#128C7E);" href="https://wa.me/2348036850229?text=Hello%20Interior%20Duct!%20I%20need%20help%20with%20furniture purchase for my space." target="_blank" title="Text inquiry on WhatsApp">
-  &#9742;
-  <div class="wa-badge" style="background:var(--brown);">Hi</div>
-</a>
-
+<!-- Duct AI floating button replacement removed; using the built-in right-side AI widget toggle instead -->
 <script>
 // Floating WhatsApp button for product image slider
 function openWhatsAppProductSlider() {
@@ -2691,7 +2685,7 @@ function openWhatsAppProductSlider() {
 }
 </script>
 <style>
-/* Only one .wa-fab (green, Hi badge) and one .wa-fab-product (blue/brown, P badge) remain, positioned left and right */
+/* Only one .wa-fab (Duct AI button) and one .wa-fab-product (blue/brown, P badge) remain, positioned left and right */
 @media (max-width: 600px) {
   .wa-fab, .wa-fab-product { width: 48px; height: 48px; font-size: 1.1rem; }
   .wa-badge { width: 14px; height: 14px; font-size: .5rem; }
@@ -2871,6 +2865,7 @@ function openWhatsAppProductSlider() {
   // Use the dedicated backend subdomain for Duct AI API calls.
   // Update this URL when the backend is deployed to Render.
   window.DUCT_AI_BACKEND_URL = 'https://api.interiorductltd.com';
+  window.DUCT_AI_AVATAR_URL = '/static/duct-ai-agent.jpg';
   
   // Hide old embedded chat panel - use new floating widget instead
   const style = document.createElement('style');

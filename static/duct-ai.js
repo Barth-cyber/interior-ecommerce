@@ -1,4 +1,5 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
+const BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
 let chatHistory = [];
 
 function getDuctAiSessionId() {
@@ -13,8 +14,9 @@ function getDuctAiSessionId() {
 async function askDuctAI(query, imageUrl) {
   chatHistory.push({ role: 'user', content: query, image: imageUrl || null });
   try {
-    const res = await fetch('/ai-query', {
+    const res = await fetch(`${BACKEND_URL}/ai-query`, {
       method: 'POST',
+      mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, session_id: getDuctAiSessionId() }),
     });
@@ -63,8 +65,9 @@ function renderChat() {
 }
 
 async function escalateToHuman(query, imageUrl) {
-  await fetch('/escalate', {
+  await fetch(`${BACKEND_URL}/escalate`, {
     method: 'POST',
+    mode: 'cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, imageUrl }),
   });

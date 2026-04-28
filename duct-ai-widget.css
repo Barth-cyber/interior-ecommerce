@@ -8,8 +8,9 @@
 
 .duct-ai-widget-toggle {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 6rem;
+  left: 2rem;
+  right: auto;
   z-index: 10001;
   background: linear-gradient(135deg, var(--navy, #1B3A6B), var(--navy-light, #2A5298));
   color: #fff;
@@ -20,14 +21,120 @@
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
   box-shadow: 0 12px 32px rgba(27, 58, 107, 0.25);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: auto;
 }
 
+.panel-open .duct-ai-widget-toggle {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.duct-ai-widget-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.duct-ai-widget-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #fff;
+}
+
+.duct-ai-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.85rem 1rem;
+}
+
+.duct-ai-widget-header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.duct-ai-widget-header-copy h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.duct-ai-widget-header-copy span {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.84rem;
+}
+
+.duct-ai-toggle-icon {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f9dbb8 0%, #f0c08b 45%, #c68c5f 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+  position: relative;
+}
+
+.duct-ai-toggle-icon::before {
+  content: '';
+  position: absolute;
+  top: 0.35rem;
+  left: 0.35rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: #1f3152;
+}
+
+.duct-ai-toggle-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 0.18rem;
+  left: 0.28rem;
+  width: 1.4rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: #1f3152;
+}
+
 .duct-ai-widget-toggle:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 40px rgba(27, 58, 107, 0.35);
+}
+
+.duct-ai-toggle-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.duct-ai-toggle-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .duct-ai-widget-overlay {
@@ -47,17 +154,17 @@
 .duct-ai-widget-panel {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   height: 100vh;
   width: min(520px, 100%);
   max-width: 520px;
   background: #fff;
-  border-left: 1px solid rgba(27, 58, 107, 0.08);
-  box-shadow: -24px 0 60px rgba(13, 27, 42, 0.18);
+  border-right: 1px solid rgba(27, 58, 107, 0.08);
+  box-shadow: 24px 0 60px rgba(13, 27, 42, 0.18);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transform: translateX(100%);
+  transform: translateX(-100%);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: auto;
 }
@@ -73,7 +180,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   border-bottom: 1px solid rgba(196, 168, 130, 0.1);
+}
+
+.duct-ai-widget-header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.duct-ai-widget-header-copy span {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
 }
 
 .duct-ai-widget-header h3 {
@@ -251,7 +370,8 @@
 @media (max-width: 600px) {
   .duct-ai-widget-container {
     bottom: 1rem;
-    right: 1rem;
+    left: 1rem;
+    right: auto;
   }
 
   .duct-ai-widget-panel {

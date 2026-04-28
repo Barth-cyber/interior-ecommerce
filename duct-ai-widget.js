@@ -1,7 +1,18 @@
 (function () {
   // Chat widget for Duct AI integration with WhatsApp escalation
-  const BACKEND_URL = window.DUCT_AI_BACKEND_URL || window.location.origin;
-  const CHAT_ENDPOINT = `${BACKEND_URL}/chat`;
+  const DEFAULT_BACKEND_URL = 'https://api.interiorductltd.com';
+  const BACKEND_URL = window.DUCT_AI_BACKEND_URL || DEFAULT_BACKEND_URL;
+  const AGENT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || '/static/duct-ai-agent.jpg';
+  const API_ENDPOINTS = [
+    {
+      url: `${BACKEND_URL}/ai-query`,
+      makeBody: (text, sessionId) => ({ query: text, session_id: sessionId })
+    },
+    {
+      url: `${BACKEND_URL}/chat`,
+      makeBody: (text, sessionId) => ({ message: text, session_id: sessionId, page: window.location.pathname, user_agent: navigator.userAgent })
+    }
+  ];
   const SESSION_STORAGE_KEY = 'duct_ai_session_id';
   const WHATSAPP_NUMBER = '2348036850229';
 
@@ -20,11 +31,22 @@
   const container = document.createElement('div');
   container.className = 'duct-ai-widget-container';
   container.innerHTML = `
-    <button class="duct-ai-widget-toggle" aria-label="Open Duct AI Chat">💬 Ask Duct AI</button>
+    <button class="duct-ai-widget-toggle" aria-label="Open Duct AI Chat">
+      <span class="duct-ai-toggle-avatar">
+        <img src="${AGENT_AVATAR_URL}" alt="Duct AI avatar" onerror="this.style.display='none'" />
+      </span>
+      <span>Ask Duct AI</span>
+    </button>
     <div class="duct-ai-widget-overlay"></div>
     <div class="duct-ai-widget-panel">
       <div class="duct-ai-widget-header">
-        <h3>Duct AI Assistant</h3>
+        <div class="duct-ai-widget-avatar">
+          <img src="${AGENT_AVATAR_URL}" alt="Agent avatar" onerror="this.style.display='none'" />
+        </div>
+        <div class="duct-ai-widget-header-copy">
+          <h3>Duct AI Assistant</h3>
+          <span>Luxury Design Advisor</span>
+        </div>
         <button class="duct-ai-widget-close" aria-label="Close chat">×</button>
       </div>
       <div class="duct-ai-widget-messages" id="ductAiMessages"></div>
@@ -111,6 +133,42 @@
     overlay.classList.remove('visible');
   }
 
+  async function fetchChatData(text) {
+    const sessionId = getDuctAiSessionId();
+    const errors = [];
+
+    for (const endpoint of API_ENDPOINTS) {
+      try {
+        const response = await fetch(endpoint.url, {
+          method: 'POST',
+          mode: 'cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(endpoint.makeBody(text, sessionId))
+        });
+
+        if (!response.ok) {
+          if (response.status === 404 || response.status === 405) {
+            errors.push(`${endpoint.url} not available (${response.status})`);
+            continue;
+          }
+          const errorText = await response.text();
+          throw new Error(`Chat failed (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+        if (!data || (data.reply == null && data.answer == null && data.escalate == null)) {
+          throw new Error('Invalid chat response');
+        }
+        return data;
+      } catch (error) {
+        console.warn(`Duct AI endpoint failed: ${endpoint.url}`, error);
+        errors.push(error.message || String(error));
+      }
+    }
+
+    throw new Error(errors.join(' | '));
+  }
+
   async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
@@ -121,29 +179,19 @@
     send.disabled = true;
 
     try {
-      const sessionId = getDuctAiSessionId();
-      const payload = {
-        message: text,
-        session_id: sessionId,
-        page: window.location.pathname,
-        user_agent: navigator.userAgent
-      };
+      const data = await fetchChatData(text);
+      const reply = data.reply || data.answer;
 
-      const response = await fetch(CHAT_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Chat failed (${response.status}): ${errorText}`);
+      if (reply) {
+        addMessage(reply, 'assistant');
+        chatHistory.push({ role: 'assistant', text: reply });
+      } else if (data.escalate) {
+        addMessage('I can connect you with a human agent. Opening WhatsApp now...', 'assistant');
+        escalateToWhatsApp();
+      } else {
+        addMessage('I apologize, I\'m having trouble responding. Please try again.', 'assistant');
+        chatHistory.push({ role: 'assistant', text: 'I apologize, I\'m having trouble responding. Please try again.' });
       }
-
-      const data = await response.json();
-      const reply = data.reply || 'I apologize, I\'m having trouble responding. Please try again.';
-      addMessage(reply, 'assistant');
-      chatHistory.push({ role: 'assistant', text: reply });
 
       if (data.recommendation) {
         addMessage(data.recommendation, 'assistant');
