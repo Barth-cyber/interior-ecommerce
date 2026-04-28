@@ -12,6 +12,8 @@ from datetime import datetime
 from pymongo import MongoClient
 import io
 
+from admin.routes.health import register_health
+
 ENV_FILE = os.path.join(os.path.dirname(__file__), '..', '.env')
 # Load environment variables from .env file
 load_dotenv(ENV_FILE)
@@ -70,6 +72,8 @@ app.config.update({
     'SESSION_COOKIE_SAMESITE': 'Lax',
     'SESSION_COOKIE_SECURE': os.environ.get('ADMIN_COOKIE_SECURE', 'False').lower() == 'true',
 })
+
+register_health(app)
 
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 if isinstance(ADMIN_USERNAME, str):
@@ -360,11 +364,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
-
-# ✅ Health check endpoint (TEST THIS)
-@app.route("/api/health", endpoint="api_health")
-def api_health():
-    return jsonify({"status": "ok", "message": "Duct AI backend live"}), 200
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Auth routes
@@ -1386,11 +1385,6 @@ def _parse_recommendations_json(answer_text):
     except json.JSONDecodeError:
         pass
     return None
-
-
-@app.route('/health')
-def health():
-    return jsonify({'status': 'ok'})
 
 
 @app.route('/chat', methods=['POST'])
