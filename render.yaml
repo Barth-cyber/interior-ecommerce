@@ -3,8 +3,8 @@ services:
     name: interior-ecommerce
     runtime: python
     pythonVersion: "3.11.9"
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT application:app
+    buildCommand: python -m pip install -r requirements.txt
+    startCommand: gunicorn -w 1 -b 0.0.0.0:$PORT application:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
