@@ -2543,15 +2543,11 @@ async function openWhatsApp(item) {
   if (item && typeof item === 'object') {
     const imageUrl = getWhatsAppProductImage(item);
     const message = buildWhatsAppProductMessage(item);
-    const productImageUrl = imageUrl
-      ? /^(https?:)?\/\//i.test(imageUrl)
-        ? imageUrl
-        : `${window.location.origin}/${String(imageUrl).replace(/^\/+/, '')}`
-      : '';
-    const finalMessage = imageUrl
-      ? `${message}\n\nImage: ${productImageUrl}`
-      : message;
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(finalMessage)}`, '_blank');
+    if (imageUrl) {
+      await shareProductImageToWhatsApp(imageUrl, message);
+      return;
+    }
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
     return;
   }
 
