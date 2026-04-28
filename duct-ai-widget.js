@@ -2,7 +2,20 @@
   // Chat widget for Duct AI integration with WhatsApp escalation
   const DEFAULT_BACKEND_URL = 'https://api.interiorductltd.com';
   const BACKEND_URL = window.DUCT_AI_BACKEND_URL || DEFAULT_BACKEND_URL;
-  const AGENT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || '/static/duct-ai-agent.jpg';
+  const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
+
+  function normalizeAvatarPath(url) {
+    if (typeof url !== 'string' || !url.length) return url;
+    if (window.location.protocol === 'file:' && url.startsWith('/')) {
+      return '.' + url;
+    }
+    if (window.location.protocol !== 'file:' && url.startsWith('./')) {
+      return url.slice(1);
+    }
+    return url;
+  }
+
+  const AGENT_AVATAR_URL = normalizeAvatarPath(DEFAULT_AVATAR_URL);
   const API_ENDPOINTS = [
     {
       url: `${BACKEND_URL}/ai-query`,
