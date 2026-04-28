@@ -25,7 +25,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Upload artifact for GitHub Pages
-        - name: Upload artifact for GitHub Pages
+      - name: Upload artifact for GitHub Pages
   uses: actions/upload-pages-artifact), update any usage of actions/upload-artifact@v3 to at least actions/upload-artifact@v4.
 
 Example:
