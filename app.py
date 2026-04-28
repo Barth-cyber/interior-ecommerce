@@ -8,6 +8,8 @@ import os
 import json
 import difflib
 import requests as http_requests
+from pymongo import MongoClient
+from datetime import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,6 +21,27 @@ try:
 except Exception as e:
     print(f"S3 initialization warning: {e}")
     s3_storage = None
+
+# ✅ MongoDB Connection
+mongo_uri = os.getenv("MONGO_URI")
+if mongo_uri:
+    try:
+        client = MongoClient(mongo_uri)
+        db = client["ductai"]
+        chats = db["chats"]
+        users = db["users"]
+        products = db["products"]
+        print("✅ MongoDB connected successfully")
+    except Exception as e:
+        print(f"⚠️  MongoDB connection warning: {e}")
+        chats = None
+        users = None
+        products = None
+else:
+    print("⚠️  MONGO_URI not set. Chat history will not be stored in MongoDB.")
+    chats = None
+    users = None
+    products = None
 
 app = Flask(__name__, static_folder=None)
 

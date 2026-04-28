@@ -4,10 +4,10 @@ const TRACK_ENDPOINT = `${API_BASE}/track`;
 const SESSION_STORAGE_KEY = 'duct_ai_session_id';
 
 function getDuctAiSessionId() {
-  let sessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
+  let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
   if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
   }
   return sessionId;
 }

@@ -24,6 +24,8 @@
       <button onclick="window.open('/3d-demo','_blank')">3D Viewer Demo</button>
       <button onclick="window.open('/categories.html','_blank')">Organize Images</button>
       <button onclick="showSection('faq-manager')">FAQ Manager</button>
+      <button onclick="showSection('chatlogs')">Chat Logs</button>
+      <button onclick="showSection('analytics')">Analytics</button>
       <button onclick="showSection('settings')">Admin Settings</button>
       <button onclick="window.location.href='/logout'">Logout</button>
     </nav>
@@ -94,6 +96,40 @@
       <span id="faqSaveMsg" style="color:#27ae60;display:none;">Saved!</span>
     </section>
 
+    <!-- CHAT LOGS (PART 4) -->
+    <section id="chatlogs-section" class="admin-section" style="display:none;">
+      <h2>Chat Logs</h2>
+      <div style="margin-bottom:1rem;">
+        <button onclick="loadChatLogs()">🔄 Refresh</button>
+        <button onclick="exportChatLogs()">📥 Export CSV</button>
+      </div>
+      <div id="chatLogsContainer" style="max-height:600px;overflow-y:auto;border:1px solid #ddd;padding:1rem;border-radius:4px;">
+        <p style="color:#999;">Loading chat logs...</p>
+      </div>
+    </section>
+
+    <!-- ANALYTICS (PART 5) -->
+    <section id="analytics-section" class="admin-section" style="display:none;">
+      <h2>Analytics Dashboard</h2>
+      <div id="analyticsContainer">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem;">
+          <div style="background:#f0f0f0;padding:1rem;border-radius:4px;">
+            <p style="color:#666;margin:0;font-size:0.9rem;">Total Chats</p>
+            <p style="font-size:2rem;font-weight:bold;margin:0.5rem 0;" id="totalChats">-</p>
+          </div>
+          <div style="background:#f0f0f0;padding:1rem;border-radius:4px;">
+            <p style="color:#666;margin:0;font-size:0.9rem;">Total Users</p>
+            <p style="font-size:2rem;font-weight:bold;margin:0.5rem 0;" id="totalUsers">-</p>
+          </div>
+        </div>
+        
+        <h3>Top Questions (Self-Learning)</h3>
+        <div id="topQuestionsContainer" style="border:1px solid #ddd;padding:1rem;border-radius:4px;">
+          <p style="color:#999;">Loading top questions...</p>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <!-- SESSION + NAV -->
@@ -124,6 +160,8 @@
       if (name === 'products' && window.loadProducts) loadProducts();
       if (name === 'faq-manager' && window.loadFAQs) loadFAQs();
       if (name === 'settings' && window.loadAdminSettings) loadAdminSettings();
+      if (name === 'chatlogs' && window.loadChatLogs) loadChatLogs();
+      if (name === 'analytics' && window.loadAnalytics) loadAnalytics();
     }
   </script>
 

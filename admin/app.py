@@ -9,6 +9,7 @@ import json
 import difflib
 import requests as http_requests
 from datetime import datetime
+from pymongo import MongoClient
 import io
 
 ENV_FILE = os.path.join(os.path.dirname(__file__), '..', '.env')
@@ -22,6 +23,27 @@ try:
 except Exception as e:
     print(f"S3 initialization warning: {e}")
     s3_storage = None
+
+# ✅ MongoDB Connection
+mongo_uri = os.getenv("MONGO_URI")
+if mongo_uri:
+    try:
+        client = MongoClient(mongo_uri)
+        db = client["ductai"]
+        chats = db["chats"]
+        users = db["users"]
+        products = db["products"]
+        print("✅ MongoDB connected successfully")
+    except Exception as e:
+        print(f"⚠️  MongoDB connection warning: {e}")
+        chats = None
+        users = None
+        products = None
+else:
+    print("⚠️  MONGO_URI not set. Chat history will not be stored in MongoDB.")
+    chats = None
+    users = None
+    products = None
 
 app = Flask(__name__, static_folder=None)
 
@@ -167,7 +189,12 @@ PAYSTACK_PUBLIC_KEY    = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
 
 # ── Google Gemini AI config ──────────────────────────────────────────────────
 # Free tier: 1,500 requests/day  |  get key at https://aistudio.google.com/apikey
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_API_KEY = (
+    os.environ.get('GEMINI_API_KEY') or
+    os.environ.get('Gemini_API_Key') or
+    os.environ.get('GOOGLE_API_KEY') or
+    ''
+)
 # Using gemini-1.5-flash — fastest, free-tier supported model
 GEMINI_MODEL   = 'gemini-1.5-flash'
 GEMINI_URL     = f'https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent'
@@ -877,6 +904,61 @@ def conversations_html():
     return send_from_directory('.', 'conversations.html')
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PART 4 & 5 — ADMIN DASHBOARD (Chat Logs + Analytics)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/admin/chat-logs', methods=['GET'])
+@login_required
+def admin_chat_logs():
+    """Get chat logs from MongoDB (PART 4 - Admin Dashboard)."""
+    if not chats:
+        return jsonify({'error': 'MongoDB not available'}), 500
+    
+    try:
+        limit = request.args.get('limit', 50, type=int)
+        data = list(chats.find().sort("_id", -1).limit(limit))
+        
+        # Convert ObjectId to string for JSON serialization
+        for d in data:
+            d["_id"] = str(d["_id"])
+            if "timestamp" in d:
+                d["timestamp"] = d["timestamp"].isoformat()
+        
+        return jsonify({'chats': data})
+    except Exception as e:
+        app.logger.error(f"Error retrieving chat logs: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/admin/analytics', methods=['GET'])
+@login_required
+def admin_analytics():
+    """Get analytics data for dashboard (PART 5 - Self-Learning)."""
+    try:
+        result = {
+            'top_questions': [],
+            'total_chats': 0,
+            'total_users': 0
+        }
+        
+        if chats:
+            # Get total chat count
+            result['total_chats'] = chats.count_documents({})
+            
+            # Get top questions (PART 5)
+            result['top_questions'] = get_top_questions()
+        
+        if users:
+            # Get total unique users
+            result['total_users'] = users.count_documents({})
+        
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Error retrieving analytics: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/kb', methods=['GET'])
 def get_kb():
     if not os.path.exists(KB_PATH):
@@ -1014,6 +1096,181 @@ YOUR ROLE:
 - If you cannot help, say so honestly and offer to connect them to the human team"""
 
     return _call_gemini(query, system_instruction=system_instruction, max_tokens=512)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MongoDB Chat Functions
+# ─────────────────────────────────────────────────────────────────────────────
+
+def save_chat(session_id, user_msg, bot_reply):
+    """Save chat messages to MongoDB."""
+    if not chats:
+        app.logger.warning("MongoDB not available. Chat not saved.")
+        return False
+    
+    try:
+        chats.insert_one({
+            "session_id": session_id,
+            "user": user_msg,
+            "bot": bot_reply,
+            "timestamp": datetime.utcnow()
+        })
+        return True
+    except Exception as e:
+        app.logger.error(f"Error saving chat to MongoDB: {e}")
+        return False
+
+
+def load_history(session_id, limit=5):
+    """Load chat history from MongoDB (context memory)."""
+    if not chats:
+        app.logger.warning("MongoDB not available. No history loaded.")
+        return []
+    
+    try:
+        history = chats.find({"session_id": session_id}).sort("_id", -1).limit(limit)
+        
+        messages = []
+        for h in reversed(list(history)):
+            messages.append({"role": "user", "parts": [h["user"]]})
+            messages.append({"role": "model", "parts": [h["bot"]]})
+        
+        return messages
+    except Exception as e:
+        app.logger.error(f"Error loading chat history from MongoDB: {e}")
+        return []
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PART 1 — USER PROFILES (returning visitors)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_or_create_user(session_id):
+    """Track users across visits and build behavior history."""
+    if not users:
+        return {"session_id": session_id}
+    
+    try:
+        user = users.find_one({"session_id": session_id})
+        
+        if not user:
+            user = {
+                "session_id": session_id,
+                "created_at": datetime.utcnow(),
+                "interests": [],
+                "visits": 1
+            }
+            users.insert_one(user)
+        else:
+            users.update_one(
+                {"session_id": session_id},
+                {"$inc": {"visits": 1}}
+            )
+        
+        return user
+    except Exception as e:
+        app.logger.error(f"Error in get_or_create_user: {e}")
+        return {"session_id": session_id}
+
+
+def update_user_interests(session_id, message):
+    """Track user interests automatically based on message keywords."""
+    if not users:
+        return False
+    
+    try:
+        keywords = {
+            "chair": "chairs",
+            "sofa": "sofas",
+            "table": "tables",
+            "bed": "beds",
+            "cabinet": "cabinets",
+            "desk": "desks",
+            "shelf": "shelves",
+            "wardrobe": "wardrobes",
+            "decor": "decoration",
+            "lighting": "lights",
+            "rug": "rugs",
+            "curtain": "curtains",
+        }
+        
+        for word, tag in keywords.items():
+            if word in message.lower():
+                users.update_one(
+                    {"session_id": session_id},
+                    {"$addToSet": {"interests": tag}}
+                )
+        
+        return True
+    except Exception as e:
+        app.logger.error(f"Error in update_user_interests: {e}")
+        return False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PART 3 — AI RECOMMENDATIONS (PRODUCT-BASED)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_recommendation(user):
+    """Get product recommendation based on user interests."""
+    if not products:
+        return None
+    
+    try:
+        interests = user.get("interests", [])
+        
+        if not interests:
+            return None
+        
+        # Find a product matching user interests
+        product = products.find_one({"category": {"$in": interests}})
+        
+        if product:
+            name = product.get("name", "Product")
+            price = product.get("price", "Price on request")
+            return f"👉 You may like: {name} ({price})"
+        
+        return None
+    except Exception as e:
+        app.logger.error(f"Error in get_recommendation: {e}")
+        return None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PART 5 — SELF-LEARNING AI LOOP
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_top_questions():
+    """Analyze patterns — get most frequently asked questions."""
+    if not chats:
+        return []
+    
+    try:
+        pipeline = [
+            {"$group": {"_id": "$user", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 5}
+        ]
+        
+        return list(chats.aggregate(pipeline))
+    except Exception as e:
+        app.logger.error(f"Error in get_top_questions: {e}")
+        return []
+
+
+def build_dynamic_prompt(user, message):
+    """Improve AI prompt dynamically based on user interests."""
+    interests = ", ".join(user.get("interests", []))
+    visits = user.get("visits", 1)
+    
+    context = ""
+    if interests:
+        context += f"\nUser interests: {interests}"
+    
+    if visits > 1:
+        context += f"\n(Returning visitor - {visits} visits)"
+    
+    return context
 
 
 def _build_product_summary(products):
@@ -1252,21 +1509,49 @@ def recommendations():
 def ai_query():
     data = request.get_json() or {}
     query = data.get('query', '').strip()
+    session_id = data.get('session_id', 'default')  # Get session_id from request
+    
     if not query:
         return jsonify({'answer': None, 'escalate': True})
 
+    # PART 1: Get or create user + track interests
+    user = get_or_create_user(session_id)
+    update_user_interests(session_id, query)
+
     kb = _load_kb()
-    products = _load_products()
+    products_data = _load_products()
 
     # 1. Try fast local fuzzy match first (no API cost)
     local_answer = _fuzzy_kb_match(query, kb)
     if local_answer:
-        return jsonify({'answer': local_answer, 'escalate': False})
+        # Save to MongoDB if available
+        save_chat(session_id, query, local_answer)
+        
+        # PART 3: Get recommendation based on user interests
+        recommendation = get_recommendation(user)
+        
+        return jsonify({
+            'answer': local_answer,
+            'escalate': False,
+            'recommendation': recommendation,
+            'visits': user.get('visits', 1)
+        })
 
     # 2. Call Gemini API
-    answer, escalate = _ask_gemini_chat(query, kb, products)
+    answer, escalate = _ask_gemini_chat(query, kb, products_data)
     if answer:
-        return jsonify({'answer': answer, 'escalate': False})
+        # Save to MongoDB if available
+        save_chat(session_id, query, answer)
+        
+        # PART 3: Get recommendation based on user interests
+        recommendation = get_recommendation(user)
+        
+        return jsonify({
+            'answer': answer,
+            'escalate': False,
+            'recommendation': recommendation,
+            'visits': user.get('visits', 1)
+        })
 
     # 3. Escalate to human
     return jsonify({'answer': None, 'escalate': escalate})
@@ -1276,6 +1561,13 @@ def ai_query():
 def escalate():
     data = request.get_json()
     return jsonify({'escalated': True, 'payload': data})
+
+
+@app.route('/chat-history/<session_id>', methods=['GET'])
+def get_chat_history(session_id):
+    """Retrieve chat history for a session from MongoDB."""
+    history = load_history(session_id, limit=5)
+    return jsonify({'session_id': session_id, 'history': history})
 
 
 @app.route('/user-log', methods=['GET'])

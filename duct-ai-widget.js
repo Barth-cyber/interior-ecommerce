@@ -6,10 +6,10 @@
   const WHATSAPP_NUMBER = '2348036850229';
 
   function getDuctAiSessionId() {
-    let sessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
     if (!sessionId) {
-      sessionId = crypto.randomUUID();
-      sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+      sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
     }
     return sessionId;
   }
@@ -144,6 +144,11 @@
       const reply = data.reply || 'I apologize, I\'m having trouble responding. Please try again.';
       addMessage(reply, 'assistant');
       chatHistory.push({ role: 'assistant', text: reply });
+
+      if (data.recommendation) {
+        addMessage(data.recommendation, 'assistant');
+        chatHistory.push({ role: 'assistant', text: data.recommendation });
+      }
     } catch (error) {
       console.error('Chat error:', error);
       addMessage('Sorry, I had trouble connecting to the server. Please check your internet and try again.', 'assistant');

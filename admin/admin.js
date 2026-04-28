@@ -218,6 +218,112 @@ async function loadProducts() {
   renderProducts();
 }
 
+// ================= PART 4: CHAT LOGS (ADMIN DASHBOARD) =================
+async function loadChatLogs() {
+  const container = document.getElementById('chatLogsContainer');
+  container.innerHTML = '<p style="color:#999;">Loading chat logs...</p>';
+
+  try {
+    const res = await fetch('/admin/chat-logs');
+    const data = await res.json();
+
+    if (data.error) {
+      container.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+      return;
+    }
+
+    const chats = data.chats || [];
+    if (!chats.length) {
+      container.innerHTML = '<p style="color:#999;">No chat logs found.</p>';
+      return;
+    }
+
+    container.innerHTML = '';
+    chats.forEach(chat => {
+      const div = document.createElement('div');
+      div.style.cssText = 'border-bottom:1px solid #eee;padding:1rem 0;';
+      
+      const timestamp = chat.timestamp ? new Date(chat.timestamp).toLocaleString() : 'N/A';
+      
+      div.innerHTML = `
+        <div style="font-size:0.9rem;color:#666;">
+          <strong>Session:</strong> ${chat.session_id || 'N/A'} | <strong>Time:</strong> ${timestamp}
+        </div>
+        <div style="margin:0.5rem 0;">
+          <strong style="color:#2c3e50;">User:</strong> ${escapeHtml(chat.user || '')}
+        </div>
+        <div>
+          <strong style="color:#27ae60;">Bot:</strong> ${escapeHtml(chat.bot || '')}
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (err) {
+    container.innerHTML = `<p style="color:red;">Error loading chat logs: ${err.message}</p>`;
+    console.error(err);
+  }
+}
+
+function exportChatLogs() {
+  alert('CSV export functionality coming soon!');
+}
+
+// ================= PART 5: ANALYTICS DASHBOARD =================
+async function loadAnalytics() {
+  try {
+    const res = await fetch('/admin/analytics');
+    const data = await res.json();
+
+    if (data.error) {
+      document.getElementById('analyticsContainer').innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+      return;
+    }
+
+    // Update metrics
+    document.getElementById('totalChats').textContent = data.total_chats || 0;
+    document.getElementById('totalUsers').textContent = data.total_users || 0;
+
+    // Update top questions
+    const topQuestionsContainer = document.getElementById('topQuestionsContainer');
+    const topQuestions = data.top_questions || [];
+
+    if (!topQuestions.length) {
+      topQuestionsContainer.innerHTML = '<p style="color:#999;">No questions found yet.</p>';
+      return;
+    }
+
+    topQuestionsContainer.innerHTML = '';
+    topQuestions.forEach((q, idx) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:0.8rem;border-bottom:1px solid #eee;';
+      
+      div.innerHTML = `
+        <div style="font-weight:bold;margin-bottom:0.3rem;">
+          #${idx + 1} (asked ${q.count} times)
+        </div>
+        <div style="color:#555;font-size:0.95rem;">
+          ${escapeHtml(q._id || '')}
+        </div>
+      `;
+      topQuestionsContainer.appendChild(div);
+    });
+  } catch (err) {
+    console.error('Error loading analytics:', err);
+  }
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 function renderProducts() {
   const list = document.getElementById('productsList');
   if (!list) return;

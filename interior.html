@@ -1922,7 +1922,7 @@ function logQueryForLearning(query, response) {
 function getSessionId() {
   let sessionId = localStorage.getItem('chatSessionId');
   if (!sessionId) {
-    sessionId = 'session-' + Math.random().toString(36).slice(2) + '-' + Date.now();
+    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('chatSessionId', sessionId);
   }
   return sessionId;
@@ -1965,6 +1965,9 @@ async function sendMsg() {
     const data = await res.json();
 
     addMessage('bot', data.reply || 'No response');
+    if (data.recommendation) {
+      addMessage('bot', data.recommendation);
+    }
 
     logQueryForLearning(message, data.reply);
 

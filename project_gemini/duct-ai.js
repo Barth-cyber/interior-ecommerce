@@ -1,17 +1,29 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
 let chatHistory = [];
 
+function getDuctAiSessionId() {
+  let sessionId = localStorage.getItem('duct_ai_session_id');
+  if (!sessionId) {
+    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('duct_ai_session_id', sessionId);
+  }
+  return sessionId;
+}
+
 async function askDuctAI(query, imageUrl) {
   chatHistory.push({ role: 'user', content: query, image: imageUrl || null });
   try {
     const res = await fetch('/ai-query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, session_id: getDuctAiSessionId() }),
     });
     const data = await res.json();
     if (data.answer) {
       chatHistory.push({ role: 'ai', content: data.answer });
+      if (data.recommendation) {
+        chatHistory.push({ role: 'ai', content: data.recommendation });
+      }
       renderChat();
     } else if (data.escalate) {
       escalateToHuman(query, imageUrl);
