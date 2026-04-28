@@ -362,8 +362,8 @@ def login_required(f):
 
 
 # ✅ Health check endpoint (TEST THIS)
-@app.route("/api/health")
-def health():
+@app.route("/api/health", endpoint="api_health")
+def api_health():
     return jsonify({"status": "ok", "message": "Duct AI backend live"}), 200
 
 # ─────────────────────────────────────────────────────────────────────────────
