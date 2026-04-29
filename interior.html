@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Interior Duct Ltd — Functionality, Durability &amp; Aesthetics</title>
@@ -569,7 +569,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .ab-img-sec{width:60%;height:50%}
 }
 </style>
-<script src="/static/3d-viewer.js"></script>
+<script src="static/3d-viewer.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script nomodule src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 </head>
@@ -2696,9 +2696,9 @@ async function loadContent() {
 
 loadContent();
 </script>
-<script src="/hero-popup-slider.js"></script>
-<script src="/duct-ai-assistant.js"></script>
-<script src="/static/payment.js"></script>
+<script src="hero-popup-slider.js"></script>
+<script src="duct-ai-assistant.js"></script>
+<script src="static/payment.js"></script>
 <!-- Duct AI Chat Widget (deprecated old versions removed - using new production widget) -->
 
 <!-- Duct AI floating button replacement removed; using the new floating AI widget instead -->
@@ -2897,15 +2897,15 @@ function openWhatsAppProductSlider() {
   // Use the dedicated backend subdomain for Duct AI API calls.
   // Update this URL when the backend is deployed to Render.
   window.DUCT_AI_BACKEND_URL = 'https://api.interiorductltd.com';
-  window.DUCT_AI_AVATAR_URL = '/static/duct-ai-agent.jpg';
+  window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
   
   // Hide old embedded chat panel - use new floating widget instead
   const style = document.createElement('style');
   style.textContent = '.ai-grid { display: none !important; }';
   document.head.appendChild(style);
 </script>
-<link rel="stylesheet" href="/duct-ai-widget.css?v=20260429">
-<script src="/duct-ai-widget.js?v=20260429" defer></script>
+<link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
+<script src="duct-ai-widget.js?v=20260429" defer></script>
 
 </body>
 </html>
