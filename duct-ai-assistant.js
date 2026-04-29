@@ -1,7 +1,30 @@
-const API_BASE = 'https://api.interiorductltd.com';
-const CHAT_ENDPOINT = `${API_BASE}/ai-query`;
-const TRACK_ENDPOINT = `${API_BASE}/user-log`;
+const API_BASES = [
+  window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+  'https://duct-ai-backend.onrender.com',
+  'https://interior-ecommerce-lh3e.onrender.com'
+];
+const CHAT_PATH = '/ai-query';
+const TRACK_PATH = '/user-log';
 const SESSION_STORAGE_KEY = 'duct_ai_session_id';
+
+async function fetchWithBackendFallback(path, options = {}) {
+  let lastError = null;
+  for (const base of API_BASES) {
+    const url = `${base.replace(/\/$/, '')}${path}`;
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        lastError = new Error(`Backend request failed (${response.status}) ${response.statusText} @ ${url}: ${errorText}`);
+        continue;
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error('All backend endpoints failed');
+}
 
 function getDuctAiSessionId() {
   let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
@@ -22,18 +45,13 @@ async function sendDuctAiChat(userMessage) {
   };
 
   try {
-    const response = await fetch(CHAT_ENDPOINT, {
+    const response = await fetchWithBackendFallback(CHAT_PATH, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Chat request failed (${response.status} ${response.statusText}): ${errorText}`);
-    }
 
     const data = await response.json();
     return data;
@@ -51,7 +69,7 @@ async function sendBehaviourEvent(eventData) {
   };
 
   try {
-    await fetch(TRACK_ENDPOINT, {
+    await fetchWithBackendFallback(TRACK_PATH, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -1,6 +1,29 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
-const BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+const BACKEND_URLS = [
+  window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+  'https://duct-ai-backend.onrender.com',
+  'https://interior-ecommerce-lh3e.onrender.com'
+];
 let chatHistory = [];
+
+async function fetchBackend(path, options = {}) {
+  let lastError = null;
+  for (const base of BACKEND_URLS) {
+    const url = `${base.replace(/\/$/, '')}${path}`;
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        lastError = new Error(`Backend request failed (${res.status}) at ${url}: ${body}`);
+        continue;
+      }
+      return res;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error('All backend endpoints failed');
+}
 
 function getDuctAiSessionId() {
   let sessionId = localStorage.getItem('duct_ai_session_id');
@@ -14,7 +37,7 @@ function getDuctAiSessionId() {
 async function askDuctAI(query, imageUrl) {
   chatHistory.push({ role: 'user', content: query, image: imageUrl || null });
   try {
-    const res = await fetch(`${BACKEND_URL}/ai-query`, {
+    const res = await fetchBackend('/ai-query', {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
@@ -65,7 +88,7 @@ function renderChat() {
 }
 
 async function escalateToHuman(query, imageUrl) {
-  await fetch(`${BACKEND_URL}/escalate`, {
+  await fetchBackend('/escalate', {
     method: 'POST',
     mode: 'cors',
     headers: { 'Content-Type': 'application/json' },

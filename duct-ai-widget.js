@@ -1,8 +1,30 @@
 (function () {
   // Chat widget for Duct AI integration with WhatsApp escalation
-  const DEFAULT_BACKEND_URL = 'https://api.interiorductltd.com';
-  const BACKEND_URL = window.DUCT_AI_BACKEND_URL || DEFAULT_BACKEND_URL;
+  const BACKEND_URLS = [
+    window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+    'https://duct-ai-backend.onrender.com',
+    'https://interior-ecommerce-lh3e.onrender.com'
+  ];
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
+
+  async function fetchChatBackend(path, options = {}) {
+    let lastError = null;
+    for (const base of BACKEND_URLS) {
+      const url = `${base.replace(/\/$/, '')}${path}`;
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          const text = await response.text().catch(() => '');
+          lastError = new Error(`Backend request failed (${response.status}) at ${url}: ${text}`);
+          continue;
+        }
+        return response;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error('All backend endpoints failed');
+  }
 
   function normalizeAvatarPath(url) {
     if (typeof url !== 'string' || !url.length) return url;
@@ -185,7 +207,7 @@
 
   async function fetchChatData(text) {
     const sessionId = getDuctAiSessionId();
-    const response = await fetch(CHAT_ENDPOINT, {
+    const response = await fetchChatBackend('/ai-query', {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
@@ -198,11 +220,6 @@
         }
       })
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Chat failed (${response.status}): ${errorText}`);
-    }
 
     const data = await response.json();
     if (!data || (data.reply == null && data.answer == null && data.escalate == null)) {

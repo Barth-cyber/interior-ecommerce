@@ -1951,21 +1951,43 @@ async function sendMsg() {
   input.value = '';
 
   try {
-    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
-    const res = await fetch(`${backendUrl}/ai-query`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query: message,
-        session_id: getSessionId(),
-        context: {
-          page: window.location.pathname,
-          user_agent: navigator.userAgent
+    const backendUrls = [
+      window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+      'https://duct-ai-backend.onrender.com',
+      'https://interior-ecommerce-lh3e.onrender.com'
+    ];
+    let res = null;
+    let lastError = null;
+
+    for (const backendUrl of backendUrls) {
+      try {
+        res = await fetch(`${backendUrl.replace(/\/$/, '')}/ai-query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: message,
+            session_id: getSessionId(),
+            context: {
+              page: window.location.pathname,
+              user_agent: navigator.userAgent
+            }
+          })
+        });
+        if (!res.ok) {
+          lastError = new Error(`Chat failed (${res.status}) at ${backendUrl}`);
+          continue;
         }
-      })
-    });
+        break;
+      } catch (e) {
+        lastError = e;
+      }
+    }
+
+    if (!res) {
+      throw lastError || new Error('Unable to connect to AI backend');
+    }
 
     const data = await res.json();
     const reply = data.answer || data.reply || 'No response';
