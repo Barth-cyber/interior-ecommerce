@@ -16,16 +16,8 @@
   }
 
   const AGENT_AVATAR_URL = normalizeAvatarPath(DEFAULT_AVATAR_URL);
-  const API_ENDPOINTS = [
-    {
-      url: `${BACKEND_URL}/ai-query`,
-      makeBody: (text, sessionId) => ({ query: text, session_id: sessionId })
-    },
-    {
-      url: `${BACKEND_URL}/chat`,
-      makeBody: (text, sessionId) => ({ message: text, session_id: sessionId, page: window.location.pathname, user_agent: navigator.userAgent })
-    }
-  ];
+  const CHAT_ENDPOINT = `${BACKEND_URL}/ai-query`;
+  const RECOMMEND_ENDPOINT = `${BACKEND_URL}/recommend`;
   const SESSION_STORAGE_KEY = 'duct_ai_session_id';
   const WHATSAPP_NUMBER = '2348036850229';
 
@@ -146,40 +138,78 @@
     overlay.classList.remove('visible');
   }
 
-  async function fetchChatData(text) {
-    const sessionId = getDuctAiSessionId();
-    const errors = [];
+  function openDuctAIChat(initialText = '', autoSend = false) {
+    container.classList.add('panel-open');
+    panel.classList.add('visible');
+    overlay.classList.add('visible');
+    input.focus();
 
-    for (const endpoint of API_ENDPOINTS) {
-      try {
-        const response = await fetch(endpoint.url, {
-          method: 'POST',
-          mode: 'cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(endpoint.makeBody(text, sessionId))
-        });
-
-        if (!response.ok) {
-          if (response.status === 404 || response.status === 405) {
-            errors.push(`${endpoint.url} not available (${response.status})`);
-            continue;
-          }
-          const errorText = await response.text();
-          throw new Error(`Chat failed (${response.status}): ${errorText}`);
-        }
-
-        const data = await response.json();
-        if (!data || (data.reply == null && data.answer == null && data.escalate == null)) {
-          throw new Error('Invalid chat response');
-        }
-        return data;
-      } catch (error) {
-        console.warn(`Duct AI endpoint failed: ${endpoint.url}`, error);
-        errors.push(error.message || String(error));
-      }
+    if (messages.children.length === 0) {
+      addMessage('Welcome to Interior Duct Ltd! I\'m Duct AI, your design advisor. Tell me what room you\'re furnishing or what style interests you.', 'assistant');
     }
 
-    throw new Error(errors.join(' | '));
+    if (initialText) {
+      input.value = initialText;
+      if (autoSend) {
+        sendMessage();
+      }
+    }
+  }
+
+  function processChatActions(actions) {
+    if (!Array.isArray(actions) || actions.length === 0) return;
+
+    actions.forEach(action => {
+      if (action.type === 'scroll' && action.target) {
+        const targetId = action.target.toLowerCase().trim();
+        const target = document.getElementById(targetId) || document.querySelector(`[name="${targetId}"]`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          addMessage(`Scrolling to ${targetId} section...`, 'assistant');
+        }
+      }
+
+      if (action.type === 'highlight_product' && action.name) {
+        const match = document.querySelector(`[data-product-name="${action.name}"]`) || [...document.querySelectorAll('.pcard, .product-card, .product-card-item')].find(el => el.textContent.includes(action.name));
+        if (match) {
+          match.classList.add('duct-ai-highlight');
+          setTimeout(() => match.classList.remove('duct-ai-highlight'), 4200);
+          addMessage(`Highlighted product: ${action.name}`, 'assistant');
+        }
+      }
+    });
+  }
+
+  window.openDuctAIChat = openDuctAIChat;
+  window.openDuctAIWidget = openDuctAIChat;
+
+  async function fetchChatData(text) {
+    const sessionId = getDuctAiSessionId();
+    const response = await fetch(CHAT_ENDPOINT, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: text,
+        session_id: sessionId,
+        context: {
+          page: window.location.pathname,
+          user_agent: navigator.userAgent
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Chat failed (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    if (!data || (data.reply == null && data.answer == null && data.escalate == null)) {
+      throw new Error('Invalid chat response');
+    }
+
+    return data;
   }
 
   async function sendMessage() {
@@ -209,6 +239,9 @@
       if (data.recommendation) {
         addMessage(data.recommendation, 'assistant');
         chatHistory.push({ role: 'assistant', text: data.recommendation });
+      }
+      if (Array.isArray(data.actions)) {
+        processChatActions(data.actions);
       }
     } catch (error) {
       console.error('Chat error:', error);

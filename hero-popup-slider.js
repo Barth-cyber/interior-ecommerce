@@ -658,13 +658,16 @@ function getInspirationalQuote() {
 
 function openAIConversation() {
   const product = getCurrentAIProduct();
-  if (product && product.img) {
-    openWhatsApp(product);
+  const prompt = product && product.name
+    ? `Hello Interior Duct! I want recommendations for a luxury product like ${product.name}. ${product.desc || ''} ${product.price ? `Budget: ${product.price}.` : ''}`
+    : `Hello Interior Duct! I'm looking for interior design inspiration today. ${getInspirationalQuote()}`;
+
+  if (window.openDuctAIChat) {
+    window.openDuctAIChat(prompt, true);
   } else {
-    const quote = getInspirationalQuote();
-    const message = `Hello Interior Duct! I'm looking for interior design inspiration today. ${quote}`;
-    openWhatsApp(message);
+    openWhatsApp(prompt);
   }
+
   closeAIChat();
 }
 

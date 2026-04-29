@@ -1,6 +1,6 @@
 const API_BASE = 'https://api.interiorductltd.com';
-const CHAT_ENDPOINT = `${API_BASE}/chat`;
-const TRACK_ENDPOINT = `${API_BASE}/track`;
+const CHAT_ENDPOINT = `${API_BASE}/ai-query`;
+const TRACK_ENDPOINT = `${API_BASE}/user-log`;
 const SESSION_STORAGE_KEY = 'duct_ai_session_id';
 
 function getDuctAiSessionId() {
@@ -15,7 +15,7 @@ function getDuctAiSessionId() {
 async function sendDuctAiChat(userMessage) {
   const sessionId = getDuctAiSessionId();
   const payload = {
-    message: userMessage,
+    query: userMessage,
     session_id: sessionId,
     page: window.location.pathname,
     user_agent: navigator.userAgent

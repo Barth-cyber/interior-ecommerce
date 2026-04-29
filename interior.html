@@ -1952,22 +1952,30 @@ async function sendMsg() {
 
   try {
     const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
-    const res = await fetch(`${backendUrl}/chat`, {
+    const res = await fetch(`${backendUrl}/ai-query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: message,
-        session_id: getSessionId()
+        query: message,
+        session_id: getSessionId(),
+        context: {
+          page: window.location.pathname,
+          user_agent: navigator.userAgent
+        }
       })
     });
 
     const data = await res.json();
+    const reply = data.answer || data.reply || 'No response';
 
-    addMessage('bot', data.reply || 'No response');
+    addMessage('bot', reply);
     if (data.recommendation) {
       addMessage('bot', data.recommendation);
+    }
+    if (Array.isArray(data.actions)) {
+      processChatActions(data.actions);
     }
 
     logQueryForLearning(message, data.reply);
@@ -1978,6 +1986,30 @@ async function sendMsg() {
   }
 }
 function handleKey(e) { if (e.key === 'Enter') sendMsg(); }
+
+function processChatActions(actions) {
+  if (!Array.isArray(actions)) return;
+
+  actions.forEach(action => {
+    if (action.type === 'scroll' && action.target) {
+      const targetId = action.target.toLowerCase().trim();
+      const target = document.getElementById(targetId) || document.querySelector(`[name="${targetId}"]`);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        addMessage('assistant', `Scrolling to ${targetId} section...`);
+      }
+    }
+    if (action.type === 'highlight_product' && action.name) {
+      const match = document.querySelector(`[data-product-name="${action.name}"]`) || [...document.querySelectorAll('.pcard, .product-card, .product-card-item')].find(el => el.textContent.includes(action.name));
+      if (match) {
+        match.classList.add('duct-ai-highlight');
+        setTimeout(() => match.classList.remove('duct-ai-highlight'), 4200);
+        addMessage('assistant', `Highlighted product: ${action.name}`);
+      }
+    }
+  });
+}
+
 function addQuickReplies(reply) {
   const msgs = document.getElementById('chatMsgs');
   const lowerReply = reply.toLowerCase();
@@ -2872,8 +2904,8 @@ function openWhatsAppProductSlider() {
   style.textContent = '.ai-grid { display: none !important; }';
   document.head.appendChild(style);
 </script>
-<link rel="stylesheet" href="/duct-ai-widget.css">
-<script src="/duct-ai-widget.js" defer></script>
+<link rel="stylesheet" href="/duct-ai-widget.css?v=20260429">
+<script src="/duct-ai-widget.js?v=20260429" defer></script>
 
 </body>
 </html>
