@@ -8,6 +8,9 @@ on:
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     concurrency:
       group: pages-deploy
       cancel-in-progress: true
@@ -30,4 +33,5 @@ jobs:
           path: ./
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v5
