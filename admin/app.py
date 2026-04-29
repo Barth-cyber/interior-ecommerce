@@ -52,8 +52,8 @@ app = Flask(__name__, static_folder=None)
 # ✅ REQUIRED for sessions + auth
 app.secret_key = os.environ.get("SECRET_KEY", os.environ.get('ADMIN_SECRET_KEY', 'change-me-in-production'))
 
-# ✅ FIX CORS — VERY IMPORTANT - Allow frontend URLs to connect
-CORS(app, resources={r"/api/*": {"origins": [
+# ✅ FIX CORS — VERY IMPORTANT - Allow frontend URLs to connect across all public routes
+CORS(app, resources={r"/*": {"origins": [
     "https://interiorductltd.com",
     "https://www.interiorductltd.com",
     "https://duct-ai-backend.onrender.com",
