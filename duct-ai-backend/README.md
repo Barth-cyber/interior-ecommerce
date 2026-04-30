@@ -8,6 +8,8 @@ For the frontend hosted on `interiorductltd.com`, the backend should use a dedic
 
 - `https://api.interiorductltd.com`
 
+Legacy Node backend artifacts have been removed from this service so Render deploys the Python backend only.
+
 Use the Python backend defined by `render.yaml` in this repository. The service is started with Gunicorn and the production route is `/ai-query`.
 
 In Render, configure the backend service to use that custom subdomain and set the `GEMINI_API_KEY`
