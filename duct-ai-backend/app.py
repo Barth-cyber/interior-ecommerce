@@ -39,15 +39,26 @@ def _init_gemini():
 # ── Flask app ─────────────────────────────────────────────────────────────────
 app = Flask(__name__)
 
-# Allow requests from your live domain AND localhost for development
-CORS(app, resources={r"/*": {"origins": [
-    "https://interiorductltd.com",
-    "https://www.interiorductltd.com",
-    "https://interior-ecommerce-lh3e.onrender.com",
-    "http://localhost:5000",
-    "http://127.0.0.1:5000",
-    "http://localhost:3000",
-]}})
+# Allow requests from your live domain, API subdomain, and localhost for development.
+def _parse_allowed_origins():
+    raw = os.environ.get("ALLOWED_ORIGINS", "").strip()
+    if raw:
+        origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+        if origins:
+            return origins
+
+    return [
+        "https://interiorductltd.com",
+        "https://www.interiorductltd.com",
+        "https://api.interiorductltd.com",
+        "https://duct-ai-backend.onrender.com",
+        "https://interior-ecommerce-lh3e.onrender.com",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "http://localhost:3000",
+    ]
+
+CORS(app, resources={r"/*": {"origins": _parse_allowed_origins()}})
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR       = os.path.dirname(__file__)
