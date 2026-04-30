@@ -1,0 +1,16 @@
+[
+  {
+    "session_id": "test_kb",
+    "role": "user",
+    "text": "What furniture do you offer?",
+    "context": {},
+    "ts": "2026-04-30T18:50:20.670266"
+  },
+  {
+    "session_id": "test_local_error",
+    "role": "user",
+    "text": "Hello",
+    "context": {},
+    "ts": "2026-04-30T18:52:22.670413"
+  }
+]
