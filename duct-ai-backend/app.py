@@ -14,6 +14,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DEPLOYMENT_REVISION = '43c88de'
+
 # ── Gemini setup ──────────────────────────────────────────────────────────────
 _gemini_model = None
 _gemini_initialized = False
@@ -210,6 +212,7 @@ def health():
         "service": "duct-ai-backend",
         "model": "gemini-1.5-flash",
         "keySet": bool(os.environ.get("GEMINI_API_KEY")),
+        "revision": DEPLOYMENT_REVISION,
     })
 
 
@@ -255,25 +258,14 @@ def ai_query():
 
     try:
         system_prompt = _build_system_prompt()
-        history       = _get_history(session_id)
-
-        chat = _gemini_model.start_chat()
-        if not history:
-            full_query = f"{system_prompt}\n\nUser: {query}"
-        else:
-            full_query = query
+        full_query = f"{system_prompt}\n\nUser: {query}"
 
         try:
-            response = chat.send_message(full_query)
-            answer = response.text.strip()
-        except Exception as chat_error:
-            print(f"Gemini chat send_message failed: {chat_error}")
-            try:
-                response = _gemini_model.generate_text(full_query)
-                answer = getattr(response, "text", "").strip() or str(response)
-            except Exception as fallback_error:
-                print(f"Gemini generate_text fallback failed: {fallback_error}")
-                raise
+            response = _gemini_model.generate_content(full_query)
+            answer = getattr(response, "text", "").strip()
+        except Exception as gen_error:
+            print(f"Gemini generate_content failed: {gen_error}")
+            raise
 
         # Save to history
         _save_to_history(session_id, "user", query)
