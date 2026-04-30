@@ -1,6 +1,6 @@
 (function () {
   const BACKEND_URL = window.DUCT_AI_BACKEND_URL || window.location.origin;
-  const API_PATH = `${BACKEND_URL}/api/chat`;
+  const API_PATH = `${BACKEND_URL}/ai-query`;
 
   const widgetStyles = document.createElement('link');
   widgetStyles.rel = 'stylesheet';
