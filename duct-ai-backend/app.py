@@ -289,12 +289,16 @@ def ai_query():
         })
 
     except Exception as e:
-        print(f"Gemini error: {e}")
+        import traceback
+        error_msg = f"Gemini error: {type(e).__name__}: {e}"
+        print(error_msg)
+        print(f"Traceback: {traceback.format_exc()}")
         fallbacks = kb.get("fallback_responses", ["Sorry, something went wrong."])
         import random
         return jsonify({
             "answer":   random.choice(fallbacks),
             "escalate": False,
+            "error_log": error_msg,  # Debug: include error in response
         })
 
 
