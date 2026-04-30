@@ -13,4 +13,8 @@ Use the Python backend defined by `render.yaml` in this repository. The service 
 In Render, configure the backend service to use that custom subdomain and set the `GEMINI_API_KEY`
 value in the Render dashboard under **Environment > Environment Variables**.
 
+If you need to lock the backend to specific domains, also set `ALLOWED_ORIGINS` in Render as a comma-separated list, for example:
+
+`https://interiorductltd.com,https://api.interiorductltd.com`
+
 Do not put the Gemini key in any committed file.

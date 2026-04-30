@@ -10,8 +10,8 @@ services:
       # ── Required ──────────────────────────────────────────────────────────
       - key: GEMINI_API_KEY
         sync: false       # Set manually in Render dashboard
-      # ── Optional ──────────────────────────────────────────────────────────
-      - key: ANALYTICS_TOKEN
+      # ── Optional ──────────────────────────────────────────────────────────      - key: ALLOWED_ORIGINS
+        sync: false       # Comma-separated allowed origins for CORS (e.g. https://interiorductltd.com,https://api.interiorductltd.com)      - key: ANALYTICS_TOKEN
         generateValue: true   # Random token for /analytics endpoint
       - key: AWS_ACCESS_KEY_ID
         sync: false
