@@ -262,7 +262,9 @@ def ai_query():
 
         try:
             response = _gemini_model.generate_content(full_query)
-            answer = getattr(response, "text", "").strip()
+            answer = _extract_response_text(response)
+            if not answer:
+                raise ValueError("Gemini response contained no text")
         except Exception as gen_error:
             print(f"Gemini generate_content failed: {gen_error}")
             raise
@@ -294,6 +296,28 @@ def ai_query():
             "answer":   random.choice(fallbacks),
             "escalate": False,
         })
+
+
+def _extract_response_text(response):
+    """Normalize Gemini response text from multiple response shapes."""
+    if response is None:
+        return ""
+    if hasattr(response, "text") and response.text:
+        return str(response.text).strip()
+
+    # Fallback for older/alternate SDK response objects.
+    candidates = getattr(response, "candidates", None)
+    if candidates:
+        try:
+            first = candidates[0]
+            if hasattr(first, "content") and first.content:
+                return str(first.content).strip()
+            if isinstance(first, dict) and first.get("content"):
+                return str(first["content"]).strip()
+        except Exception as parse_error:
+            print(f"Response candidate parse failed: {parse_error}")
+
+    return ""
 
 
 def _extract_actions(text):
