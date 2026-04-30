@@ -15,11 +15,13 @@ async function fetchWithBackendFallback(path, options = {}) {
       const response = await fetch(url, options);
       if (!response.ok) {
         const errorText = await response.text().catch(() => '');
+        console.error('Duct AI assistant backend error:', { url, status: response.status, statusText: response.statusText, body: errorText, options });
         lastError = new Error(`Backend request failed (${response.status}) ${response.statusText} @ ${url}: ${errorText}`);
         continue;
       }
       return response;
     } catch (error) {
+      console.error('Duct AI assistant fetch exception:', { url, error, options });
       lastError = error;
     }
   }

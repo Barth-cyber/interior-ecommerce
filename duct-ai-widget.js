@@ -15,11 +15,14 @@
         const response = await fetch(url, options);
         if (!response.ok) {
           const text = await response.text().catch(() => '');
-          lastError = new Error(`Backend request failed (${response.status}) at ${url}: ${text}`);
+          const error = new Error(`Backend request failed (${response.status}) at ${url}: ${text}`);
+          console.error('Duct AI backend error:', { url, status: response.status, statusText: response.statusText, body: text, options });
+          lastError = error;
           continue;
         }
         return response;
       } catch (error) {
+        console.error('Duct AI backend fetch exception:', { url, error, options });
         lastError = error;
       }
     }

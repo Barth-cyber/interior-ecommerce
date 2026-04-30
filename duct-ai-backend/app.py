@@ -29,7 +29,15 @@ def _init_gemini():
         gemini_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
         if gemini_api_key:
             genai.configure(api_key=gemini_api_key)
-            _gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+            for model_name in ["gemini-1.5-flash", "gemini-1.5", "gemini-1.0"]:
+                try:
+                    _gemini_model = genai.GenerativeModel(model_name)
+                    print(f"Gemini init: using model {model_name}")
+                    break
+                except Exception as model_error:
+                    print(f"Gemini model init failed for {model_name}: {model_error}")
+            if not _gemini_model:
+                print("Gemini init error: no usable model could be initialized")
         else:
             _gemini_model = None
     except Exception as _e:
@@ -249,20 +257,26 @@ def ai_query():
         system_prompt = _build_system_prompt()
         history       = _get_history(session_id)
 
-        # Build Gemini chat with history
-        chat = _gemini_model.start_chat(history=history)
-
-        # Prepend system prompt only on first message
+        chat = _gemini_model.start_chat()
         if not history:
             full_query = f"{system_prompt}\n\nUser: {query}"
         else:
             full_query = query
 
-        response = chat.send_message(full_query)
-        answer   = response.text.strip()
+        try:
+            response = chat.send_message(full_query)
+            answer = response.text.strip()
+        except Exception as chat_error:
+            print(f"Gemini chat send_message failed: {chat_error}")
+            try:
+                response = _gemini_model.generate_text(full_query)
+                answer = getattr(response, "text", "").strip() or str(response)
+            except Exception as fallback_error:
+                print(f"Gemini generate_text fallback failed: {fallback_error}")
+                raise
 
         # Save to history
-        _save_to_history(session_id, "user",  query)
+        _save_to_history(session_id, "user", query)
         _save_to_history(session_id, "model", answer)
 
         # Parse action directives embedded in answer

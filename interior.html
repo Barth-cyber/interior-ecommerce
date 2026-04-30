@@ -1976,11 +1976,19 @@ async function sendMsg() {
           })
         });
         if (!res.ok) {
-          lastError = new Error(`Chat failed (${res.status}) at ${backendUrl}`);
+          const text = await res.text().catch(() => '');
+          console.error('Duct AI inline backend error:', {
+            url: backendUrl,
+            status: res.status,
+            statusText: res.statusText,
+            body: text
+          });
+          lastError = new Error(`Chat failed (${res.status}) at ${backendUrl}: ${text}`);
           continue;
         }
         break;
       } catch (e) {
+        console.error('Duct AI inline fetch exception:', { url: backendUrl, error: e });
         lastError = e;
       }
     }
