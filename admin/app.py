@@ -199,14 +199,21 @@ GEMINI_API_KEY = (
     os.environ.get('GOOGLE_API_KEY') or
     ''
 )
-# Using gemini-1.5-flash — fastest, free-tier supported model
-GEMINI_MODEL   = 'gemini-1.5-flash'
+# Using gemini-2.0-flash — fast, free-tier supported model
+GEMINI_MODEL   = 'gemini-2.0-flash'
 GEMINI_URL     = f'https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent'
 
+# ── Anthropic Claude config ─────────────────────────────────────────────────
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20241022')
 
-# Ensure GEMINI_API_KEY is set
-if not GEMINI_API_KEY:
-    app.logger.warning("GEMINI_API_KEY is not set. AI assistant responses will be disabled until the API key is configured.")
+# ── OpenAI config ──────────────────────────────────────────────────────────
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
+
+# Ensure at least one AI provider is available
+if not any([GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY]):
+    app.logger.warning("No AI API keys set. AI assistant responses will be disabled. Configure GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY.")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -1397,6 +1404,99 @@ def _parse_recommendations_json(answer_text):
     return None
 
 
+def _call_anthropic(prompt_text, system_instruction=None, max_tokens=512):
+    """Call Anthropic Claude API for AI chat responses."""
+    if not ANTHROPIC_API_KEY:
+        return None, True
+
+    try:
+        from anthropic import Anthropic
+        
+        client = Anthropic(api_key=ANTHROPIC_API_KEY)
+        
+        messages = [
+            {'role': 'user', 'content': prompt_text}
+        ]
+        
+        response = client.messages.create(
+            model=ANTHROPIC_MODEL,
+            max_tokens=max_tokens,
+            system=system_instruction,
+            messages=messages,
+            temperature=0.7,
+        )
+        
+        if response.content and len(response.content) > 0:
+            answer = response.content[0].text.strip()
+            return answer, False
+        return None, True
+    except ImportError:
+        app.logger.error("Anthropic package not installed. Install with: pip install anthropic")
+        return None, True
+    except Exception as e:
+        app.logger.error(f"Anthropic Claude API error: {e}")
+        return None, True
+
+
+def _call_anthropic_conversation(history, system_instruction=None, max_tokens=512):
+    """Call Anthropic Claude API with conversation history."""
+    if not ANTHROPIC_API_KEY:
+        return None, True
+
+    try:
+        from anthropic import Anthropic
+        
+        client = Anthropic(api_key=ANTHROPIC_API_KEY)
+        
+        # Convert history to Anthropic format (user/assistant alternating)
+        messages = []
+        for msg in history:
+            if msg['role'] == 'user':
+                messages.append({'role': 'user', 'content': msg['text']})
+            elif msg['role'] == 'assistant':
+                messages.append({'role': 'assistant', 'content': msg['text']})
+        
+        response = client.messages.create(
+            model=ANTHROPIC_MODEL,
+            max_tokens=max_tokens,
+            system=system_instruction,
+            messages=messages,
+            temperature=0.7,
+        )
+        
+        if response.content and len(response.content) > 0:
+            answer = response.content[0].text.strip()
+            return answer, False
+        return None, True
+    except ImportError:
+        app.logger.error("Anthropic package not installed. Install with: pip install anthropic")
+        return None, True
+    except Exception as e:
+        app.logger.error(f"Anthropic Claude conversation API error: {e}")
+        return None, True
+
+
+def _call_llm_conversation(history, system_instruction=None, max_tokens=512):
+    """Call LLM with intelligent fallback chain for conversation."""
+    # Try Gemini first (most reliable)
+    if GEMINI_API_KEY:
+        app.logger.info("Trying Gemini for conversation...")
+        answer, error = _call_gemini_conversation(history, system_instruction, max_tokens)
+        if answer and not error:
+            return answer, False
+    
+    # Try Anthropic Claude
+    if ANTHROPIC_API_KEY:
+        app.logger.info("Fallback 1: Trying Anthropic Claude for conversation...")
+        answer, error = _call_anthropic_conversation(history, system_instruction, max_tokens)
+        if answer and not error:
+            return answer, False
+    
+    # No provider worked
+    app.logger.error("All LLM providers failed for conversation. No API keys configured or all APIs are down.")
+    return None, True
+
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json() or {}
@@ -1426,9 +1526,9 @@ def chat():
     products = _load_products()
     system_prompt = _build_drogram_prompt(products)
 
-    answer, error = _call_gemini_conversation(history, system_instruction=system_prompt, max_tokens=512)
+    answer, error = _call_llm_conversation(history, system_instruction=system_prompt, max_tokens=512)
     if error or answer is None:
-        return jsonify({'error': 'Unable to get a response from Gemini'}), 503
+        return jsonify({'error': 'Unable to get a response from AI provider'}), 503
 
     history.append({
         'role': 'assistant',
@@ -1483,9 +1583,9 @@ def recommendations():
         'Do not include any additional narrative outside the JSON array.'
     )
 
-    answer, error = _call_gemini_conversation(history, system_instruction=system_prompt, max_tokens=512)
+    answer, error = _call_llm_conversation(history, system_instruction=system_prompt, max_tokens=512)
     if error or answer is None:
-        return jsonify({'error': 'Unable to get a response from Gemini'}), 503
+        return jsonify({'error': 'Unable to get a response from AI provider'}), 503
 
     recommendations = _parse_recommendations_json(answer)
     if recommendations is None:

@@ -97,7 +97,7 @@ STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
 PAYSTACK_PUBLIC_KEY    = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
 
 # ── LLM provider config ─────────────────────────────────────────────────────
-LLM_PROVIDER = os.environ.get('LLM_PROVIDER', 'gemini').lower()  # gemini | google | openai
+LLM_PROVIDER = os.environ.get('LLM_PROVIDER', 'gemini').lower()  # gemini | google | openai | anthropic
 
 # Gemini / Google GenAI config
 GEMINI_API_KEY = (
@@ -106,7 +106,7 @@ GEMINI_API_KEY = (
     os.environ.get('GOOGLE_API_KEY') or
     ''
 )
-GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash-exp')
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash')
 GEMINI_URL = f'https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent'
 TEXT_BISON_MODEL = os.environ.get('TEXT_BISON_MODEL', 'text-bison')
 TEXT_BISON_URL = f'https://generativelanguage.googleapis.com/v1/models/{TEXT_BISON_MODEL}:generate'
@@ -116,12 +116,18 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
 OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 
+# Anthropic Claude config
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20241022')
+
 if LLM_PROVIDER == 'gemini' and not GEMINI_API_KEY:
     print('⚠️ GEMINI_API_KEY not set. Gemini provider unavailable.')
 if LLM_PROVIDER == 'google' and not GEMINI_API_KEY:
     print('⚠️ GEMINI_API_KEY not set. Google/Text-Bison provider unavailable.')
 if LLM_PROVIDER == 'openai' and not OPENAI_API_KEY:
     print('⚠️ OPENAI_API_KEY not set. OpenAI provider unavailable.')
+if LLM_PROVIDER == 'anthropic' and not ANTHROPIC_API_KEY:
+    print('⚠️ ANTHROPIC_API_KEY not set. Anthropic/Claude provider unavailable.')
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -603,13 +609,87 @@ def _call_openai(prompt_text, system_instruction=None, max_tokens=512):
         return None, True
 
 
+def _call_anthropic(prompt_text, system_instruction=None, max_tokens=512):
+    """Call Anthropic Claude API for AI chat responses."""
+    if not ANTHROPIC_API_KEY:
+        return None, True
+
+    try:
+        from anthropic import Anthropic
+        
+        client = Anthropic(api_key=ANTHROPIC_API_KEY)
+        
+        messages = [
+            {'role': 'user', 'content': prompt_text}
+        ]
+        
+        response = client.messages.create(
+            model=ANTHROPIC_MODEL,
+            max_tokens=max_tokens,
+            system=system_instruction,
+            messages=messages,
+            temperature=0.7,
+        )
+        
+        if response.content and len(response.content) > 0:
+            answer = response.content[0].text.strip()
+            return answer, False
+        return None, True
+    except ImportError:
+        app.logger.error("Anthropic package not installed. Install with: pip install anthropic")
+        return None, True
+    except Exception as e:
+        app.logger.error(f"Anthropic Claude API error: {e}")
+        return None, True
+
+
 def _call_llm(prompt_text, system_instruction=None, max_tokens=512):
-    """Call the configured LLM provider."""
+    """Call the configured LLM provider with smart fallback chain."""
+    # Try primary provider first
     if LLM_PROVIDER == 'openai':
-        return _call_openai(prompt_text, system_instruction, max_tokens)
-    if LLM_PROVIDER in ('google', 'text-bison'):
-        return _call_text_bison(prompt_text, system_instruction, max_tokens)
-    return _call_gemini(prompt_text, system_instruction, max_tokens)
+        answer, error = _call_openai(prompt_text, system_instruction, max_tokens)
+        if answer:
+            return answer, error
+    elif LLM_PROVIDER == 'anthropic':
+        answer, error = _call_anthropic(prompt_text, system_instruction, max_tokens)
+        if answer:
+            return answer, error
+    elif LLM_PROVIDER in ('google', 'text-bison'):
+        answer, error = _call_text_bison(prompt_text, system_instruction, max_tokens)
+        if answer:
+            return answer, error
+    else:  # Default to gemini
+        answer, error = _call_gemini(prompt_text, system_instruction, max_tokens)
+        if answer:
+            return answer, error
+    
+    # Intelligent fallback chain if primary provider fails
+    app.logger.warning(f"Primary LLM provider '{LLM_PROVIDER}' failed. Trying fallback chain...")
+    
+    # Try Gemini (most reliable)
+    if LLM_PROVIDER != 'gemini' and GEMINI_API_KEY:
+        app.logger.info("Fallback 1: Trying Gemini...")
+        answer, error = _call_gemini(prompt_text, system_instruction, max_tokens)
+        if answer:
+            return answer, False
+    
+    # Try OpenAI
+    if LLM_PROVIDER != 'openai' and OPENAI_API_KEY:
+        app.logger.info("Fallback 2: Trying OpenAI...")
+        answer, error = _call_openai(prompt_text, system_instruction, max_tokens)
+        if answer:
+            return answer, False
+    
+    # Try Anthropic Claude
+    if LLM_PROVIDER != 'anthropic' and ANTHROPIC_API_KEY:
+        app.logger.info("Fallback 3: Trying Anthropic Claude...")
+        answer, error = _call_anthropic(prompt_text, system_instruction, max_tokens)
+        if answer:
+            return answer, False
+    
+    # All AI providers failed, return error
+    app.logger.error("All LLM providers failed. No API keys configured or all APIs are down.")
+    return None, True
 
 
 def _generate_fallback_response(query, kb, products):
