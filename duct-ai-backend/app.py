@@ -1,99 +1,188 @@
-"""
-Duct AI Backend — Interior Duct Ltd
-Serves: https://interiorductltd.com  (embedded chat widget)
-Model:  Google Gemini 2.5 Flash
+"""Duct AI Backend — Interior Duct Ltd
+Lightweight Flask backend used by local preview and the production site.
+
+Endpoints:
+- GET  /            -> status + model info
+- GET  /health      -> simple health
+- POST /ai-query    -> main chat endpoint
+- POST /recommend   -> recommendation endpoint
+
+This file uses `google-genai` (imported as `google.genai`) when a
+`GEMINI_API_KEY` is present. The GenAI client is lazily initialised so
+the module can still be imported in environments without the package.
 """
 
 import os
 import json
 import time
 import datetime
+from typing import Any
 from flask import Flask, request, jsonify
+import requests
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-BASE_DIR = os.path.dirname(__file__)
-load_dotenv(os.path.join(BASE_DIR, '.env'))
-load_dotenv(os.path.join(BASE_DIR, '..', '.env'), override=False)
+load_dotenv()
 
-DEPLOYMENT_REVISION = '43c88de'
+# GenAI globals
 
-# ── Gemini setup ──────────────────────────────────────────────────────────────
+# Gemini globals
 _gemini_model = None
 _gemini_model_name = None
 _gemini_initialized = False
+_genai_client = None
+
+# OpenAI config
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-3.5-turbo")
+OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+
+# Anthropic (Claude) config
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
+
+def _call_openai(system_prompt, user_query):
+    if not OPENAI_API_KEY:
+        return None, "OpenAI API key not set"
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": OPENAI_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_query}
+        ],
+        "temperature": 0.7
+    }
+    try:
+        resp = requests.post(OPENAI_URL, headers=headers, json=data, timeout=20)
+        resp.raise_for_status()
+        result = resp.json()
+        content = result["choices"][0]["message"]["content"].strip()
+        return content, None
+    except Exception as e:
+        return None, str(e)
 
 
-def _init_gemini():
+def _call_anthropic(system_prompt, user_query):
+    if not ANTHROPIC_API_KEY:
+        return None, "Anthropic API key not set"
+    headers = {
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": ANTHROPIC_MODEL,
+        "max_tokens": 1024,
+        "system": system_prompt,
+        "messages": [
+            {"role": "user", "content": user_query}
+        ]
+    }
+    try:
+        resp = requests.post(ANTHROPIC_URL, headers=headers, json=data, timeout=20)
+        resp.raise_for_status()
+        result = resp.json()
+        content = result["content"][0]["text"].strip()
+        return content, None
+    except Exception as e:
+        return None, str(e)
+
+
+def _init_gemini() -> None:
+    """Initialise google.genai client and pick a usable Gemini model.
+
+    This does a local import of `google.genai` to avoid hard dependency
+    at module import time. It sets `_gemini_model` to `client.models` so
+    call sites can use `generate_content(model=..., contents=...)`.
+    """
     global _gemini_model, _gemini_model_name, _gemini_initialized
     if _gemini_initialized:
         return
     _gemini_initialized = True
     try:
-        import google.generativeai as genai
+        import google.genai as genai
         gemini_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-        if gemini_api_key:
-            genai.configure(api_key=gemini_api_key)
-            for model_name in [
-                "models/gemini-2.5-flash",
-                "models/gemini-2.5-pro",
-                "models/gemini-2.0-flash",
-                "models/gemini-2.0-flash-001",
-                "models/gemini-2.0-flash-lite-001",
-                "models/gemini-2.0-flash-lite",
-            ]:
-                try:
-                    _gemini_model = genai.GenerativeModel(model_name)
-                    _gemini_model_name = model_name
-                    print(f"Gemini init: using model {model_name}")
-                    break
-                except Exception as model_error:
-                    print(f"Gemini model init failed for {model_name}: {model_error}")
-            if not _gemini_model:
-                _gemini_model_name = None
-                print("Gemini init error: no usable model could be initialized")
-        else:
+        if not gemini_api_key:
             _gemini_model = None
             _gemini_model_name = None
-    except Exception as _e:
-        print(f"Gemini init warning: {_e}")
-        _gemini_model = None
+            return
 
-# ── Flask app ─────────────────────────────────────────────────────────────────
+        client = genai.client.Client(api_key=gemini_api_key)
+        # keep a reference to the client to avoid it being closed/GC'd
+        global _genai_client
+        _genai_client = client
+        for model_name in [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.5-pro",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-001",
+            "models/gemini-2.0-flash-lite-001",
+            "models/gemini-2.0-flash-lite",
+        ]:
+            try:
+                client.models.get(model=model_name)
+                _gemini_model = client.models
+                _gemini_model_name = model_name
+                print(f"GenAI init: using model {model_name}")
+                return
+            except Exception as e:
+                print(f"GenAI model not available {model_name}: {e}")
+
+        _gemini_model = None
+        _gemini_model_name = None
+        print("GenAI init: no usable model found")
+    except Exception as e:
+        print(f"GenAI init failed: {e}")
+        _gemini_model = None
+        _gemini_model_name = None
+
+
+# Flask app and CORS
 app = Flask(__name__)
 
-# Allow requests from your live domain, API subdomain, and localhost for development.
+
 def _parse_allowed_origins():
     raw = os.environ.get("ALLOWED_ORIGINS", "").strip()
+    dev_origins = [
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:3000",
+    ]
     if raw:
-        origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
-        if origins:
-            return origins
-
+        origins = [o.strip() for o in raw.split(",") if o.strip()]
+        for o in dev_origins:
+            if o not in origins:
+                origins.append(o)
+        return origins
     return [
         "https://interiorductltd.com",
         "https://www.interiorductltd.com",
         "https://api.interiorductltd.com",
-        "https://duct-ai-backend.onrender.com",
-        "https://interior-ecommerce-lh3e.onrender.com",
-        "http://localhost:5000",
-        "http://127.0.0.1:5000",
-        "http://localhost:3000",
+        *dev_origins,
     ]
+
 
 CORS(app, resources={r"/*": {"origins": _parse_allowed_origins()}})
 
-# ── Paths ─────────────────────────────────────────────────────────────────────
-BASE_DIR       = os.path.dirname(__file__)
-KB_PATH        = os.path.join(BASE_DIR, "knowledge_base.json")
-PRODUCTS_PATH  = os.path.join(BASE_DIR, "products.json")
-CONV_LOG_PATH  = os.path.join(BASE_DIR, "conversations.json")
-USER_LOG_PATH  = os.path.join(BASE_DIR, "user_log.json")
-FEEDBACK_PATH  = os.path.join(BASE_DIR, "feedback.json")
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# Paths
+BASE_DIR = os.path.dirname(__file__)
+KB_PATH = os.path.join(BASE_DIR, "knowledge_base.json")
+PRODUCTS_PATH = os.path.join(BASE_DIR, "products.json")
+CONV_LOG_PATH = os.path.join(BASE_DIR, "conversations.json")
+USER_LOG_PATH = os.path.join(BASE_DIR, "user_log.json")
+FEEDBACK_PATH = os.path.join(BASE_DIR, "feedback.json")
+DEPLOYMENT_REVISION = os.environ.get("DEPLOYMENT_REVISION", "dev")
 
-def _read_json(path, default):
+
+def _read_json(path: str, default: Any):
     if not os.path.exists(path):
         return default
     try:
@@ -103,7 +192,7 @@ def _read_json(path, default):
         return default
 
 
-def _write_json(path, data):
+def _write_json(path: str, data) -> bool:
     try:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -118,116 +207,70 @@ def _load_kb():
 
 
 def _load_products():
-    # Try products.json first, fall back to knowledge_base products key
-    products = _read_json(PRODUCTS_PATH, None)
-    if products is not None:
-        return products
+    p = _read_json(PRODUCTS_PATH, None)
+    if p is not None:
+        return p
     kb = _load_kb()
     return kb.get("products", [])
 
 
 def _build_system_prompt():
-    """Build a rich system prompt from the knowledge base."""
-    kb    = _load_kb()
+    kb = _load_kb()
     prods = _load_products()
-
-    company = kb.get("company_info", {})
-    contact = company.get("contact", {})
-    faqs    = kb.get("faqs", [])
-
-    faq_text = "\n".join(
-        f"Q: {f['q']}\nA: {f['a']}" for f in faqs[:20]
-    )
-
-    product_list = "\n".join(
-        f"- {p.get('name','?')} | {p.get('category','')} | "
-        f"{p.get('price','')} | {p.get('description','')}"
-        for p in prods[:30]
-    )
-
-    rec_prompts = kb.get("recommendation_engine_prompts", [])
-    rec_text = "\n".join(
-        f"Scenario: {r.get('scenario','')} → {r.get('response','')[:200]}"
-        for r in rec_prompts[:5]
-    )
-
-    return f"""You are Duct AI, the intelligent luxury design assistant for Interior Duct Ltd.
-
-== COMPANY ==
-Name: {company.get('name','Interior Duct Ltd')}
-Tagline: {company.get('tagline','Functionality, Durability & Aesthetics')}
-Founder: {company.get('founder','Benedict Omoregbe Onaiwu')}
-HQ: {company.get('headquarters','Benin City, Edo State, Nigeria')}
-Showrooms: {', '.join(company.get('showrooms', ['Benin City','Abuja','Port Harcourt']))}
-Delivery: {company.get('delivery_coverage','Nationwide across all 36 states')}
-International: {company.get('international_presence','4 countries served')}
-Experience: {company.get('experience','15+ years')}
-Mission: {company.get('mission','')}
-
-== CONTACT ==
-Phone/WhatsApp: {contact.get('phone','+234 803 685 0229')}
-Email: {contact.get('email_primary','hello@interiorductltd.com')}
-Hours: {contact.get('business_hours','Mon-Sat 8am-6pm WAT')}
-
-== PAYMENT ==
-Nigeria: Paystack — bank transfer, USSD, card, mobile money (NGN ₦)
-International: Stripe — Visa, Mastercard, Apple Pay, Google Pay (USD, GBP, EUR)
-Security: TLS 1.3, 3D Secure, PCI-DSS Level 1
-
-== PRODUCTS (sample) ==
-{product_list}
-
-== COMMON FAQs ==
-{faq_text}
-
-== RECOMMENDATION SCENARIOS ==
-{rec_text}
-
-== YOUR BEHAVIOUR RULES ==
-1. Be warm, professional, and luxury-brand appropriate at all times.
-2. Keep answers concise (2-4 sentences) unless detail is genuinely needed.
-3. Never invent prices — reference the catalogue above or ask them to request a quote.
-4. For custom orders, measurements, or site visits → invite WhatsApp: +234 803 685 0229
-5. If the user wants a human, say you're connecting them and provide WhatsApp link.
-6. If asked to show a category (sofas, tables, doors, etc.) respond with the category
-   name in this format so the website can act on it: [SCROLL:section_name]
-   Valid sections: seating, dining, doors, collection, bedroom, living, office, 3d-viewer
-7. If you recommend specific products, format them as [PRODUCT:product_name] so the
-   website can highlight them.
-8. If payment is mentioned, explain both Paystack (NGN) and Stripe (international) options.
-9. Always end responses that don't have a clear next step with a helpful follow-up question.
-"""
+    faq_text = "\n".join(f"Q: {f['q']}\nA: {f['a']}" for f in kb.get("faqs", [])[:20])
+    product_list = "\n".join(f"- {p.get('name','?')} | {p.get('category','')} | {p.get('price','')}" for p in prods[:30])
+    return f"You are Duct AI, the intelligent luxury design assistant for Interior Duct Ltd.\n\n{faq_text}\n\n{product_list}"
 
 
-# ── In-memory conversation store (per session_id) ─────────────────────────────
-_sessions = {}   # { session_id: [{"role":..., "parts":[...]}, ...] }
+def _extract_response_text(response) -> str:
+    if response is None:
+        return ""
+    if hasattr(response, "text") and response.text:
+        return str(response.text).strip()
+    candidates = getattr(response, "candidates", None)
+    if candidates:
+        try:
+            first = candidates[0]
+            if hasattr(first, "content") and first.content:
+                return str(first.content).strip()
+            if isinstance(first, dict) and first.get("content"):
+                return str(first["content"]).strip()
+        except Exception:
+            return ""
+    return ""
 
 
-def _get_history(session_id):
-    return _sessions.get(session_id, [])
+# Simple in-memory stores and logging helpers
+_sessions = {}
 
 
-def _save_to_history(session_id, role, text):
-    if session_id not in _sessions:
-        _sessions[session_id] = []
-    _sessions[session_id].append({"role": role, "parts": [text]})
-    # Keep last 30 turns to avoid context overflow
-    if len(_sessions[session_id]) > 30:
-        _sessions[session_id] = _sessions[session_id][-30:]
-
-
-# ── Routes ────────────────────────────────────────────────────────────────────
-
-@app.route("/", methods=["GET"])
-def health():
-    _init_gemini()
-    return jsonify({
-        "status": "ok",
-        "service": "duct-ai-backend",
-        "model": _gemini_model_name or "unavailable",
-        "keySet": bool(os.environ.get("GEMINI_API_KEY")),
-        "revision": DEPLOYMENT_REVISION,
+def _log_conversation(session_id, role, text, context=None):
+    logs = _read_json(CONV_LOG_PATH, [])
+    logs.append({
+        "session_id": session_id,
+        "role": role,
+        "text": text,
+        "context": context or {},
+        "ts": datetime.datetime.utcnow().isoformat(),
     })
+    if len(logs) > 50000:
+        logs = logs[-50000:]
+    _write_json(CONV_LOG_PATH, logs)
+
+
+def _log_event(event_type, payload):
+    logs = _read_json(USER_LOG_PATH, [])
+    logs.append({"event": event_type, "data": payload, "ts": datetime.datetime.utcnow().isoformat()})
+    if len(logs) > 5000:
+        logs = logs[-5000:]
+    _write_json(USER_LOG_PATH, logs)
+
+
+# Routes
+@app.route("/", methods=["GET"])
+def index():
+    _init_gemini()
+    return jsonify({"status": "ok", "model": _gemini_model_name or "unavailable", "revision": DEPLOYMENT_REVISION})
 
 
 @app.route("/health", methods=["GET"])
@@ -237,161 +280,89 @@ def health_check():
 
 @app.route("/ai-query", methods=["POST"])
 def ai_query():
-    """
-    Main chat endpoint.
-    Body: { "query": "...", "session_id": "...", "context": {...} }
-    Returns: { "answer": "...", "escalate": false, "actions": [...] }
-    """
-    data       = request.get_json(silent=True) or {}
-    query      = (data.get("query") or "").strip()
-    session_id = (data.get("session_id") or "anonymous")
-    context    = data.get("context", {})   # optional: { page, product, scroll_pos }
-
+    data = request.get_json(silent=True) or {}
+    query = (data.get("query") or "").strip()
+    session_id = data.get("session_id") or "anonymous"
+    context = data.get("context") or {}
     if not query:
         return jsonify({"answer": None, "escalate": True})
 
-    # Log the query
     _log_conversation(session_id, "user", query, context)
 
-    # Check human-handoff triggers first (no AI needed)
     kb = _load_kb()
     handoff_triggers = kb.get("human_handoff", {}).get("triggers", [])
     if any(t.lower() in query.lower() for t in handoff_triggers):
-        handoff_msg = kb.get("human_handoff", {}).get("response",
-            "Let me connect you to our human team. WhatsApp: +234 803 685 0229")
-        _log_conversation(session_id, "assistant", handoff_msg, {})
-        return jsonify({"answer": handoff_msg, "escalate": True, "actions": []})
+        msg = kb.get("human_handoff", {}).get("response", "Let me connect you to our human team.")
+        _log_conversation(session_id, "assistant", msg, {})
+        return jsonify({"answer": msg, "escalate": True, "actions": []})
 
     _init_gemini()
-    if not _gemini_model:
-        # Graceful fallback when API key not set or Gemini is unavailable
-        fallbacks = kb.get("fallback_responses",
-            ["I'm not available right now. Please WhatsApp +234 803 685 0229"])
-        import random
-        return jsonify({
-            "answer": random.choice(fallbacks),
-            "escalate": False,
-            "error_log": "Gemini unavailable: no model initialized or API key not loaded."
-        })
-
-    try:
-        system_prompt = _build_system_prompt()
-        full_query = f"{system_prompt}\n\nUser: {query}"
-
+    system_prompt = _build_system_prompt()
+    full_query = f"{system_prompt}\n\nUser: {query}"
+    answer = None
+    error_log = None
+    provider_used = None
+    
+    # Try Gemini first
+    if _gemini_model:
         try:
-            response = _gemini_model.generate_content(full_query)
+            response = _gemini_model.generate_content(model=_gemini_model_name, contents=full_query)
             answer = _extract_response_text(response)
             if not answer:
-                raise ValueError("Gemini response contained no text")
-        except Exception as gen_error:
-            print(f"Gemini generate_content failed: {gen_error}")
-            raise
+                raise ValueError("empty response from GenAI")
+            _log_conversation(session_id, "assistant", answer, {})
+            actions = []
+            return jsonify({"answer": answer, "escalate": False, "actions": actions, "provider": "gemini"})
+        except Exception as e:
+            print(f"Gemini error: {e}")
+            error_log = str(e)
 
-        # Save to history
-        _save_to_history(session_id, "user", query)
-        _save_to_history(session_id, "model", answer)
+    # Fallback to OpenAI if Gemini fails or is unavailable
+    if OPENAI_API_KEY:
+        openai_answer, openai_error = _call_openai(system_prompt, query)
+        if openai_answer:
+            _log_conversation(session_id, "assistant", openai_answer, {})
+            return jsonify({"answer": openai_answer, "escalate": False, "actions": [], "provider": "openai"})
+        else:
+            error_log = f"Gemini failed: {error_log}; OpenAI failed: {openai_error}"
 
-        # Parse action directives embedded in answer
-        actions = _extract_actions(answer)
-        # Clean directives from visible answer text
-        clean_answer = answer.replace("[SCROLL:", "").replace("[PRODUCT:", "")
-        for a in actions:
-            clean_answer = clean_answer.replace(a.get("raw", ""), "").strip()
+    # Fallback to Anthropic (Claude) if OpenAI fails or is unavailable
+    if ANTHROPIC_API_KEY:
+        anthropic_answer, anthropic_error = _call_anthropic(system_prompt, query)
+        if anthropic_answer:
+            _log_conversation(session_id, "assistant", anthropic_answer, {})
+            return jsonify({"answer": anthropic_answer, "escalate": False, "actions": [], "provider": "anthropic"})
+        else:
+            error_log = f"Gemini failed: {error_log}; OpenAI failed: {openai_error}; Anthropic failed: {anthropic_error}"
 
-        _log_conversation(session_id, "assistant", clean_answer, {})
-
-        return jsonify({
-            "answer":   clean_answer,
-            "escalate": False,
-            "actions":  actions,
-        })
-
-    except Exception as e:
-        import traceback
-        error_msg = f"Gemini error: {type(e).__name__}: {e}"
-        print(error_msg)
-        print(f"Traceback: {traceback.format_exc()}")
-        fallbacks = kb.get("fallback_responses", ["Sorry, something went wrong."])
-        import random
-        return jsonify({
-            "answer":   random.choice(fallbacks),
-            "escalate": False,
-            "error_log": error_msg,  # Debug: include error in response
-        })
-
-
-def _extract_response_text(response):
-    """Normalize Gemini response text from multiple response shapes."""
-    if response is None:
-        return ""
-    if hasattr(response, "text") and response.text:
-        return str(response.text).strip()
-
-    # Fallback for older/alternate SDK response objects.
-    candidates = getattr(response, "candidates", None)
-    if candidates:
-        try:
-            first = candidates[0]
-            if hasattr(first, "content") and first.content:
-                return str(first.content).strip()
-            if isinstance(first, dict) and first.get("content"):
-                return str(first["content"]).strip()
-        except Exception as parse_error:
-            print(f"Response candidate parse failed: {parse_error}")
-
-    return ""
-
-
-def _extract_actions(text):
-    """Parse [SCROLL:section] and [PRODUCT:name] directives from AI response."""
-    import re
-    actions = []
-    for m in re.finditer(r'\[SCROLL:(\w[\w-]*)\]', text):
-        actions.append({"type": "scroll", "target": m.group(1), "raw": m.group(0)})
-    for m in re.finditer(r'\[PRODUCT:([^\]]+)\]', text):
-        actions.append({"type": "highlight_product", "name": m.group(1), "raw": m.group(0)})
-    return actions
+    # If all fail, return fallback from knowledge base
+    fallbacks = kb.get("fallback_responses", ["Sorry, something went wrong."])
+    import random
+    return jsonify({"answer": random.choice(fallbacks), "escalate": False, "error_log": error_log or "No provider available"})
 
 
 @app.route("/recommend", methods=["POST"])
 def recommend():
-    """
-    AI product recommendation.
-    Body: { "preferences": "...", "budget": "...", "room": "...", "session_id": "..." }
-    """
-    data        = request.get_json(silent=True) or {}
-    preferences = data.get("preferences", "")
-    budget      = data.get("budget", "")
-    room        = data.get("room", "")
-    session_id  = data.get("session_id", "anonymous")
-
+    data = request.get_json(silent=True) or {}
+    session_id = data.get("session_id") or "anonymous"
     products = _load_products()
-    product_list = "\n".join(
-        f"{i+1}. {p.get('name','?')} | {p.get('category','')} | "
-        f"{p.get('price','')} | {p.get('description','')}"
-        for i, p in enumerate(products)
-    )
 
     _init_gemini()
     if not _gemini_model:
         return jsonify({"recommendations": [], "message": "AI not configured."})
 
-    prompt = f"""A customer wants furniture recommendations:
-- Room: {room or 'not specified'}
-- Budget: {budget or 'not specified'}
-- Style/preferences: {preferences or 'not specified'}
-
-Products available:
-{product_list}
-
-Return ONLY valid JSON — a list of exactly 3 objects:
-[{{"id": <1-based index>, "name": "<product name>", "reason": "<one sentence>"}}]
-No markdown, no explanation, just the JSON array."""
-
+    product_list = "\n".join(f"{i+1}. {p.get('name','?')} | {p.get('category','')} | {p.get('price','')}" for i, p in enumerate(products))
+    prompt = f"A customer wants furniture recommendations:\n\nProducts available:\n{product_list}\n\nReturn ONLY valid JSON — a list of exactly 3 objects." 
     try:
-        response = _gemini_model.generate_content(prompt)
-        raw      = response.text.strip().replace("```json","").replace("```","").strip()
-        recs_raw = json.loads(raw)
+        response = _gemini_model.generate_content(model=_gemini_model_name, contents=prompt)
+        raw = _extract_response_text(response)
+        # extract JSON array
+        start = raw.find("[")
+        end = raw.rfind("]")
+        if start != -1 and end != -1 and end > start:
+            recs_raw = json.loads(raw[start : end + 1])
+        else:
+            recs_raw = []
 
         recommendations = []
         for rec in recs_raw:
@@ -399,21 +370,15 @@ No markdown, no explanation, just the JSON array."""
             if 0 <= idx < len(products):
                 p = products[idx]
                 recommendations.append({
-                    "name":     p.get("name",""),
-                    "price":    p.get("price",""),
-                    "image":    p.get("image",""),
-                    "category": p.get("category",""),
-                    "reason":   rec.get("reason",""),
+                    "name": p.get("name", ""),
+                    "price": p.get("price", ""),
+                    "image": p.get("image", ""),
+                    "category": p.get("category", ""),
+                    "reason": rec.get("reason", ""),
                 })
 
-        _log_event("recommendation", {
-            "session_id": session_id,
-            "room": room, "budget": budget,
-            "results": [r["name"] for r in recommendations],
-        })
-
+        _log_event("recommendation", {"session_id": session_id, "results": [r["name"] for r in recommendations]})
         return jsonify({"recommendations": recommendations})
-
     except Exception as e:
         print(f"Recommend error: {e}")
         return jsonify({"recommendations": [], "message": "Could not generate recommendations."})
@@ -421,121 +386,19 @@ No markdown, no explanation, just the JSON array."""
 
 @app.route("/escalate", methods=["POST"])
 def escalate():
-    """Log escalation events (user wants human agent)."""
     data = request.get_json(silent=True) or {}
     _log_event("escalation", data)
     return jsonify({"escalated": True})
 
 
-@app.route("/user-log", methods=["POST"])
-def user_log():
-    """Log user behaviour events (page views, product clicks, etc.)."""
-    data = request.get_json(silent=True) or {}
-    logs = _read_json(USER_LOG_PATH, [])
-    logs.append({**data, "ts": int(time.time())})
-    if len(logs) > 5000:
-        logs = logs[-5000:]
-    _write_json(USER_LOG_PATH, logs)
-    return jsonify({"logged": True})
-
-
-@app.route("/feedback", methods=["POST"])
-def feedback():
-    """
-    Receive thumbs-up/thumbs-down on AI answers for self-improvement.
-    Body: { "query": "...", "answer": "...", "rating": 1|-1, "session_id": "..." }
-    """
-    data = request.get_json(silent=True) or {}
-    feedbacks = _read_json(FEEDBACK_PATH, [])
-    feedbacks.append({
-        "query":      data.get("query",""),
-        "answer":     data.get("answer",""),
-        "rating":     data.get("rating", 0),   # 1=good, -1=bad
-        "comment":    data.get("comment",""),
-        "session_id": data.get("session_id",""),
-        "ts":         datetime.datetime.utcnow().isoformat(),
-    })
-    if len(feedbacks) > 10000:
-        feedbacks = feedbacks[-10000:]
-    _write_json(FEEDBACK_PATH, feedbacks)
-    return jsonify({"saved": True})
-
-
-@app.route("/analytics", methods=["GET"])
-def analytics():
-    """
-    Basic analytics endpoint — returns conversation and feedback summary.
-    Protected by a simple token check.
-    """
-    token = request.args.get("token","")
-    if token != os.environ.get("ANALYTICS_TOKEN",""):
-        return jsonify({"error": "Unauthorized"}), 401
-
-    logs     = _read_json(CONV_LOG_PATH, [])
-    feedback = _read_json(FEEDBACK_PATH, [])
-    ulogs    = _read_json(USER_LOG_PATH, [])
-
-    total_convs    = len(logs)
-    user_msgs      = [l for l in logs if l.get("role") == "user"]
-    positive_fb    = sum(1 for f in feedback if f.get("rating",0) > 0)
-    negative_fb    = sum(1 for f in feedback if f.get("rating",0) < 0)
-
-    # Most asked queries (simple frequency count)
-    from collections import Counter
-    query_counts = Counter(
-        l.get("text","").lower()[:60]
-        for l in user_msgs
-    )
-
-    return jsonify({
-        "total_messages":    total_convs,
-        "user_messages":     len(user_msgs),
-        "unique_sessions":   len({l.get("session_id") for l in logs}),
-        "positive_feedback": positive_fb,
-        "negative_feedback": negative_fb,
-        "behaviour_events":  len(ulogs),
-        "top_queries":       query_counts.most_common(10),
-    })
-
-
 @app.route("/kb", methods=["GET"])
 def get_kb():
-    """Return the knowledge base (public, no auth — used by frontend)."""
     return jsonify(_load_kb())
 
 
 @app.route("/products", methods=["GET"])
 def get_products():
-    """Return product list."""
     return jsonify(_load_products())
-
-
-# ── Internal helpers ──────────────────────────────────────────────────────────
-
-def _log_conversation(session_id, role, text, context):
-    logs = _read_json(CONV_LOG_PATH, [])
-    logs.append({
-        "session_id": session_id,
-        "role":       role,
-        "text":       text,
-        "context":    context,
-        "ts":         datetime.datetime.utcnow().isoformat(),
-    })
-    if len(logs) > 50000:
-        logs = logs[-50000:]
-    _write_json(CONV_LOG_PATH, logs)
-
-
-def _log_event(event_type, payload):
-    logs = _read_json(USER_LOG_PATH, [])
-    logs.append({
-        "event": event_type,
-        "data":  payload,
-        "ts":    datetime.datetime.utcnow().isoformat(),
-    })
-    if len(logs) > 5000:
-        logs = logs[-5000:]
-    _write_json(USER_LOG_PATH, logs)
 
 
 if __name__ == "__main__":

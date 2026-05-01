@@ -61,5 +61,155 @@
     "text": "At Interior Duct Ltd, we pride ourselves on using only premium materials sourced globally and locally. This includes solid hardwoods like mahogany, walnut, and oak, exquisite quartz and marble for tabletops, and luxurious leathers and linen for upholstery. We also incorporate sophisticated finishes, metal inlays, tempered glass, and engineered composite boards to ensure both durability and stunning aesthetics.\n\nAre you looking for specific materials for a custom project?",
     "context": {},
     "ts": "2026-05-01T03:37:05.305608"
+  },
+  {
+    "session_id": "test-local",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T04:44:43.888903"
+  },
+  {
+    "session_id": "test-local",
+    "role": "assistant",
+    "text": "We work with an exquisite selection of premium materials, sourced both locally and internationally, to ensure durability and aesthetic excellence. This includes solid hardwoods like mahogany and walnut, luxurious quartz and granite for tabletops, and fine leathers and linens for upholstery.\n\nWe also utilize high-gloss lacquer and natural oil finishes, elegant metal inlays, and tempered glass to bring our bespoke designs to life. Is there a particular material you're interested in for your project?",
+    "context": {},
+    "ts": "2026-05-01T04:44:47.222139"
+  },
+  {
+    "session_id": "test-session",
+    "role": "user",
+    "text": "Hello from preview",
+    "context": {},
+    "ts": "2026-05-01T04:50:58.228432"
+  },
+  {
+    "session_id": "session_gmcow3aa4",
+    "role": "user",
+    "text": "Test connection from widget",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T04:51:45.176586"
+  },
+  {
+    "session_id": "local-test",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T05:31:11.104321"
+  },
+  {
+    "session_id": "probe",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T05:45:53.384238"
+  },
+  {
+    "session_id": "probe-5002",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T05:46:58.558305"
+  },
+  {
+    "session_id": "probe-5002",
+    "role": "assistant",
+    "text": "We work with premium materials sourced both locally and internationally, including:\n\n*   **Solid hardwoods:** mahogany, walnut, oak, and other premium timbers\n*   **Stone surfaces:** Quartz, granite, and marble for tabletops\n*   **Upholstery:** Premium leathers and linen\n*   **Finishes:** High-gloss lacquer, matte, and natural oil finishes\n*   **Metals:** Brass, chrome, and stainless steel inlays\n*   **Glass:** Tempered glass and mirror inserts\n*   **Engineered boards:** Composite boards for modern designs\n\nAll materials are selected for their durability, beauty, and sustainability. Is there a specific material you're interested in, or for a particular product?",
+    "context": {},
+    "ts": "2026-05-01T05:47:07.689451"
+  },
+  {
+    "session_id": "session_gmcow3aa4",
+    "role": "user",
+    "text": "hi",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T06:16:43.326120"
+  },
+  {
+    "session_id": "session_gmcow3aa4",
+    "role": "user",
+    "text": "Suggest a room",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T06:17:08.753698"
+  },
+  {
+    "session_id": "test-session",
+    "role": "user",
+    "text": "What is your best sofa?",
+    "context": {},
+    "ts": "2026-05-01T15:49:33.648299"
+  },
+  {
+    "session_id": "test-session",
+    "role": "user",
+    "text": "What is your best sofa?",
+    "context": {},
+    "ts": "2026-05-01T15:57:50.579506"
+  },
+  {
+    "session_id": "test-session",
+    "role": "user",
+    "text": "What is your best sofa?",
+    "context": {},
+    "ts": "2026-05-01T17:26:25.143005"
+  },
+  {
+    "session_id": "session_g0rsuz10r",
+    "role": "user",
+    "text": "What is your best sofa?",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T17:28:10.541735"
+  },
+  {
+    "session_id": "session_90guf7vmr",
+    "role": "user",
+    "text": "Hi",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T17:30:08.324455"
+  },
+  {
+    "session_id": "session_90guf7vmr",
+    "role": "user",
+    "text": "I am looking for furniture designs",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T17:30:33.218226"
+  },
+  {
+    "session_id": "session_90guf7vmr",
+    "role": "user",
+    "text": "I need chairs for my office",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T17:30:53.737973"
+  },
+  {
+    "session_id": "session_90guf7vmr",
+    "role": "user",
+    "text": "Great",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T17:31:07.893286"
   }
 ]
