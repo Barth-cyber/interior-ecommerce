@@ -211,5 +211,25 @@
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
     },
     "ts": "2026-05-01T17:31:07.893286"
+  },
+  {
+    "session_id": "session_90guf7vmr",
+    "role": "user",
+    "text": "Hi",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T17:36:06.517247"
+  },
+  {
+    "session_id": "session_90guf7vmr",
+    "role": "user",
+    "text": "Hi",
+    "context": {
+      "page": "/interior.html",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+    },
+    "ts": "2026-05-01T17:36:16.688733"
   }
 ]
