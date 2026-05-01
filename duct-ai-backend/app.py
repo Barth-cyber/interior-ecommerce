@@ -12,7 +12,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-load_dotenv()
+BASE_DIR = os.path.dirname(__file__)
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+load_dotenv(os.path.join(BASE_DIR, '..', '.env'), override=False)
 
 DEPLOYMENT_REVISION = '43c88de'
 
@@ -266,7 +268,11 @@ def ai_query():
         fallbacks = kb.get("fallback_responses",
             ["I'm not available right now. Please WhatsApp +234 803 685 0229"])
         import random
-        return jsonify({"answer": random.choice(fallbacks), "escalate": False})
+        return jsonify({
+            "answer": random.choice(fallbacks),
+            "escalate": False,
+            "error_log": "Gemini unavailable: no model initialized or API key not loaded."
+        })
 
     try:
         system_prompt = _build_system_prompt()
