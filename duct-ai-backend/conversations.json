@@ -12,5 +12,54 @@
     "text": "Hello",
     "context": {},
     "ts": "2026-04-30T18:52:22.670413"
+  },
+  {
+    "session_id": "local-test",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T03:18:39.017921"
+  },
+  {
+    "session_id": "local-test",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T03:25:15.967517"
+  },
+  {
+    "session_id": "local-test",
+    "role": "assistant",
+    "text": "At Interior Duct Ltd, we meticulously select premium materials for their durability, beauty, and sustainability. We craft our bespoke pieces from solid hardwoods like mahogany, walnut, and oak, alongside exquisite quartz, granite, and marble for tabletops. Our upholstery includes premium leathers and fine linen, complemented by high-gloss lacquer or natural oil finishes, and elegant metal inlays.\n\nIs there a specific material you're interested in, or perhaps a product category you'd like to explore?",
+    "context": {},
+    "ts": "2026-05-01T03:25:21.311040"
+  },
+  {
+    "session_id": "local-test",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T03:36:41.411425"
+  },
+  {
+    "session_id": "local-test",
+    "role": "assistant",
+    "text": "At Interior Duct, we craft our bespoke pieces from premium materials sourced both locally and internationally. This includes solid hardwoods like mahogany and walnut, exquisite quartz and marble for tabletops, and luxurious leathers for upholstery. We ensure all materials are selected for their durability, beauty, and sustainability, finished with options like high-gloss lacquer or natural oils.\n\nIs there a specific material you're interested in for your project?",
+    "context": {},
+    "ts": "2026-05-01T03:36:49.182824"
+  },
+  {
+    "session_id": "local-test",
+    "role": "user",
+    "text": "What materials do you use?",
+    "context": {},
+    "ts": "2026-05-01T03:36:59.350649"
+  },
+  {
+    "session_id": "local-test",
+    "role": "assistant",
+    "text": "At Interior Duct Ltd, we pride ourselves on using only premium materials sourced globally and locally. This includes solid hardwoods like mahogany, walnut, and oak, exquisite quartz and marble for tabletops, and luxurious leathers and linen for upholstery. We also incorporate sophisticated finishes, metal inlays, tempered glass, and engineered composite boards to ensure both durability and stunning aesthetics.\n\nAre you looking for specific materials for a custom project?",
+    "context": {},
+    "ts": "2026-05-01T03:37:05.305608"
   }
 ]

@@ -2,6 +2,7 @@
   const BACKEND_URLS = [
     window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
     'https://duct-ai-backend.onrender.com',
+    'https://interior-ecommerce-backend.onrender.com',
     'https://interior-ecommerce-lh3e.onrender.com'
   ];
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';

@@ -1,6 +1,7 @@
 const API_BASES = [
   window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
   'https://duct-ai-backend.onrender.com',
+  'https://interior-ecommerce-backend.onrender.com',
   'https://interior-ecommerce-lh3e.onrender.com'
 ];
 const CHAT_PATH = '/ai-query';

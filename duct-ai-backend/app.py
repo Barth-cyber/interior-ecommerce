@@ -1,7 +1,7 @@
 """
 Duct AI Backend — Interior Duct Ltd
 Serves: https://interiorductltd.com  (embedded chat widget)
-Model:  Google Gemini 1.5 Flash
+Model:  Google Gemini 2.5 Flash
 """
 
 import os
@@ -18,11 +18,12 @@ DEPLOYMENT_REVISION = '43c88de'
 
 # ── Gemini setup ──────────────────────────────────────────────────────────────
 _gemini_model = None
+_gemini_model_name = None
 _gemini_initialized = False
 
 
 def _init_gemini():
-    global _gemini_model, _gemini_initialized
+    global _gemini_model, _gemini_model_name, _gemini_initialized
     if _gemini_initialized:
         return
     _gemini_initialized = True
@@ -31,17 +32,27 @@ def _init_gemini():
         gemini_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
         if gemini_api_key:
             genai.configure(api_key=gemini_api_key)
-            for model_name in ["gemini-1.5-flash", "gemini-1.5", "gemini-1.0"]:
+            for model_name in [
+                "models/gemini-2.5-flash",
+                "models/gemini-2.5-pro",
+                "models/gemini-2.0-flash",
+                "models/gemini-2.0-flash-001",
+                "models/gemini-2.0-flash-lite-001",
+                "models/gemini-2.0-flash-lite",
+            ]:
                 try:
                     _gemini_model = genai.GenerativeModel(model_name)
+                    _gemini_model_name = model_name
                     print(f"Gemini init: using model {model_name}")
                     break
                 except Exception as model_error:
                     print(f"Gemini model init failed for {model_name}: {model_error}")
             if not _gemini_model:
+                _gemini_model_name = None
                 print("Gemini init error: no usable model could be initialized")
         else:
             _gemini_model = None
+            _gemini_model_name = None
     except Exception as _e:
         print(f"Gemini init warning: {_e}")
         _gemini_model = None
@@ -207,10 +218,11 @@ def _save_to_history(session_id, role, text):
 
 @app.route("/", methods=["GET"])
 def health():
+    _init_gemini()
     return jsonify({
         "status": "ok",
         "service": "duct-ai-backend",
-        "model": "gemini-1.5-flash",
+        "model": _gemini_model_name or "unavailable",
         "keySet": bool(os.environ.get("GEMINI_API_KEY")),
         "revision": DEPLOYMENT_REVISION,
     })
