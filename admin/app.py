@@ -1069,10 +1069,11 @@ def _call_gemini(prompt_text, system_instruction=None, max_tokens=512):
         data = response.json()
         # Extract text from Gemini response structure
         answer = data['candidates'][0]['content']['parts'][0]['text'].strip()
-        return answer, False
+        return answer, False, None
     except Exception as e:
-        app.logger.error(f"Gemini API error: {e}")
-        return None, True
+        error_str = str(e)
+        app.logger.error(f"Gemini API error: {error_str}")
+        return None, True, error_str
 
 
 def _call_llm(prompt_text, system_instruction=None, max_tokens=512):
@@ -1086,35 +1087,38 @@ def _call_llm(prompt_text, system_instruction=None, max_tokens=512):
     Returns: (answer_text, error_bool)
     """
     # Try Gemini first (Primary)
+    provider = None
+    error_log = None
+
     if GEMINI_API_KEY:
         app.logger.info("Trying Gemini API...")
-        answer, error = _call_gemini(prompt_text, system_instruction, max_tokens)
+        answer, error, provider_error = _call_gemini(prompt_text, system_instruction, max_tokens)
         if answer and not error:
             app.logger.info("✅ Gemini responded successfully")
-            return answer, False
-        app.logger.warning(f"Gemini failed or no response")
-    
-    # Try Anthropic Claude (Fallback 1)
+            return answer, False, 'gemini', None
+        error_log = f"Gemini: {provider_error}" if provider_error else "Gemini failed"
+        app.logger.warning("Gemini failed or no response")
+
     if ANTHROPIC_API_KEY:
         app.logger.info("Fallback 1: Trying Anthropic Claude API...")
-        answer, error = _call_anthropic(prompt_text, system_instruction, max_tokens)
+        answer, error, provider_error = _call_anthropic(prompt_text, system_instruction, max_tokens)
         if answer and not error:
             app.logger.info("✅ Anthropic Claude responded successfully")
-            return answer, False
-        app.logger.warning(f"Anthropic failed or no response")
-    
-    # Try OpenAI (Fallback 2)
+            return answer, False, 'anthropic', None
+        error_log = f"Anthropic: {provider_error}" if provider_error else error_log or "Anthropic failed"
+        app.logger.warning("Anthropic failed or no response")
+
     if OPENAI_API_KEY:
         app.logger.info("Fallback 2: Trying OpenAI API...")
-        answer, error = _call_openai(prompt_text, system_instruction, max_tokens)
+        answer, error, provider_error = _call_openai(prompt_text, system_instruction, max_tokens)
         if answer and not error:
             app.logger.info("✅ OpenAI responded successfully")
-            return answer, False
-        app.logger.warning(f"OpenAI failed or no response")
-    
-    # All providers failed
+            return answer, False, 'openai', None
+        error_log = f"OpenAI: {provider_error}" if provider_error else error_log or "OpenAI failed"
+        app.logger.warning("OpenAI failed or no response")
+
     app.logger.error("❌ All AI providers failed. No response available.")
-    return None, True
+    return None, True, None, error_log or "No AI providers available"
 
 
 def _ask_gemini_chat(query, kb, products):
@@ -1399,7 +1403,7 @@ def _append_behaviour_event(event):
 
 def _call_gemini_conversation(history, system_instruction=None, max_tokens=512):
     if not GEMINI_API_KEY:
-        return None, True
+        return None, True, 'Gemini API key not configured'
 
     body = {
         'contents': [
@@ -1428,10 +1432,11 @@ def _call_gemini_conversation(history, system_instruction=None, max_tokens=512):
         response.raise_for_status()
         data = response.json()
         answer = data['candidates'][0]['content']['parts'][0]['text'].strip()
-        return answer, False
+        return answer, False, None
     except Exception as e:
-        app.logger.error(f"Gemini conversation API error: {e}")
-        return None, True
+        error_str = str(e)
+        app.logger.error(f"Gemini conversation API error: {error_str}")
+        return None, True, error_str
 
 
 def _parse_recommendations_json(answer_text):
@@ -1449,7 +1454,7 @@ def _parse_recommendations_json(answer_text):
 def _call_openai(prompt_text, system_instruction=None, max_tokens=512):
     """Call OpenAI API (GPT-4o-mini) for AI chat responses."""
     if not OPENAI_API_KEY:
-        return None, True
+        return None, True, 'OpenAI API key not configured'
 
     try:
         from openai import OpenAI
@@ -1470,20 +1475,22 @@ def _call_openai(prompt_text, system_instruction=None, max_tokens=512):
         
         if response.choices and len(response.choices) > 0:
             answer = response.choices[0].message.content.strip()
-            return answer, False
-        return None, True
+            return answer, False, None
+        return None, True, 'OpenAI returned no text'
     except ImportError:
-        app.logger.error("OpenAI package not installed. Install with: pip install openai")
-        return None, True
+        error_str = 'OpenAI package not installed. Install with: pip install openai'
+        app.logger.error(error_str)
+        return None, True, error_str
     except Exception as e:
-        app.logger.error(f"OpenAI API error: {e}")
-        return None, True
+        error_str = str(e)
+        app.logger.error(f"OpenAI API error: {error_str}")
+        return None, True, error_str
 
 
 def _call_openai_conversation(history, system_instruction=None, max_tokens=512):
     """Call OpenAI API with conversation history."""
     if not OPENAI_API_KEY:
-        return None, True
+        return None, True, 'OpenAI API key not configured'
 
     try:
         from openai import OpenAI
@@ -1510,20 +1517,22 @@ def _call_openai_conversation(history, system_instruction=None, max_tokens=512):
         
         if response.choices and len(response.choices) > 0:
             answer = response.choices[0].message.content.strip()
-            return answer, False
-        return None, True
+            return answer, False, None
+        return None, True, 'OpenAI conversation returned no text'
     except ImportError:
-        app.logger.error("OpenAI package not installed. Install with: pip install openai")
-        return None, True
+        error_str = 'OpenAI package not installed. Install with: pip install openai'
+        app.logger.error(error_str)
+        return None, True, error_str
     except Exception as e:
-        app.logger.error(f"OpenAI conversation API error: {e}")
-        return None, True
+        error_str = str(e)
+        app.logger.error(f"OpenAI conversation API error: {error_str}")
+        return None, True, error_str
 
 
 def _call_anthropic(prompt_text, system_instruction=None, max_tokens=512):
     """Call Anthropic Claude API for AI chat responses."""
     if not ANTHROPIC_API_KEY:
-        return None, True
+        return None, True, 'Anthropic API key not configured'
 
     try:
         from anthropic import Anthropic
@@ -1544,20 +1553,22 @@ def _call_anthropic(prompt_text, system_instruction=None, max_tokens=512):
         
         if response.content and len(response.content) > 0:
             answer = response.content[0].text.strip()
-            return answer, False
-        return None, True
+            return answer, False, None
+        return None, True, 'Anthropic returned no text'
     except ImportError:
-        app.logger.error("Anthropic package not installed. Install with: pip install anthropic")
-        return None, True
+        error_str = 'Anthropic package not installed. Install with: pip install anthropic'
+        app.logger.error(error_str)
+        return None, True, error_str
     except Exception as e:
-        app.logger.error(f"Anthropic Claude API error: {e}")
-        return None, True
+        error_str = str(e)
+        app.logger.error(f"Anthropic Claude API error: {error_str}")
+        return None, True, error_str
 
 
 def _call_anthropic_conversation(history, system_instruction=None, max_tokens=512):
     """Call Anthropic Claude API with conversation history."""
     if not ANTHROPIC_API_KEY:
-        return None, True
+        return None, True, 'Anthropic API key not configured'
 
     try:
         from anthropic import Anthropic
@@ -1582,42 +1593,45 @@ def _call_anthropic_conversation(history, system_instruction=None, max_tokens=51
         
         if response.content and len(response.content) > 0:
             answer = response.content[0].text.strip()
-            return answer, False
-        return None, True
+            return answer, False, None
+        return None, True, 'Anthropic conversation returned no text'
     except ImportError:
-        app.logger.error("Anthropic package not installed. Install with: pip install anthropic")
-        return None, True
+        error_str = 'Anthropic package not installed. Install with: pip install anthropic'
+        app.logger.error(error_str)
+        return None, True, error_str
     except Exception as e:
-        app.logger.error(f"Anthropic Claude conversation API error: {e}")
-        return None, True
+        error_str = str(e)
+        app.logger.error(f"Anthropic Claude conversation API error: {error_str}")
+        return None, True, error_str
 
 
 def _call_llm_conversation(history, system_instruction=None, max_tokens=512):
     """Call LLM with intelligent fallback chain for conversation."""
-    # Try Gemini first (most reliable)
+    error_log = None
+
     if GEMINI_API_KEY:
         app.logger.info("Trying Gemini for conversation...")
-        answer, error = _call_gemini_conversation(history, system_instruction, max_tokens)
+        answer, error, provider_error = _call_gemini_conversation(history, system_instruction, max_tokens)
         if answer and not error:
-            return answer, False
-    
-    # Try Anthropic Claude
+            return answer, False, 'gemini', None
+        error_log = f"Gemini: {provider_error}" if provider_error else "Gemini failed"
+
     if ANTHROPIC_API_KEY:
         app.logger.info("Fallback 1: Trying Anthropic Claude for conversation...")
-        answer, error = _call_anthropic_conversation(history, system_instruction, max_tokens)
+        answer, error, provider_error = _call_anthropic_conversation(history, system_instruction, max_tokens)
         if answer and not error:
-            return answer, False
-    
-    # Try OpenAI (GPT-4o-mini)
+            return answer, False, 'anthropic', None
+        error_log = f"Anthropic: {provider_error}" if provider_error else error_log or "Anthropic failed"
+
     if OPENAI_API_KEY:
         app.logger.info("Fallback 2: Trying OpenAI for conversation...")
-        answer, error = _call_openai_conversation(history, system_instruction, max_tokens)
+        answer, error, provider_error = _call_openai_conversation(history, system_instruction, max_tokens)
         if answer and not error:
-            return answer, False
-    
-    # No provider worked
+            return answer, False, 'openai', None
+        error_log = f"OpenAI: {provider_error}" if provider_error else error_log or "OpenAI failed"
+
     app.logger.error("All LLM providers failed for conversation. No API keys configured or all APIs are down.")
-    return None, True
+    return None, True, None, error_log or "No AI providers available"
 
 
 @app.route('/chat', methods=['POST'])
@@ -1649,9 +1663,10 @@ def chat():
     products = _load_products()
     system_prompt = _build_drogram_prompt(products)
 
-    answer, error = _call_llm_conversation(history, system_instruction=system_prompt, max_tokens=512)
+    answer, error, provider, error_log = _call_llm_conversation(history, system_instruction=system_prompt, max_tokens=512)
     if error or answer is None:
-        return jsonify({'error': 'Unable to get a response from AI provider'}), 503
+        app.logger.error(f"/chat fallback response: provider={provider}, error_log={error_log}")
+        return jsonify({'error': 'Unable to get a response from AI provider', 'provider': provider, 'error_log': error_log}), 503
 
     history.append({
         'role': 'assistant',
@@ -1706,9 +1721,10 @@ def recommendations():
         'Do not include any additional narrative outside the JSON array.'
     )
 
-    answer, error = _call_llm_conversation(history, system_instruction=system_prompt, max_tokens=512)
+    answer, error, provider, error_log = _call_llm_conversation(history, system_instruction=system_prompt, max_tokens=512)
     if error or answer is None:
-        return jsonify({'error': 'Unable to get a response from AI provider'}), 503
+        app.logger.error(f"/recommendations fallback response: provider={provider}, error_log={error_log}")
+        return jsonify({'error': 'Unable to get a response from AI provider', 'provider': provider, 'error_log': error_log}), 503
 
     recommendations = _parse_recommendations_json(answer)
     if recommendations is None:
@@ -1765,7 +1781,7 @@ def ai_query():
         })
 
     # 2. Call Gemini API
-    answer, escalate = _ask_gemini_chat(query, kb, products_data)
+    answer, escalate, provider, error_log = _ask_gemini_chat(query, kb, products_data)
     if answer:
         # Save to MongoDB if available
         save_chat(session_id, query, answer)
@@ -1776,12 +1792,19 @@ def ai_query():
         return jsonify({
             'answer': answer,
             'escalate': False,
+            'provider': provider,
             'recommendation': recommendation,
             'visits': user.get('visits', 1)
         })
 
-    # 3. Escalate to human
-    return jsonify({'answer': None, 'escalate': escalate})
+    fallback_answer = 'Sorry, I’m having trouble connecting to our AI service right now. Please try again later or contact us on WhatsApp.'
+    app.logger.error(f"/ai-query fallback response: provider={provider}, escalate={escalate}, error_log={error_log}")
+    return jsonify({
+        'answer': fallback_answer,
+        'escalate': escalate,
+        'provider': provider,
+        'error_log': error_log
+    })
 
 
 @app.route('/escalate', methods=['POST'])
