@@ -20,9 +20,10 @@ from typing import Any
 from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+# Load environment variables from the nearest .env file
+load_dotenv(find_dotenv())
 
 # GenAI globals
 

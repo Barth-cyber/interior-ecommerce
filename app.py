@@ -3,7 +3,7 @@ from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import os
 import json
 import difflib
@@ -11,8 +11,8 @@ import requests as http_requests
 from pymongo import MongoClient
 from datetime import datetime
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from the nearest .env file
+load_dotenv(find_dotenv())
 
 # Import S3 storage
 try:

@@ -241,5 +241,19 @@
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.118.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
     },
     "ts": "2026-05-01T17:40:29.662327"
+  },
+  {
+    "session_id": "test_session",
+    "role": "user",
+    "text": "What furniture do you recommend for a living room?",
+    "context": {},
+    "ts": "2026-05-02T14:46:02.173272"
+  },
+  {
+    "session_id": "test_session",
+    "role": "assistant",
+    "text": "For your living room, we can create a truly luxurious and personalized space! Here are some key pieces of furniture we highly recommend, all customizable to your taste:\n\n**1. Seating:**\n*   **Sofa Sets:** Our **Royal Chesterfield Sofa Set** is a timeless classic, or consider a **Premium Living Room Set** which can include a sofa, loveseat, and armchairs.\n*   **Lounge Chairs:** Add individual comfort with a **Luxury Royal Lounge Chair** or an **Elegant Two-Seater Chair – Royal**.\n*   **Configuration:** Whether you prefer a grand sectional, a classic 3-2-1 arrangement, or a cozy two-seater, we can tailor it to your room size and style.\n\n**2. Tables:**\n*   **Coffee Tables:** A central piece, we offer options like the modern **Low Profile Coffee Table** or the more elaborate **Prestige Executive Coffee Table**.\n*   **Side Tables:** Perfect for lamps and drinks, these can complement your coffee table and seating.\n\n**3. Entertainment & Media:**\n*   **TV Consoles & Media Walls:** Our **TV Media Wall Unit - Premium Display** provides a sophisticated integrated solution, or you might prefer a standalone **White Modern TV Console — Minimalist** or **Sophisticated Dark TV Console**. These often include smart storage for media devices.\n\n**4. Speciality Pieces:**\n*   **Bar & Wine Counters:** For entertaining, our **Executive Bar & Wine Counter** can be a stunning addition.\n\n**Remember:** Every piece at Interior Duct Ltd is 100% bespoke! Just tell me your room dimensions, preferred style (e.g., modern, classic, minimalist, royal), desired colour palette, and any specific functionalities you need, and I'll help you design the perfect ensemble.\n\nWould you like me to walk you through a specific item or style in more detail?",
+    "context": {},
+    "ts": "2026-05-02T14:46:26.318871"
   }
 ]
