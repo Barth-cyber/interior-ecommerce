@@ -13,10 +13,11 @@ the module can still be imported in environments without the package.
 """
 
 import os
+import re
 import json
 import time
 import datetime
-from typing import Any
+from typing import Any, List, Optional
 from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
@@ -223,6 +224,68 @@ def _build_system_prompt():
     return f"You are Duct AI, the intelligent luxury design assistant for Interior Duct Ltd.\n\n{faq_text}\n\n{product_list}"
 
 
+def _normalize_text(text: str) -> str:
+    if not text:
+        return ""
+    return re.sub(r"[^a-z0-9\s]", " ", text.lower()).strip()
+
+
+def _text_tokens(text: str) -> List[str]:
+    return [token for token in _normalize_text(text).split() if len(token) > 2]
+
+
+def _token_score(query_tokens: List[str], text: str) -> int:
+    if not query_tokens:
+        return 0
+    return len(set(query_tokens) & set(_text_tokens(text)))
+
+
+def _find_kb_response(query: str, kb: dict) -> Optional[str]:
+    if not query:
+        return None
+    query_lower = query.lower()
+    query_tokens = _text_tokens(query)
+
+    # Simple greeting or FAQ trigger matches
+    for item in kb.get("greetings", []):
+        for trigger in item.get("trigger", []):
+            if trigger and trigger.lower() in query_lower:
+                return item.get("response")
+
+    # Match FAQ entries by keyword overlap and direct phrase
+    best_faq = None
+    best_score = 0
+    for faq in kb.get("faqs", []):
+        source = " ".join([faq.get("q", ""), faq.get("a", ""), faq.get("category", "")])
+        score = _token_score(query_tokens, source)
+        if faq.get("q", "").lower() in query_lower or query_lower in faq.get("q", "").lower():
+            score += 2
+        if score > best_score:
+            best_score = score
+            best_faq = faq
+    if best_faq and best_score >= 2:
+        return best_faq.get("a")
+
+    company = kb.get("company_info", {})
+    contact = company.get("contact", {})
+    if any(term in query_lower for term in ["email", "mail", "contact"]):
+        email = contact.get("email_primary") or contact.get("email_secondary")
+        if email:
+            return f"You can contact us on email at {email}. For the fastest response, message us on WhatsApp at +234 803 685 0229."
+    if any(term in query_lower for term in ["phone", "call", "whatsapp", "number"]):
+        phone = contact.get("phone") or contact.get("alt_phone")
+        if phone:
+            return f"You can reach our team on WhatsApp or phone at {phone}. You can also email us at {contact.get('email_primary', 'hello@interiorductltd.com')}."
+    if any(term in query_lower for term in ["location", "address", "where", "showroom", "headquarters"]):
+        location = company.get("headquarters")
+        showrooms = company.get("showrooms", [])
+        if location or showrooms:
+            showroom_text = f" Our showrooms are in {', '.join(showrooms)}." if showrooms else ""
+            return f"Our headquarters is in {location}.{showroom_text} Showroom visits are by appointment."
+
+    return None
+
+
 def _extract_response_text(response) -> str:
     if response is None:
         return ""
@@ -336,10 +399,17 @@ def ai_query():
         else:
             error_log = f"Gemini failed: {error_log}; OpenAI failed: {openai_error}; Anthropic failed: {anthropic_error}"
 
-    # If all fail, return fallback from knowledge base
+    # If all providers fail, try knowledge-base fallback first
+    kb_answer = _find_kb_response(query, kb)
+    if kb_answer:
+        _log_conversation(session_id, "assistant", kb_answer, {"fallback": True})
+        return jsonify({"answer": kb_answer, "escalate": False, "actions": [], "provider": "kb_fallback"})
+
     fallbacks = kb.get("fallback_responses", ["Sorry, something went wrong."])
     import random
-    return jsonify({"answer": random.choice(fallbacks), "escalate": False, "error_log": error_log or "No provider available"})
+    fallback_answer = random.choice(fallbacks)
+    _log_conversation(session_id, "assistant", fallback_answer, {"fallback": True})
+    return jsonify({"answer": fallback_answer, "escalate": False, "error_log": error_log or "No provider available", "provider": "kb_fallback"})
 
 
 @app.route("/recommend", methods=["POST"])

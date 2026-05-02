@@ -329,7 +329,6 @@ section{padding:6rem 0}
 .pcard-name{font-family:var(--f-head);font-size:1rem;margin:0 0 .35rem;color:var(--text-dark)}
 .pcard-desc{font-size:.8rem;color:var(--text-soft);margin:0 0 .75rem;line-height:1.4}
 .pcard-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:.5rem;margin:0}
-.pcard-price{font-family:var(--f-head);font-size:1rem;color:var(--navy);font-weight:600}
 .pcard-avail{font-size:.67rem;letter-spacing:.09em;color:#27AE60;text-transform:none}
 .pcard-avail.low{color:#E67E22}
 .pcard-content button{min-width:fit-content;margin:0;padding:.4rem .8rem}
@@ -593,7 +592,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   </a>
   <nav>
     <a href="#home">Home</a>
-    <a href="#collection">Shop</a>
+    <a href="#showroom">Showroom</a>
     <a href="#doors">Doors</a>
     <a href="#showroom">Showroom</a>
     <a href="#ai-design">AI Design</a>
@@ -606,7 +605,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       <option value="USD">&#36; USD</option>
       <option value="GBP">&#163; GBP</option>
       <option value="EUR">&#8364; EUR</option>
-    </select>
+    </select
     <button class="hdr-icon-btn" title="Cart" id="cartBtn">&#128722; <sup id="cartCount">0</sup></button>
     <button class="hdr-cta btn" onclick="scrollTo('ai-design')">AI Designer</button>
     <button class="nav-toggle" id="navToggle" onclick="toggleMobileNav()" aria-label="Menu">&#9776;</button>
@@ -616,7 +615,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
 <!-- Mobile Nav -->
 <div class="mobile-nav" id="mobileNav">
   <a href="#home" onclick="closeMobileNav()">Home</a>
-  <a href="#collection" onclick="closeMobileNav()">Shop Collection</a>
+  <a href="#showroom" onclick="closeMobileNav()">Showroom</a>
   <a href="#doors" onclick="closeMobileNav()">Doors</a>
   <a href="#showroom" onclick="closeMobileNav()">Showroom</a>
   <a href="#ai-design" onclick="closeMobileNav()">AI Design</a>
@@ -636,7 +635,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
     <h1>Crafting<br><span class="hl">Extraordinary</span><br>Interiors</h1>
     <p class="hero-p">From factory floor to finished space &mdash; we manufacture and deliver bespoke luxury furniture, custom doors, and complete interior solutions nationwide across Nigeria.</p>
     <div class="hero-btns">
-      <button class="btn btn-brown" onclick="scrollTo('collection')">Shop Collection</button>
+      <button class="btn btn-brown" onclick="scrollTo('doors')">Shop Collection</button>
       <button class="btn btn-outline-white" onclick="scrollTo('showroom')">View Showroom</button>
       <button class="btn btn-outline-white" onclick="scrollTo('3d-viewer')">AI Designer Demo</button>
       
@@ -854,59 +853,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
 </div>
 
 <!-- CATEGORICAL PRODUCT SECTIONS -->
-<section class="category-section" id="seating">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Seating</span>
-    <h2 class="sec-title">Premium <em>Seating</em> Collection</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="seatingTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-       
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="seatingPrev">&#8592;</button>
-      <button class="btn btn-navy" id="seatingNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="dining">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Dining</span>
-    <h2 class="sec-title">Elegant <em>Dining</em> Sets</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="diningTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="diningPrev">&#8592;</button>
-      <button class="btn btn-navy" id="diningNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="bedroom">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Bedroom</span>
-    <h2 class="sec-title">Luxury <em>Bedroom</em> Suites</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="bedroomTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-      
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="bedroomPrev">&#8592;</button>
-      <button class="btn btn-navy" id="bedroomNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
 <section class="category-section" id="doors">
   <div class="sec-hdr container">
     <span class="sec-tag">Doors</span>
@@ -920,40 +866,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
     <div style="text-align:center;margin-top:1.2rem;">
       <button class="btn btn-navy" id="doorsPrev">&#8592;</button>
       <button class="btn btn-navy" id="doorsNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="living">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Living Room</span>
-    <h2 class="sec-title">Stunning <em>Living Room</em> Pieces</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="livingTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="livingPrev">&#8592;</button>
-      <button class="btn btn-navy" id="livingNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="office">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Office & Reception</span>
-    <h2 class="sec-title">Professional <em>Office</em> Furniture</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="officeTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="officePrev">&#8592;</button>
-      <button class="btn btn-navy" id="officeNext">&#8594;</button>
     </div>
   </div>
 </section>
@@ -982,14 +894,9 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
           <div class="sl-cat">Living Room</div>
           <h2>Prestige Executive<br>Coffee &#8217;s Table</h2>
           <p>Custom coffee table, feature wall, TV console &amp; full interior fit-out by Interior Duct Ltd</p>
-          <div class="price-row">
-            <div class="p-lbl" id="sl-lbl-1">NGN</div>
-            <span class="p-amt" data-ngn="3850000" id="sl-p1">&#8358;3,850,000</span>
-            <span class="p-orig" data-ngn="4500000" id="sl-po1">&#8358;4,500,000</span>
-          </div>
           <div class="sl-btns">
             <button class="btn btn-navy" onclick="addCart('Prestige Executive Desk')">Add to Cart</button>
-            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Prestige Executive Coffee Table', desc: 'Custom coffee table, feature wall, TV console & full interior fit-out by Interior Duct Ltd', price: '₦3,850,000', img: 'IDL_Product_branding/Table_coffee_mahogany.jpg' })">Request Quote</button>
+            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Prestige Executive Coffee Table', desc: 'Custom coffee table, feature wall, TV console & full interior fit-out by Interior Duct Ltd', img: 'IDL_Product_branding/Table_coffee_mahogany.jpg' })">Request Quote</button>
           </div>
           <div class="sl-feats">
             <span class="feat-chip">Solid Mahogany</span>
@@ -1014,13 +921,9 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
           <div class="sl-cat">Dining Collection</div>
           <h2>Exquisite TV <br>Console &amp; Complete Living Room</h2>
           <p>Custom coffee table, feature wall, TV console &amp; full interior fit-out by Interior Duct Ltd</p>
-          <div class="price-row">
-            <div class="p-lbl" id="sl-lbl-2">NGN</div>
-            <span class="p-amt" data-ngn="5200000" id="sl-p2">&#8358;5,200,000</span>
-          </div>
           <div class="sl-btns">
             <button class="btn btn-navy" onclick="addCart('Quartz Dining Set')">Add to Cart</button>
-            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Quartz Dining Set', desc: 'Exquisite TV console & complete living room package', price: '₦5,200,000', img: 'IDL_Product_branding/Dining_Set.jpg' })">Request Quote</button>
+            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Quartz Dining Set', desc: 'Exquisite TV console & complete living room package', img: 'IDL_Product_branding/Dining_Set.jpg' })">Request Quote</button>
           </div>
           <div class="sl-feats">
             <span class="feat-chip">Quartz Top</span>
@@ -1044,13 +947,9 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
           <div class="sl-cat">Bed Room</div>
           <h2>Ivory 2-Drawer<br>Bedside Cabinet</h2>
           <p>Elegant ivory bedside cabinet with two drawers, perfect for bedroom storage and adding sophistication to your space.</p>
-          <div class="price-row">
-            <div class="p-lbl" id="sl-lbl-3">NGN</div>
-            <span class="p-amt" data-ngn="800000" id="sl-p3">&#8358;890,000</span>
-          </div>
           <div class="sl-btns">
             <button class="btn btn-navy" onclick="addCart('TV Media Wall Unit')">Add to Cart</button>
-            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Ivory 2-Drawer Bedside Cabinet', desc: 'Elegant ivory bedside cabinet with two drawers, perfect for bedroom storage and adding sophistication to your space.', price: '₦890,000', img: 'IDL_Product_branding/Bedside.jpg' })">Request Quote</button>
+            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Ivory 2-Drawer Bedside Cabinet', desc: 'Elegant ivory bedside cabinet with two drawers, perfect for bedroom storage and adding sophistication to your space.', img: 'IDL_Product_branding/Bedside.jpg' })">Request Quote</button>
           </div>
           <div class="sl-feats">
             <span class="feat-chip">Gloss White</span>
@@ -1074,13 +973,9 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
           <div class="sl-cat">TV &amp; Unit</div>
           <h2>Nordic TV Console<br>Multiple Storages</h2>
           <p>Scandinavian-inspired TV stands with ample storage compartments and clean minimalist design aesthetics.</p>
-          <div class="price-row">
-            <div class="p-lbl" id="sl-lbl-4">NGN</div>
-            <span class="p-amt" data-ngn="4200000" id="sl-p4">&#8358;4,200,000</span>
-          </div>
           <div class="sl-btns">
             <button class="btn btn-navy" onclick="addCart('Grand Double Entrance Door')">Add to Cart</button>
-            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Nordic TV Console', desc: 'Scandinavian-inspired TV stands with ample storage compartments and clean minimalist design aesthetics.', price: '₦4,200,000', img: 'IDL_Product_branding/tv_console_white1.jpg' })">Request Quote</button>
+            <button class="btn btn-outline-navy" onclick="openWhatsApp({ name: 'Nordic TV Console', desc: 'Scandinavian-inspired TV stands with ample storage compartments and clean minimalist design aesthetics.', img: 'IDL_Product_branding/tv_console_white1.jpg' })">Request Quote</button>
           </div>
           <div class="sl-feats">
             <span class="feat-chip">Natural Walnut</span>
@@ -1106,72 +1001,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
 </section>
 
 
-<section class="products-section" id="collection">
-  <div class="container">
-    <div class="sec-hdr">
-      <span class="sec-tag">Our Collection</span>
-      <h2 class="sec-title">Browse by <em>Category</em></h2>
-      <div class="divider"></div>
-      <p style="color:var(--text-soft);font-family:var(--f-sub);font-size:1.05rem;max-width:520px;margin:0 auto">Explore our curated selection of luxury furniture and bespoke pieces. Each category showcases our craftsmanship and design excellence.</p>
-    </div>
-    <div class="cat-cards">
-      <div class="cat-card" onclick="scrollTo('seating')">
-        <div class="cat-card-img">
-          <img src="IDL_Product_branding/Chair_Royal.jpg" alt="Seating Collection">
-        </div>
-        <div class="cat-card-body">
-          <div class="cat-card-title">Seating</div>
-          <div class="cat-card-desc">Premium chairs and seating solutions for every space.</div>
-        </div>
-      </div>
-      <div class="cat-card" onclick="scrollTo('dining')">
-        <div class="cat-card-img">
-          <img src="IDL_Product_branding/Dining_Set.jpg" alt="Dining Collection">
-        </div>
-        <div class="cat-card-body">
-          <div class="cat-card-title">Dining</div>
-          <div class="cat-card-desc">Elegant dining sets and tables for memorable meals.</div>
-        </div>
-      </div>
-      <div class="cat-card" onclick="scrollTo('bedroom')">
-        <div class="cat-card-img">
-          <img src="IDL_Product_branding/Bedside.jpg" alt="Bedroom Collection">
-        </div>
-        <div class="cat-card-body">
-          <div class="cat-card-title">Bedroom</div>
-          <div class="cat-card-desc">Luxury bedroom suites and furniture.</div>
-        </div>
-      </div>
-      <div class="cat-card" onclick="scrollTo('doors')">
-        <div class="cat-card-img">
-          <img src="IDL_Product_branding/Door.jpg" alt="Doors Collection">
-        </div>
-        <div class="cat-card-body">
-          <div class="cat-card-title">Doors</div>
-          <div class="cat-card-desc">Bespoke doors and entrances crafted to perfection.</div>
-        </div>
-      </div>
-      <div class="cat-card" onclick="scrollTo('living')">
-        <div class="cat-card-img">
-          <img src="IDL_Product_branding/tv_console1.jpg" alt="Living Room Collection">
-        </div>
-        <div class="cat-card-body">
-          <div class="cat-card-title">Living Room</div>
-          <div class="cat-card-desc">Stunning living room pieces for modern homes.</div>
-        </div>
-      </div>
-      <div class="cat-card" onclick="scrollTo('office')">
-        <div class="cat-card-img">
-          <img src="IDL_Product_branding/Reception_Counter.jpg" alt="Office Collection">
-        </div>
-        <div class="cat-card-body">
-          <div class="cat-card-title">Office</div>
-          <div class="cat-card-desc">Professional office furniture and reception areas.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <section class="doors-section" id="doors">
   <div class="container">
@@ -1192,7 +1021,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
         <div class="door-body">
           <div class="door-name">Premium Pivot Entrance Door</div>
           <div class="door-desc">Centre-pivot mechanism &middot; Natural hardwood &middot; Precision Process &middot; Available in custom sizes</div>
-          <div class="door-price" data-ngn="1850000" id="dp1">&#8358;1,850,000</div>
           <button class="door-order-btn" onclick="addCart('Premium Pivot Entrance Door')">Order Now &mdash; Ready to Ship</button>
         </div>
       </div>
@@ -1206,7 +1034,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
         <div class="door-body">
           <div class="door-name">CNC Hexagon Panel Door</div>
           <div class="door-desc">Hand-routed CNC hexagon pattern &middot; Premium hardwood &middot; Fully bespoke &middot; 2-week lead time</div>
-          <div class="door-price" data-ngn="4200000" id="dp2">&#8358;4,200,000</div>
           <button class="door-order-btn" onclick="addCart('Grand Double Entrance Door')">Order Now &mdash; Ready to Ship</button>
         </div>
       </div>
@@ -1220,7 +1047,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
         <div class="door-body">
           <div class="door-name">Modern Interior Door</div>
           <div class="door-desc">Dark mahogany veneer &middot; Aluminium channel inlays &middot; Security mortice lock set included</div>
-          <div class="door-price" data-ngn="680000" id="dp3">&#8358;680,000</div>
           <button class="door-order-btn" onclick="addCart('Modern Interior Door')">Order Now &mdash; In Stock</button>
         </div>
       </div>
@@ -1234,7 +1060,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
         <div class="door-body">
           <div class="door-name">Mahogany Louvred Vent Door</div>
           <div class="door-desc">Full-height mahogany &middot; Glass louvres for visibility/ventilation &middot; Dual-handle lock hardware included</div>
-          <div class="door-price" data-ngn="1200000" id="dp4">&#8358;1,200,000</div>
           <button class="door-order-btn" onclick="addCart('Mahogany Louvred Door')">Order Now &mdash; In Stock</button>
         </div>
       </div>
@@ -1248,7 +1073,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
         <div class="door-body">
           <div class="door-name">Milk White Mirror Door</div>
           <div class="door-desc">Full-length mirror insert &middot; Cream lacquer frame &middot; Lever handle &middot; Interior &amp; wardrobe use</div>
-          <div class="door-price" data-ngn="890000" id="dp5">&#8358;890,000</div>
           <button class="door-order-btn" onclick="addCart('Milk White Mirror Door')">Order Now &mdash; In Stock</button>
         </div>
       </div>
@@ -1262,7 +1086,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
         <div class="door-body">
           <div class="door-name">Modern Interior Door with Long Stainless Steel Handle</div>
           <div class="door-desc">Dark mahogany veneer &middot; Aluminium channel inlays &middot; Security mortice lock set included</div>
-          <div class="door-price" data-ngn="950000" id="dp6">&#8358;950,000</div>
           <button class="door-order-btn" onclick="addCart('CNC Hexagon Panel Door')">Order Now &mdash; Bespoke</button>
         </div>
       </div>
@@ -1576,7 +1399,7 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
           </div>
         </div>
         <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap">
-          <a class="btn btn-navy" href="#collection">Shop Now</a>
+          <a class="btn btn-navy" href="#showroom">Explore Showroom</a>
           <a class="btn btn-navy" href="https://wa.me/2348036850229?text=Hello%2C%20I%20want%20to%20make%20an%20enquiry" target="_blank">Talk to Us</a>
       
         </div>
@@ -1698,13 +1521,8 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
       </div>
       <div class="f-col">
         <h4>Collections</h4>
-        <a href="#collection" onclick="scrollTo('collection')">All Furniture</a>
-        <a href="#seating" onclick="scrollTo('seating')">Seating</a>
-        <a href="#dining" onclick="scrollTo('dining')">Dining</a>
-        <a href="#bedroom" onclick="scrollTo('bedroom')">Bedroom</a>
+        <a href="#showroom" onclick="scrollTo('showroom')">Showroom</a>
         <a href="#doors" onclick="scrollTo('doors')">Doors</a>
-        <a href="#living" onclick="scrollTo('living')">Living Room</a>
-        <a href="#office" onclick="scrollTo('office')">Office</a>
         <a href="#" onclick="openWhatsApp('bespoke order')">Bespoke Orders</a>
       </div>
       <div class="f-col">
@@ -1861,7 +1679,7 @@ function filterCat(btn, cat) {
   document.querySelectorAll('.pcard').forEach(c => {
     c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'block' : 'none';
   });
-  scrollTo('collection');
+  scrollTo('showroom');
 }
 
 // AI CHAT
@@ -2259,8 +2077,7 @@ function loadProductGrid() {
         categories[cat].push({
           name: img.replace(/\.[^/.]+$/, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
           img: '/idl-images/' + img,
-          cat: cat,
-          price: 'Contact for Price'
+          cat: cat
         });
       });
       
@@ -2273,14 +2090,14 @@ function loadProductGrid() {
       // If no images, show sample products
       if (products.length === 0) {
         products.push(
-          {name: 'Royal Chair', img: '/IDL_Product_branding/Chair_Royal.jpg', cat: 'living-room', price: '₦520,000'},
-          {name: 'Dining Set', img: '/IDL_Product_branding/Dining_Set.jpg', cat: 'living-room', price: '₦1,200,000'},
-          {name: 'Bedside Table', img: '/IDL_Product_branding/Bedside.jpg', cat: 'bedroom', price: '₦145,000'},
-          {name: 'TV Console', img: '/IDL_Product_branding/tv_console1.jpg', cat: 'living-room', price: '₦320,000'},
-          {name: 'Office Chair', img: '/IDL_Product_branding/Chair_Dining.jpg', cat: 'office', price: '₦680,000'},
-          {name: 'Kitchen Cabinet', img: '/IDL_Product_branding/Kitchen_Cabinet.jpg', cat: 'kitchen', price: '₦890,000'},
-          {name: 'Reception Counter', img: '/IDL_Product_branding/Reception_Counter.jpg', cat: 'office', price: '₦750,000'},
-          {name: 'Premium Door', img: '/IDL_Product_branding/Door.jpg', cat: 'doors', price: '₦1,850,000'}
+          {name: 'Royal Chair', img: '/IDL_Product_branding/Chair_Royal.jpg', cat: 'living-room'},
+          {name: 'Dining Set', img: '/IDL_Product_branding/Dining_Set.jpg', cat: 'living-room'},
+          {name: 'Bedside Table', img: '/IDL_Product_branding/Bedside.jpg', cat: 'bedroom'},
+          {name: 'TV Console', img: '/IDL_Product_branding/tv_console1.jpg', cat: 'living-room'},
+          {name: 'Office Chair', img: '/IDL_Product_branding/Chair_Dining.jpg', cat: 'office'},
+          {name: 'Kitchen Cabinet', img: '/IDL_Product_branding/Kitchen_Cabinet.jpg', cat: 'kitchen'},
+          {name: 'Reception Counter', img: '/IDL_Product_branding/Reception_Counter.jpg', cat: 'office'},
+          {name: 'Premium Door', img: '/IDL_Product_branding/Door.jpg', cat: 'doors'}
         );
       }
       
@@ -2291,8 +2108,8 @@ function loadProductGrid() {
         card.setAttribute('data-cat', p.cat);
         card.dataset.productName = p.name;
         card.dataset.productDesc = p.desc || 'Premium quality craftsmanship with attention to detail.';
-        card.dataset.productPrice = p.price;
         card.dataset.productImg = p.img;
+
         const imgSrc = normalizeProductImagePath(p.img);
         card.innerHTML = `
           <div class="pcard-img">
@@ -2307,7 +2124,6 @@ function loadProductGrid() {
             <div class="pcard-name">${p.name}</div>
             <div class="pcard-desc">Premium quality craftsmanship with attention to detail.</div>
             <div class="pcard-foot">
-              <div class="pcard-price">${p.price}</div>
               <div class="pcard-avail">In Stock</div>
             </div>
           </div>
@@ -2318,14 +2134,14 @@ function loadProductGrid() {
     .catch(() => {
       // Fallback to sample products
       const products = [
-        {name: 'Royal Chair', img: '/IDL_Product_branding/Chair_Royal.jpg', cat: 'living-room', price: '₦520,000'},
-        {name: 'Dining Set', img: '/IDL_Product_branding/Dining_Set.jpg', cat: 'living-room', price: '₦1,200,000'},
-        {name: 'Bedside Table', img: '/IDL_Product_branding/Bedside.jpg', cat: 'bedroom', price: '₦145,000'},
-        {name: 'TV Console', img: '/IDL_Product_branding/tv_console1.jpg', cat: 'living-room', price: '₦320,000'},
-        {name: 'Office Chair', img: '/IDL_Product_branding/Chair_Dining.jpg', cat: 'office', price: '₦680,000'},
-        {name: 'Kitchen Cabinet', img: '/IDL_Product_branding/Kitchen_Cabinet.jpg', cat: 'kitchen', price: '₦890,000'},
-        {name: 'Reception Counter', img: '/IDL_Product_branding/Reception_Counter.jpg', cat: 'office', price: '₦750,000'},
-        {name: 'Premium Door', img: '/IDL_Product_branding/Door.jpg', cat: 'doors', price: '₦1,850,000'}
+        {name: 'Royal Chair', img: '/IDL_Product_branding/Chair_Royal.jpg', cat: 'living-room'},
+        {name: 'Dining Set', img: '/IDL_Product_branding/Dining_Set.jpg', cat: 'living-room'},
+        {name: 'Bedside Table', img: '/IDL_Product_branding/Bedside.jpg', cat: 'bedroom'},
+        {name: 'TV Console', img: '/IDL_Product_branding/tv_console1.jpg', cat: 'living-room'},
+        {name: 'Office Chair', img: '/IDL_Product_branding/Chair_Dining.jpg', cat: 'office'},
+        {name: 'Kitchen Cabinet', img: '/IDL_Product_branding/Kitchen_Cabinet.jpg', cat: 'kitchen'},
+        {name: 'Reception Counter', img: '/IDL_Product_branding/Reception_Counter.jpg', cat: 'office'},
+        {name: 'Premium Door', img: '/IDL_Product_branding/Door.jpg', cat: 'doors'}
       ];
       
       grid.innerHTML = '';
@@ -2335,8 +2151,8 @@ function loadProductGrid() {
         card.setAttribute('data-cat', p.cat);
         card.dataset.productName = p.name;
         card.dataset.productDesc = p.desc || 'Premium quality craftsmanship with attention to detail.';
-        card.dataset.productPrice = p.price;
         card.dataset.productImg = p.img;
+
         const imgSrc = normalizeProductImagePath(p.img);
         card.innerHTML = `
           <div class="pcard-img">
@@ -2351,7 +2167,6 @@ function loadProductGrid() {
             <div class="pcard-name">${p.name}</div>
             <div class="pcard-desc">Premium quality craftsmanship with attention to detail.</div>
             <div class="pcard-foot">
-              <div class="pcard-price">${p.price}</div>
               <div class="pcard-avail">In Stock</div>
             </div>
           </div>
@@ -2594,9 +2409,8 @@ function getWhatsAppProductImage(item) {
 function buildWhatsAppProductMessage(product) {
   const name = product?.name || product?.productName || 'your product';
   const desc = product?.desc || product?.productDesc || product?.description || '';
-  const price = product?.price || product?.productPrice || '';
+  const price = product?.price || '';
   let message = `Hello Interior Duct! I am interested in ${name}.`;
-  if (price) message += `\nPrice: ${price}`;
   if (desc) message += `\nDescription: ${desc}`;
   message += `\nPlease send me a quote and availability.`;
   return message;
@@ -2633,7 +2447,6 @@ function openWhatsAppFromCard(button) {
   const payload = {
     name: card.dataset.productName || card.querySelector('.pcard-name')?.textContent?.trim(),
     desc: card.dataset.productDesc || card.querySelector('.pcard-desc')?.textContent?.trim(),
-    price: card.dataset.productPrice || card.querySelector('.pcard-price')?.textContent?.trim(),
     img: card.dataset.productImg || card.querySelector('.pcard-img img')?.src || ''
   };
 
@@ -2648,7 +2461,6 @@ function openWhatsAppForCurrentProduct() {
   openWhatsApp({
     name: product.name || product.productName || "Product",
     desc: product.description || product.desc || product.productDesc || "",
-    price: product.price || product.productPrice || "",
     img: product.image || product.img || product.productImg || product.productImage || ""
   });
 }
@@ -2742,7 +2554,7 @@ function openWhatsAppProductSlider() {
     product = window.heroPopupProducts[idx] || window.heroPopupProducts[0];
   }
   if (!product) {
-    product = { name: 'Luxury Product', price: '', desc: 'Premium quality craftsmanship.', img: window.location.origin + '/IDL_Product_branding/IDL_Cover_Photo.jpg' };
+    product = { name: 'Luxury Product', desc: 'Premium quality craftsmanship.', img: window.location.origin + '/IDL_Product_branding/IDL_Cover_Photo.jpg' };
   }
   openWhatsApp(product);
 }
@@ -2914,7 +2726,6 @@ function openWhatsAppProductSlider() {
     <div class="modal-body">
       <div id="modalProductCategory"></div>
       <div id="modalProductName"></div>
-      <div id="modalProductPrice"></div>
       <div class="modal-actions" style="display:flex;gap:.75rem;flex-wrap:wrap;">
         <button class="btn-primary" onclick="openWhatsAppForCurrentProduct()">Request Quote via WhatsApp</button>
         <button class="btn btn-brown" onclick="openPayment(window.currentProduct?.name || 'Interior Product', Number(String(window.currentProduct?.price || '').replace(/[^0-9]/g, '')) || 0, window.currentProduct?.image)">Checkout</button>

@@ -136,17 +136,39 @@ function closeProductModal() {
   window.currentProduct = null;
 }
 
-function openWhatsApp(productName) {
+function openWhatsApp(item) {
   const whatsappNumber = '2348036850229';
-  let message = `Hi, I'm interested in the ${productName}. Can you provide more details and a quote?`;
-  if (window.currentProduct && window.currentProduct.name === productName) {
-    message = `Hi, I'm interested in the ${window.currentProduct.name} (${window.currentProduct.price}). Category: ${window.currentProduct.category}. Please provide more details and a customized quote.`;
-    if (window.currentProduct.image && typeof window.shareProductImageToWhatsApp === 'function') {
-      window.shareProductImageToWhatsApp(window.currentProduct.image, message);
-      closeProductModal();
-      return;
+  let name = '';
+  let price = '';
+  let category = '';
+  let image = '';
+
+  if (item && typeof item === 'object') {
+    name = item.name || item.productName || '';
+    price = item.price || '';
+    category = item.category || item.productCategory || '';
+    image = item.img || item.image || item.productImage || item.productImg || '';
+  } else {
+    name = String(item || '').trim();
+    if (window.currentProduct && window.currentProduct.name === name) {
+      price = window.currentProduct.price || '';
+      category = window.currentProduct.category || '';
+      image = window.currentProduct.image || window.currentProduct.productImage || '';
     }
   }
+
+  if (!name) name = 'product';
+  let message = `Hi, I'm interested in the ${name}.`;
+  if (price) message += ` Price: ${price}.`;
+  if (category) message += ` Category: ${category}.`;
+  message += ' Please provide more details and a quote.';
+
+  if (image && typeof window.shareProductImageToWhatsApp === 'function') {
+    window.shareProductImageToWhatsApp(image, message);
+    closeProductModal();
+    return;
+  }
+
   window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   closeProductModal();
 }
