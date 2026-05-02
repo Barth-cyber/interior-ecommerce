@@ -1075,8 +1075,50 @@ def _call_gemini(prompt_text, system_instruction=None, max_tokens=512):
         return None, True
 
 
+def _call_llm(prompt_text, system_instruction=None, max_tokens=512):
+    """Call LLM with intelligent multi-provider fallback chain.
+    
+    Priority order:
+    1. Gemini (Google) - most reliable, fast free tier
+    2. Anthropic Claude - excellent reasoning
+    3. OpenAI GPT-4o-mini - reliable fallback
+    
+    Returns: (answer_text, error_bool)
+    """
+    # Try Gemini first (Primary)
+    if GEMINI_API_KEY:
+        app.logger.info("Trying Gemini API...")
+        answer, error = _call_gemini(prompt_text, system_instruction, max_tokens)
+        if answer and not error:
+            app.logger.info("✅ Gemini responded successfully")
+            return answer, False
+        app.logger.warning(f"Gemini failed or no response")
+    
+    # Try Anthropic Claude (Fallback 1)
+    if ANTHROPIC_API_KEY:
+        app.logger.info("Fallback 1: Trying Anthropic Claude API...")
+        answer, error = _call_anthropic(prompt_text, system_instruction, max_tokens)
+        if answer and not error:
+            app.logger.info("✅ Anthropic Claude responded successfully")
+            return answer, False
+        app.logger.warning(f"Anthropic failed or no response")
+    
+    # Try OpenAI (Fallback 2)
+    if OPENAI_API_KEY:
+        app.logger.info("Fallback 2: Trying OpenAI API...")
+        answer, error = _call_openai(prompt_text, system_instruction, max_tokens)
+        if answer and not error:
+            app.logger.info("✅ OpenAI responded successfully")
+            return answer, False
+        app.logger.warning(f"OpenAI failed or no response")
+    
+    # All providers failed
+    app.logger.error("❌ All AI providers failed. No response available.")
+    return None, True
+
+
 def _ask_gemini_chat(query, kb, products):
-    """Call Gemini API for intelligent AI chat responses."""
+    """Call AI API for intelligent AI chat responses (with fallback chain)."""
     product_summary = "\n".join(
         f"- {p['name']} | {p.get('category','')} | {p.get('price','')} | {p.get('description','')}"
         for p in products[:30]
@@ -1111,7 +1153,7 @@ YOUR ROLE:
 - Do NOT make up prices — reference the catalogue or invite them to request a quote
 - If you cannot help, say so honestly and offer to connect them to the human team"""
 
-    return _call_gemini(query, system_instruction=system_instruction, max_tokens=512)
+    return _call_llm(query, system_instruction=system_instruction, max_tokens=512)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1404,6 +1446,80 @@ def _parse_recommendations_json(answer_text):
     return None
 
 
+def _call_openai(prompt_text, system_instruction=None, max_tokens=512):
+    """Call OpenAI API (GPT-4o-mini) for AI chat responses."""
+    if not OPENAI_API_KEY:
+        return None, True
+
+    try:
+        from openai import OpenAI
+        
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        messages = []
+        if system_instruction:
+            messages.append({'role': 'system', 'content': system_instruction})
+        messages.append({'role': 'user', 'content': prompt_text})
+        
+        response = client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=0.7,
+        )
+        
+        if response.choices and len(response.choices) > 0:
+            answer = response.choices[0].message.content.strip()
+            return answer, False
+        return None, True
+    except ImportError:
+        app.logger.error("OpenAI package not installed. Install with: pip install openai")
+        return None, True
+    except Exception as e:
+        app.logger.error(f"OpenAI API error: {e}")
+        return None, True
+
+
+def _call_openai_conversation(history, system_instruction=None, max_tokens=512):
+    """Call OpenAI API with conversation history."""
+    if not OPENAI_API_KEY:
+        return None, True
+
+    try:
+        from openai import OpenAI
+        
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        # Convert history to OpenAI format
+        messages = []
+        if system_instruction:
+            messages.append({'role': 'system', 'content': system_instruction})
+        
+        for msg in history:
+            if msg['role'] == 'user':
+                messages.append({'role': 'user', 'content': msg['text']})
+            elif msg['role'] == 'assistant':
+                messages.append({'role': 'assistant', 'content': msg['text']})
+        
+        response = client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=0.7,
+        )
+        
+        if response.choices and len(response.choices) > 0:
+            answer = response.choices[0].message.content.strip()
+            return answer, False
+        return None, True
+    except ImportError:
+        app.logger.error("OpenAI package not installed. Install with: pip install openai")
+        return None, True
+    except Exception as e:
+        app.logger.error(f"OpenAI conversation API error: {e}")
+        return None, True
+
+
 def _call_anthropic(prompt_text, system_instruction=None, max_tokens=512):
     """Call Anthropic Claude API for AI chat responses."""
     if not ANTHROPIC_API_KEY:
@@ -1489,6 +1605,13 @@ def _call_llm_conversation(history, system_instruction=None, max_tokens=512):
     if ANTHROPIC_API_KEY:
         app.logger.info("Fallback 1: Trying Anthropic Claude for conversation...")
         answer, error = _call_anthropic_conversation(history, system_instruction, max_tokens)
+        if answer and not error:
+            return answer, False
+    
+    # Try OpenAI (GPT-4o-mini)
+    if OPENAI_API_KEY:
+        app.logger.info("Fallback 2: Trying OpenAI for conversation...")
+        answer, error = _call_openai_conversation(history, system_instruction, max_tokens)
         if answer and not error:
             return answer, False
     
