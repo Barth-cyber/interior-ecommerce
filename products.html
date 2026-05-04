@@ -73,8 +73,11 @@
       src = String(src).trim();
       if (/^(https?:)?\/\//i.test(src)) return src;
       if (src.startsWith('/')) src = src.replace(/^\/+/, '');
-      if (!/^IDL_Product_branding\//.test(src)) src = 'IDL_Product_branding/' + src;
-      return encodeURI(src.replace(/\\/g, '/'));
+      if (!/^IDL_Product_branding\//i.test(src) && !/^idl-images\//i.test(src)) {
+        src = 'IDL_Product_branding/' + src;
+      }
+      src = src.replace(/\\/g, '/').replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
+      return encodeURI(src);
     }
 
     function normalizeCategory(value) {
@@ -94,6 +97,11 @@
       const cat = String(value || 'Uncategorized').trim();
       return cat.replace(/[-_]/g, ' ').replace(/\s+&\s+/g, ' & ').toUpperCase();
     }
+
+    function getProductMeta(product) {
+      return product.dimensions || product.details || product.meta || '';
+    }
+
     function getCategoryTabs() {
       const categories = new Set(['all']);
       productCatalog.forEach(product => {
@@ -139,7 +147,7 @@
           <div class="product-card-cat">${displayCategory(categoryValue)}</div>
           <h3 class="product-card-title">${product.name}</h3>
           <p class="product-card-text">${product.desc || product.description || 'Premium furniture with craftsmanship and style.'}</p>
-          <div class="product-card-meta">${product.price ? product.price : ''}</div>
+          <div class="product-card-meta">${getProductMeta(product)}</div>
           <div class="product-card-actions">
             <button type="button">Request Quote</button>
           </div>
@@ -164,9 +172,9 @@
       } catch (error) {
         console.error('Failed to load products.json:', error);
         productCatalog = [
-          { name: 'Royal Lounge Chair', img: 'Chair_Royal.jpg', cat: 'living-room', desc: 'Regal seating with premium upholstery and sculpted timber frame.', price: 'NGN 420,000' },
-          { name: 'Grand Dining Set', img: 'Dining_Set.jpg', cat: 'dining', desc: 'Luxury dining ensemble with premium wooden construction.', price: 'NGN 980,000' },
-          { name: 'Classic Bedside Table', img: 'Bedside.jpg', cat: 'bedroom', desc: 'Elegant bedside table with soft-close drawers.', price: 'NGN 145,000' }
+          { name: 'Royal Lounge Chair', img: 'Chair_Royal.jpg', cat: 'living-room', desc: 'Regal seating with premium upholstery and sculpted timber frame.', dimensions: 'Standard dimensions: 1000mm W × 950mm D × 850mm H.' },
+          { name: 'Grand Dining Set', img: 'Dining_Set.jpg', cat: 'dining', desc: 'Luxury dining ensemble with premium wooden construction.', dimensions: 'Standard dimensions: Table 2200mm L × 1000mm W; chairs 450mm W × 550mm D.' },
+          { name: 'Classic Bedside Table', img: 'Bedside.jpg', cat: 'bedroom', desc: 'Elegant bedside table with soft-close drawers.', dimensions: 'Standard dimensions: 520mm H × 450mm W × 400mm D.' }
         ];
       }
 

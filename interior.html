@@ -2129,9 +2129,11 @@ function normalizeProductImagePath(image) {
   let src = String(image).trim();
   if (/^(https?:)?\/\//i.test(src)) return src;
   src = src.replace(/\\/g, '/').replace(/^\/+/, '');
-  const parts = src.split('/');
-  const filename = parts.pop().replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
-  return [...parts, filename].filter(Boolean).join('/');
+  if (!/^IDL_Product_branding\//i.test(src) && !/^idl-images\//i.test(src)) {
+    src = 'IDL_Product_branding/' + src;
+  }
+  src = src.replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
+  return src;
 }
 
 function handleImageError(img) {
@@ -2206,6 +2208,10 @@ function getProductDescription(product) {
   return product.desc || product.description || 'Premium quality craftsmanship with attention to detail.';
 }
 
+function getProductMeta(product) {
+  return product.dimensions || product.details || product.meta || '';
+}
+
 function getProductImage(product) {
   return normalizeProductImagePath(product.img || product.image || product.imageUrl || product.photo || '');
 }
@@ -2219,9 +2225,9 @@ async function loadProductCatalog() {
   } catch (error) {
     console.error('Unable to load product catalog:', error);
     PRODUCT_CATALOG = [
-      { name: 'Royal Lounge Chair', image: 'Chair_Royal.jpg', cat: 'living-room', description: 'Regal seating with premium upholstery and sculpted timber frame.', price: 'NGN 420,000' },
-      { name: 'Grand Dining Set', image: 'Dining_Set.jpg', cat: 'dining', description: 'Luxury dining ensemble with premium wooden construction.', price: 'NGN 980,000' },
-      { name: 'Classic Bedside Table', image: 'Bedside.jpg', cat: 'bedroom', description: 'Elegant bedside table with soft-close drawers.', price: 'NGN 145,000' }
+      { name: 'Royal Lounge Chair', image: 'Chair_Royal.jpg', cat: 'living-room', description: 'Regal seating with premium upholstery and sculpted timber frame.', dimensions: 'Standard dimensions: 1000mm W × 950mm D × 850mm H.' },
+      { name: 'Grand Dining Set', image: 'Dining_Set.jpg', cat: 'dining', description: 'Luxury dining ensemble with premium wooden construction.', dimensions: 'Standard dimensions: Table 2200mm L × 1000mm W; chairs 450mm W × 550mm D.' },
+      { name: 'Classic Bedside Table', image: 'Bedside.jpg', cat: 'bedroom', description: 'Elegant bedside table with soft-close drawers.', dimensions: 'Standard dimensions: 520mm H × 450mm W × 400mm D.' }
     ];
   }
 }
@@ -2259,9 +2265,7 @@ function renderProductGrid(category = 'all') {
         <div class="pcard-cat">${displayCategory(p.cat || p.category)}</div>
         <div class="pcard-name">${p.name}</div>
         <div class="pcard-desc">${getProductDescription(p)}</div>
-        <div class="pcard-foot">
-          <div class="pcard-avail">${p.price ? p.price : 'In Stock'}</div>
-        </div>
+        <div class="pcard-foot">${getProductMeta(p) ? `<div class="pcard-meta">${getProductMeta(p)}</div>` : ''}</div>
       </div>
     `;
     grid.appendChild(card);
