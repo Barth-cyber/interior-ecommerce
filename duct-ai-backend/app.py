@@ -189,7 +189,35 @@ PRODUCTS_PATH = os.path.join(BASE_DIR, "products.json")
 CONV_LOG_PATH = os.path.join(BASE_DIR, "conversations.json")
 USER_LOG_PATH = os.path.join(BASE_DIR, "user_log.json")
 FEEDBACK_PATH = os.path.join(BASE_DIR, "feedback.json")
-DEPLOYMENT_REVISION = os.environ.get("DEPLOYMENT_REVISION", "dev")
+
+
+def _read_git_revision() -> Optional[str]:
+    repo_dir = os.path.abspath(os.path.join(BASE_DIR, os.pardir))
+    git_dir = os.path.join(repo_dir, ".git")
+    if os.path.isdir(git_dir):
+        try:
+            head_path = os.path.join(git_dir, "HEAD")
+            with open(head_path, "r", encoding="utf-8") as head_file:
+                ref = head_file.read().strip()
+            if ref.startswith("ref:"):
+                ref_path = ref.split(" ", 1)[1].strip()
+                ref_file = os.path.join(git_dir, *ref_path.split("/"))
+                if os.path.exists(ref_file):
+                    with open(ref_file, "r", encoding="utf-8") as f:
+                        return f.read().strip()
+                return ref_path
+            return ref
+        except Exception:
+            pass
+    try:
+        import subprocess
+        result = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_dir, stderr=subprocess.DEVNULL)
+        return result.decode("utf-8").strip()
+    except Exception:
+        return None
+
+
+DEPLOYMENT_REVISION = _read_git_revision() or os.environ.get("DEPLOYMENT_REVISION") or "dev"
 
 
 def _read_json(path: str, default: Any):
@@ -210,6 +238,32 @@ def _write_json(path: str, data) -> bool:
     except Exception as e:
         print(f"Write error {path}: {e}")
         return False
+
+
+def _read_git_revision() -> Optional[str]:
+    repo_dir = os.path.abspath(os.path.join(BASE_DIR, os.pardir))
+    git_dir = os.path.join(repo_dir, ".git")
+    if os.path.isdir(git_dir):
+        try:
+            head_path = os.path.join(git_dir, "HEAD")
+            with open(head_path, "r", encoding="utf-8") as head_file:
+                ref = head_file.read().strip()
+            if ref.startswith("ref:"):
+                ref_path = ref.split(" ", 1)[1].strip()
+                ref_file = os.path.join(git_dir, *ref_path.split("/"))
+                if os.path.exists(ref_file):
+                    with open(ref_file, "r", encoding="utf-8") as f:
+                        return f.read().strip()
+                return ref_path
+            return ref
+        except Exception:
+            pass
+    try:
+        import subprocess
+        result = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_dir, stderr=subprocess.DEVNULL)
+        return result.decode("utf-8").strip()
+    except Exception:
+        return None
 
 
 def _load_kb():
