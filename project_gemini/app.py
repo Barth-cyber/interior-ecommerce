@@ -1024,6 +1024,7 @@ def ai_query():
         
         return jsonify({
             'answer': local_answer,
+            'reply': local_answer,
             'escalate': False,
             'recommendation': recommendation,
             'visits': user.get('visits', 1)
@@ -1040,13 +1041,14 @@ def ai_query():
         
         return jsonify({
             'answer': answer,
+            'reply': answer,
             'escalate': False,
             'recommendation': recommendation,
             'visits': user.get('visits', 1)
         })
 
     # 3. Escalate to human
-    return jsonify({'answer': None, 'escalate': escalate})
+    return jsonify({'answer': None, 'reply': None, 'escalate': escalate})
 
 
 @app.route('/escalate', methods=['POST'])

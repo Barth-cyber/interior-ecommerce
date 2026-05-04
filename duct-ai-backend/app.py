@@ -174,10 +174,7 @@ def _parse_allowed_origins():
         "https://interiorductltd.com",
         "https://www.interiorductltd.com",
         "https://api.interiorductltd.com",
-        "https://interior-ecommerce.onrender.com",
-        "https://interior-ecommerce-lh3e.onrender.com",
-        "https://duct-ai-backend.onrender.com",
-        "https://interior-ecommerce-backend.onrender.com",
+        r"^https://.*\.onrender\.com$",
         *dev_origins,
     ]
 
@@ -387,7 +384,7 @@ def ai_query():
                 raise ValueError("empty response from GenAI")
             _log_conversation(session_id, "assistant", answer, {})
             actions = []
-            return jsonify({"answer": answer, "escalate": False, "actions": actions, "provider": "gemini"})
+            return jsonify({"answer": answer, "reply": answer, "escalate": False, "actions": actions, "provider": "gemini"})
         except Exception as e:
             print(f"Gemini error: {e}")
             error_log = str(e)
@@ -397,7 +394,7 @@ def ai_query():
         openai_answer, openai_error = _call_openai(system_prompt, query)
         if openai_answer:
             _log_conversation(session_id, "assistant", openai_answer, {})
-            return jsonify({"answer": openai_answer, "escalate": False, "actions": [], "provider": "openai"})
+            return jsonify({"answer": openai_answer, "reply": openai_answer, "escalate": False, "actions": [], "provider": "openai"})
         else:
             error_log = f"Gemini failed: {error_log}; OpenAI failed: {openai_error}"
 
@@ -406,7 +403,7 @@ def ai_query():
         anthropic_answer, anthropic_error = _call_anthropic(system_prompt, query)
         if anthropic_answer:
             _log_conversation(session_id, "assistant", anthropic_answer, {})
-            return jsonify({"answer": anthropic_answer, "escalate": False, "actions": [], "provider": "anthropic"})
+            return jsonify({"answer": anthropic_answer, "reply": anthropic_answer, "escalate": False, "actions": [], "provider": "anthropic"})
         else:
             error_log = f"Gemini failed: {error_log}; OpenAI failed: {openai_error}; Anthropic failed: {anthropic_error}"
 
@@ -414,13 +411,13 @@ def ai_query():
     kb_answer = _find_kb_response(query, kb)
     if kb_answer:
         _log_conversation(session_id, "assistant", kb_answer, {"fallback": True})
-        return jsonify({"answer": kb_answer, "escalate": False, "actions": [], "provider": "kb_fallback"})
+        return jsonify({"answer": kb_answer, "reply": kb_answer, "escalate": False, "actions": [], "provider": "kb_fallback"})
 
     fallbacks = kb.get("fallback_responses", DEFAULT_FALLBACKS)
     import random
     fallback_answer = random.choice(fallbacks)
     _log_conversation(session_id, "assistant", fallback_answer, {"fallback": True})
-    return jsonify({"answer": fallback_answer, "escalate": True, "error_log": error_log or "No provider available", "provider": "kb_fallback"})
+    return jsonify({"answer": fallback_answer, "reply": fallback_answer, "escalate": True, "error_log": error_log or "No provider available", "provider": "kb_fallback"})
 
 
 @app.route("/recommend", methods=["POST"])

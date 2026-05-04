@@ -177,6 +177,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 CONTENT_PATH = os.path.join(os.path.dirname(__file__), 'content.json')
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+PRODUCTS_JSON_PATH = os.path.join(ROOT_DIR, 'products.json')
 IDL_BRANDING_DIR = os.path.join(ROOT_DIR, 'IDL_Product_branding')
 CATEGORIES_PATH = os.path.join(os.path.dirname(__file__), 'categories.json')
 KB_PATH = os.path.join(os.path.dirname(__file__), 'knowledge_base.json')
@@ -808,12 +809,39 @@ def update_model_metadata(model_filename):
 
 
 
+def load_products_json():
+    if not os.path.exists(PRODUCTS_JSON_PATH):
+        return []
+    try:
+        with open(PRODUCTS_JSON_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data.get('products', []) if isinstance(data, dict) else []
+    except Exception as e:
+        app.logger.error(f"Failed to load products.json: {e}")
+        return []
+
+
+def save_products_json(products):
+    if not isinstance(products, list):
+        return
+    try:
+        with open(PRODUCTS_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump({'products': products}, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        app.logger.error(f"Failed to save products.json: {e}")
+
+
 @app.route('/content', methods=['GET'])
 def get_content():
-    if not os.path.exists(CONTENT_PATH):
-        return jsonify({})
-    with open(CONTENT_PATH, 'r', encoding='utf-8') as f:
-        return jsonify(json.load(f))
+    data = {}
+    if os.path.exists(CONTENT_PATH):
+        with open(CONTENT_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+    products = load_products_json()
+    if products:
+        data['products'] = products
+    return jsonify(data)
 
 
 @app.route('/content', methods=['POST'])
@@ -825,6 +853,8 @@ def save_content():
     data = normalize_content_image_paths(data)
     with open(CONTENT_PATH, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    if isinstance(data.get('products'), list):
+        save_products_json(data['products'])
     return jsonify({'saved': True})
 
 
@@ -1775,6 +1805,7 @@ def ai_query():
         
         return jsonify({
             'answer': local_answer,
+            'reply': local_answer,
             'escalate': False,
             'recommendation': recommendation,
             'visits': user.get('visits', 1)
@@ -1791,6 +1822,7 @@ def ai_query():
         
         return jsonify({
             'answer': answer,
+            'reply': answer,
             'escalate': False,
             'provider': provider,
             'recommendation': recommendation,

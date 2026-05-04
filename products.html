@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interior Duct Ltd — Products & Categories</title>
+  <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
+  <style>
+    :root{--navy:#1B3A6B;--brown:#7B5C3E;--bg:#FAFAFA;--text:#102A44;--soft:#6B7A8D;--border:rgba(27,58,107,.08);--shadow:0 18px 40px rgba(13,27,42,.08)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:DM Sans,sans-serif;background:#f7f7f7;color:var(--text);line-height:1.6}
+    a{color:inherit;text-decoration:none}
+    header{position:sticky;top:0;z-index:99;background:#fff;border-bottom:1px solid rgba(27,58,107,.08);display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;box-shadow:0 4px 16px rgba(13,27,42,.05)}
+    .logo{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--navy);font-weight:700}
+    nav{display:flex;gap:1rem;align-items:center}
+    nav a{font-size:.94rem;color:var(--soft);padding:.45rem .75rem;border-radius:6px;transition:.25s}
+    nav a:hover{background:rgba(27,58,107,.06);color:var(--navy)}
+    .page-hero{padding:3.5rem 1.5rem 1.5rem;max-width:1120px;margin:0 auto}
+    .page-hero h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--navy);margin-bottom:.8rem;line-height:1.05}
+    .page-hero p{max-width:680px;color:var(--soft);font-size:1rem;margin-bottom:1.4rem}
+    .category-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;margin-bottom:1.5rem}
+    .category-tabs button{border:1px solid var(--border);background:#fff;color:var(--navy);padding:.85rem 1rem;border-radius:999px;font-size:.9rem;cursor:pointer;transition:.25s}
+    .category-tabs button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;}
+    .product-card{background:#fff;border:1px solid rgba(27,58,107,.08);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:.25s}
+    .product-card:hover{transform:translateY(-4px)}
+    .product-card img{width:100%;height:230px;object-fit:cover}
+    .product-card-body{padding:1rem 1.1rem 1.3rem;flex:1;display:flex;flex-direction:column}
+    .product-card-cat{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--brown);margin-bottom:.55rem}
+    .product-card-title{font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:.75rem}
+    .product-card-text{font-size:.95rem;color:var(--soft);margin-bottom:1.1rem;flex:1}
+    .product-card-meta{font-size:.82rem;color:var(--soft);margin-bottom:1.25rem}
+    .product-card-actions{display:flex;gap:.75rem;flex-wrap:wrap}
+    .product-card-actions button{flex:1;background:var(--navy);color:#fff;border:none;padding:.85rem 1rem;border-radius:8px;cursor:pointer;transition:.25s}
+    .product-card-actions button:hover{background:#17315c}
+    .page-footer{padding:3rem 1.5rem 2rem;text-align:center;color:var(--soft)}
+    @media(max-width:720px){.page-hero{padding:2.25rem 1rem 1rem}.product-card img{height:200px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Interior Duct Ltd</div>
+    <nav>
+      <a href="interior.html">Home</a>
+      <a href="interior.html#furniture">Products</a>
+      <a href="interior.html#doors">Doors</a>
+      <a href="interior.html#ai-design">AI Design</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <span class="sec-tag" style="font-size:.8rem;color:var(--brown);letter-spacing:.2em;text-transform:uppercase;">Product Showroom</span>
+      <h1>Shop furniture by type and room — bedroom, living room, office, kitchen, dining and doors.</h1>
+      <p>Explore our curated tiles with large imagery, category grouping, and quick quote actions. This page is designed for fast browsing by furniture type and product style.</p>
+    </section>
+
+    <section class="page-hero" style="padding-top:0;">
+      <div class="category-tabs" id="productsFilter"></div>
+      <div class="products-grid" id="productsGrid"></div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>Need help choosing the right furniture set? Open the Duct AI assistant in the bottom-right corner.</p>
+  </footer>
+
+  <script>
+    let productCatalog = [];
+
+    function normalizeProductImagePath(src) {
+      if (!src) return '';
+      src = String(src).trim();
+      if (/^(https?:)?\/\//i.test(src)) return src;
+      if (src.startsWith('/')) src = src.replace(/^\/+/, '');
+      if (!/^IDL_Product_branding\//.test(src)) src = 'IDL_Product_branding/' + src;
+      return encodeURI(src.replace(/\\/g, '/'));
+    }
+
+    function normalizeCategory(value) {
+      const cat = String(value || '').trim().toLowerCase();
+      if (!cat) return '';
+      if (cat.includes('bedroom')) return 'bedroom';
+      if (cat.includes('living')) return 'living-room';
+      if (cat.includes('kitchen')) return 'kitchen';
+      if (cat.includes('dining')) return 'dining';
+      if (cat.includes('door')) return 'doors';
+      if (cat.includes('office') || cat.includes('reception') || cat.includes('commercial') || cat.includes('storage') || cat.includes('media')) return 'office';
+      if (cat.includes('chair') || cat.includes('sofa') || cat.includes('seating')) return 'living-room';
+      return cat.replace(/[^a-z0-9]+/g, '-');
+    }
+
+    function displayCategory(value) {
+      const cat = String(value || 'Uncategorized').trim();
+      return cat.replace(/[-_]/g, ' ').replace(/\s+&\s+/g, ' & ').toUpperCase();
+    }
+    function getCategoryTabs() {
+      const categories = new Set(['all']);
+      productCatalog.forEach(product => {
+        const category = normalizeCategory(product.cat || product.category || '');
+        if (category) categories.add(category);
+      });
+      return Array.from(categories);
+    }
+
+    function buildCategoryTabs() {
+      const tabs = document.getElementById('productsFilter');
+      if (!tabs) return;
+
+      const defaultOrder = ['all', 'bedroom', 'living-room', 'office', 'kitchen', 'dining', 'doors'];
+      const tabsToRender = getCategoryTabs().sort((a, b) => {
+        const ai = defaultOrder.indexOf(a);
+        const bi = defaultOrder.indexOf(b);
+        if (ai !== -1 && bi !== -1) return ai - bi;
+        if (ai !== -1) return -1;
+        if (bi !== -1) return 1;
+        return a.localeCompare(b);
+      });
+
+      tabs.innerHTML = tabsToRender.map(category => {
+        const label = category === 'all' ? 'All' : displayCategory(category);
+        const active = category === 'all' ? ' class="active"' : '';
+        return `<button data-category="${category}"${active}>${label}</button>`;
+      }).join('');
+    }
+    function openWhatsApp(item) {
+      const text = encodeURIComponent(`Hello, I would like a quote for ${item.name}. ${item.desc || ''}`);
+      window.open(`https://wa.me/2348036850229?text=${text}`, '_blank');
+    }
+
+    function createProductCard(product) {
+      const card = document.createElement('article');
+      card.className = 'product-card';
+      const imgSrc = normalizeProductImagePath(product.img || product.image || '');
+      const categoryValue = normalizeCategory(product.cat || product.category || 'Uncategorized');
+      card.innerHTML = `
+        <img src="${imgSrc}" alt="${product.name}" loading="lazy" />
+        <div class="product-card-body">
+          <div class="product-card-cat">${displayCategory(categoryValue)}</div>
+          <h3 class="product-card-title">${product.name}</h3>
+          <p class="product-card-text">${product.desc || product.description || 'Premium furniture with craftsmanship and style.'}</p>
+          <div class="product-card-meta">${product.price ? product.price : ''}</div>
+          <div class="product-card-actions">
+            <button type="button">Request Quote</button>
+          </div>
+        </div>
+      `;
+      card.querySelector('button')?.addEventListener('click', () => openWhatsApp({
+        name: product.name,
+        desc: product.desc || product.description || 'Please quote this product.'
+      }));
+      return card;
+    }
+
+    async function loadProducts() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '<div style="padding:2rem;background:#fff;border-radius:16px;border:1px solid rgba(27,58,107,.08);">Loading products…</div>';
+
+      try {
+        const response = await fetch('products.json');
+        if (!response.ok) throw new Error('Products JSON fetch failed');
+        const data = await response.json();
+        productCatalog = Array.isArray(data.products) ? data.products : [];
+      } catch (error) {
+        console.error('Failed to load products.json:', error);
+        productCatalog = [
+          { name: 'Royal Lounge Chair', img: 'Chair_Royal.jpg', cat: 'living-room', desc: 'Regal seating with premium upholstery and sculpted timber frame.', price: 'NGN 420,000' },
+          { name: 'Grand Dining Set', img: 'Dining_Set.jpg', cat: 'dining', desc: 'Luxury dining ensemble with premium wooden construction.', price: 'NGN 980,000' },
+          { name: 'Classic Bedside Table', img: 'Bedside.jpg', cat: 'bedroom', desc: 'Elegant bedside table with soft-close drawers.', price: 'NGN 145,000' }
+        ];
+      }
+
+      buildCategoryTabs();
+      const activeTab = document.querySelector('#productsFilter .active');
+      renderProducts(activeTab?.dataset.category || 'all');
+    }
+
+    function renderProducts(category = 'all') {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '';
+      const products = productCatalog.filter(p => category === 'all' || normalizeCategory(p.cat || p.category) === category);
+      if (!products.length) {
+        grid.innerHTML = '<div style="padding:2rem;background:#fff;border-radius:16px;border:1px solid rgba(27,58,107,.08);">No products available for this category.</div>';
+        return;
+      }
+      products.forEach(p => grid.appendChild(createProductCard(p)));
+    }
+
+    document.getElementById('productsFilter').addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button) return;
+      document.querySelectorAll('#productsFilter button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      renderProducts(button.dataset.category);
+    });
+
+    loadProducts();
+  </script>
+  <script src="duct-ai-widget.js?v=20260429" defer></script>
+</body>
+</html>
