@@ -313,6 +313,21 @@ section{padding:6rem 0}
 .cat-card-title{font-family:var(--f-head);font-size:1.1rem;color:var(--navy);margin-bottom:.5rem}
 .cat-card-desc{font-size:.85rem;color:var(--text-soft)}
 .products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem}
+.featured-grid{display:grid;grid-template-columns:repeat(3,minmax(280px,1fr));gap:1.5rem;margin-top:1.8rem}
+.featured-card{background:var(--bg-white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);transition:var(--t);display:flex;flex-direction:column}
+.featured-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.featured-card-img{height:260px;overflow:hidden}
+.featured-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.featured-card:hover .featured-card-img img{transform:scale(1.04)}
+.featured-card-body{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem}
+.featured-card-tag{font-family:var(--f-sub);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--brown)}
+.featured-card-title{font-family:var(--f-head);font-size:1.3rem;color:var(--text-dark);line-height:1.15}
+.featured-card-text{font-size:.9rem;color:var(--text-soft);line-height:1.7}
+.featured-card-meta{font-size:.78rem;color:var(--text-mid);letter-spacing:.02em}
+.featured-card-actions{margin-top:auto;display:flex;gap:.75rem;flex-wrap:wrap}
+.featured-card-btn{flex:1;background:var(--navy);color:#fff;border:none;padding:.75rem 1rem;border-radius:4px;font-size:.82rem;cursor:pointer;transition:var(--t)}
+.featured-card-btn:hover{background:var(--navy-light)}
+@media(max-width:900px){.featured-grid{grid-template-columns:1fr}}
 .pcard{background:transparent;border:none;border-radius:0;overflow:visible;transition:none;cursor:default;display:block;padding:0}
 .pcard:hover{transform:none;box-shadow:none;border-color:transparent}
 .pcard-img{height:auto;max-height:none;aspect-ratio:auto;overflow:visible;position:static;background:transparent}
@@ -852,105 +867,88 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   </div>
 </div>
 
-<!-- CATEGORICAL PRODUCT SECTIONS -->
-<section class="category-section" id="seating">
+<!-- FEATURED FURNITURE GALLERY -->
+<section class="featured-section" id="featured">
   <div class="sec-hdr container">
-    <span class="sec-tag">Seating</span>
-    <h2 class="sec-title">Premium <em>Seating</em> Collection</h2>
+    <span class="sec-tag">Featured Collections</span>
+    <h2 class="sec-title">Curated <em>Furniture</em> Galleries</h2>
     <div class="divider"></div>
+    <p style="color:var(--text-soft);font-family:var(--f-sub);font-size:1.05rem;max-width:720px;margin:1.2rem auto 0;line-height:1.8;">Explore six premium product families handpicked from our IDL branding gallery. These category tiles showcase refined furniture types with rich visuals, elegant dimensions, and tailored finishing details.</p>
   </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="seatingTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="seatingPrev">&#8592;</button>
-      <button class="btn btn-navy" id="seatingNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="dining">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Dining</span>
-    <h2 class="sec-title">Elegant <em>Dining</em> Sets</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="diningTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="diningPrev">&#8592;</button>
-      <button class="btn btn-navy" id="diningNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="bedroom">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Bedroom</span>
-    <h2 class="sec-title">Luxury <em>Bedroom</em> Suites</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="bedroomTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="bedroomPrev">&#8592;</button>
-      <button class="btn btn-navy" id="bedroomNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="doors">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Doors</span>
-    <h2 class="sec-title">Bespoke <em>Doors</em> & Entrances</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="doorsTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="doorsPrev">&#8592;</button>
-      <button class="btn btn-navy" id="doorsNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="living">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Living Room</span>
-    <h2 class="sec-title">Stunning <em>Living Room</em> Pieces</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="livingTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="livingPrev">&#8592;</button>
-      <button class="btn btn-navy" id="livingNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
-<section class="category-section" id="office">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Office & Reception</span>
-    <h2 class="sec-title">Professional <em>Office</em> Furniture</h2>
-    <div class="divider"></div>
-  </div>
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;">
-    <div id="officeTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;">
-      <button class="btn btn-navy" id="officePrev">&#8592;</button>
-      <button class="btn btn-navy" id="officeNext">&#8594;</button>
+  <div class="container">
+    <div class="featured-grid">
+      <div class="featured-card">
+        <div class="featured-card-img">
+          <img src="IDL_Product_branding/Chair_Royal.jpg" alt="Royal Seating & Lounge" loading="lazy">
+        </div>
+        <div class="featured-card-body">
+          <span class="featured-card-tag">Seating</span>
+          <h3 class="featured-card-title">Royal Seating &amp; Lounge</h3>
+          <p class="featured-card-text">Luxurious lounge and dining seating built for comfort, posture support, and exquisite detail.</p>
+          <div class="featured-card-meta">Typical dimensions: 950mm D × 780mm H. Solid timber frame, premium upholstery, and elegant brass accents.</div>
+          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Royal Seating Collection',desc:'Send me a quote for the Royal Seating Collection.',img:'IDL_Product_branding/Chair_Royal.jpg'})">Request Quote</button></div>
+        </div>
+      </div>
+      <div class="featured-card">
+        <div class="featured-card-img">
+          <img src="IDL_Product_branding/Dining_Set.jpg" alt="Grand Dining Ensemble" loading="lazy">
+        </div>
+        <div class="featured-card-body">
+          <span class="featured-card-tag">Dining</span>
+          <h3 class="featured-card-title">Grand Dining Ensemble</h3>
+          <p class="featured-card-text">Bold dining tables and seating sets created for family stories, formal dinners, and timeless entertaining.</p>
+          <div class="featured-card-meta">Typical dimensions: 2400mm × 1000mm. Hardwood construction with rich finishes and polished edge details.</div>
+          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Grand Dining Ensemble',desc:'Please share pricing for the Grand Dining Ensemble.',img:'IDL_Product_branding/Dining_Set.jpg'})">Request Quote</button></div>
+        </div>
+      </div>
+      <div class="featured-card">
+        <div class="featured-card-img">
+          <img src="IDL_Product_branding/Bedside.jpg" alt="Classic Bedroom Nightstand" loading="lazy">
+        </div>
+        <div class="featured-card-body">
+          <span class="featured-card-tag">Bedroom</span>
+          <h3 class="featured-card-title">Classic Bedroom Nightstand</h3>
+          <p class="featured-card-text">Refined bedside storage with graceful lines, premium joinery, and ample drawer capacity.</p>
+          <div class="featured-card-meta">Typical dimensions: 520mm W × 420mm D × 720mm H. Soft-close drawers, lacquer finish, and elegant handles.</div>
+          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Classic Bedroom Nightstand',desc:'I want a quote for the Classic Bedroom Nightstand.',img:'IDL_Product_branding/Bedside.jpg'})">Request Quote</button></div>
+        </div>
+      </div>
+      <div class="featured-card">
+        <div class="featured-card-img">
+          <img src="IDL_Product_branding/tv_console_white1.jpg" alt="Modern Media Console" loading="lazy">
+        </div>
+        <div class="featured-card-body">
+          <span class="featured-card-tag">Living Room</span>
+          <h3 class="featured-card-title">Modern Media Console</h3>
+          <p class="featured-card-text">Sleek console units with storage solutions and polished surfaces that elevate any living room.</p>
+          <div class="featured-card-meta">Typical dimensions: 2200mm L. Floating design with integrated cable management and premium finish options.</div>
+          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Modern Media Console',desc:'Send me a quote for the Modern Media Console.',img:'IDL_Product_branding/tv_console_white1.jpg'})">Request Quote</button></div>
+        </div>
+      </div>
+      <div class="featured-card">
+        <div class="featured-card-img">
+          <img src="IDL_Product_branding/Office_Desk.jpg" alt="Executive Office Desk" loading="lazy">
+        </div>
+        <div class="featured-card-body">
+          <span class="featured-card-tag">Office</span>
+          <h3 class="featured-card-title">Executive Office Desk</h3>
+          <p class="featured-card-text">Professional work desks and reception furnishings made for high-performance office settings.</p>
+          <div class="featured-card-meta">Typical dimensions: 1800mm × 800mm. Solid surface top with integrated cable tray and elegant storage design.</div>
+          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Executive Office Desk',desc:'I would like pricing for the Executive Office Desk.',img:'IDL_Product_branding/Office_Desk.jpg'})">Request Quote</button></div>
+        </div>
+      </div>
+      <div class="featured-card">
+        <div class="featured-card-img">
+          <img src="IDL_Product_branding/Kitchen_Cabinet.jpg" alt="Signature Kitchen Cabinetry" loading="lazy">
+        </div>
+        <div class="featured-card-body">
+          <span class="featured-card-tag">Kitchen</span>
+          <h3 class="featured-card-title">Signature Kitchen Cabinetry</h3>
+          <p class="featured-card-text">Premium kitchen cabinetry tailored for style, storage, and long-lasting performance.</p>
+          <div class="featured-card-meta">Modular units with soft-close doors, custom finishes, and countertop-ready design.</div>
+          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Signature Kitchen Cabinetry',desc:'Please quote the Signature Kitchen Cabinetry collection.',img:'IDL_Product_branding/Kitchen_Cabinet.jpg'})">Request Quote</button></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>

@@ -44,6 +44,13 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 
+DEFAULT_FALLBACKS = [
+    "Apologies — I couldn\'t complete that request right now. Please try again in a moment or message our team on WhatsApp at +234 803 685 0229.",
+    "I\'m sorry, the AI service is temporarily unavailable. I will do my best to help with a quick response or route you to support.",
+    "Our design assistant had trouble responding. Could you try one more time or request a quote through WhatsApp?",
+    "I couldn\'t resolve that exactly, but I can still help with product ideas, pricing, or a custom order quote."
+]
+
 def _call_openai(system_prompt, user_query):
     if not OPENAI_API_KEY:
         return None, "OpenAI API key not set"
@@ -405,11 +412,11 @@ def ai_query():
         _log_conversation(session_id, "assistant", kb_answer, {"fallback": True})
         return jsonify({"answer": kb_answer, "escalate": False, "actions": [], "provider": "kb_fallback"})
 
-    fallbacks = kb.get("fallback_responses", ["Sorry, something went wrong."])
+    fallbacks = kb.get("fallback_responses", DEFAULT_FALLBACKS)
     import random
     fallback_answer = random.choice(fallbacks)
     _log_conversation(session_id, "assistant", fallback_answer, {"fallback": True})
-    return jsonify({"answer": fallback_answer, "escalate": False, "error_log": error_log or "No provider available", "provider": "kb_fallback"})
+    return jsonify({"answer": fallback_answer, "escalate": True, "error_log": error_log or "No provider available", "provider": "kb_fallback"})
 
 
 @app.route("/recommend", methods=["POST"])
