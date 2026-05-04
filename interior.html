@@ -2823,7 +2823,9 @@ function openWhatsAppProductSlider() {
   // but use local backend when previewing on localhost.
   window.DUCT_AI_BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : 'https://api.interiorductltd.com';
+    : (window.location.hostname.endsWith('.onrender.com')
+      ? 'https://duct-ai-backend.onrender.com'
+      : 'https://api.interiorductltd.com');
   window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
   
   // Hide old embedded chat panel - use new floating widget instead

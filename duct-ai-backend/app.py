@@ -174,6 +174,10 @@ def _parse_allowed_origins():
         "https://interiorductltd.com",
         "https://www.interiorductltd.com",
         "https://api.interiorductltd.com",
+        "https://interior-ecommerce.onrender.com",
+        "https://interior-ecommerce-lh3e.onrender.com",
+        "https://duct-ai-backend.onrender.com",
+        "https://interior-ecommerce-backend.onrender.com",
         *dev_origins,
     ]
 

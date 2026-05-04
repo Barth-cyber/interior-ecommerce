@@ -1,6 +1,12 @@
 (function () {
-  const BACKEND_URL = window.DUCT_AI_BACKEND_URL || window.location.origin;
-  const API_PATH = `${BACKEND_URL}/ai-query`;
+  const BACKEND_URLS = [
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? `http://${window.location.hostname}:5000`
+      : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+    'https://duct-ai-backend.onrender.com',
+    'https://interior-ecommerce-backend.onrender.com',
+    'https://interior-ecommerce-lh3e.onrender.com'
+  ];
 
   const widgetStyles = document.createElement('link');
   widgetStyles.rel = 'stylesheet';
@@ -39,6 +45,39 @@
     }
   });
 
+  function getDuctAiSessionId() {
+    let sessionId = localStorage.getItem('duct_ai_session_id');
+    if (!sessionId) {
+      sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('duct_ai_session_id', sessionId);
+    }
+    return sessionId;
+  }
+
+  async function fetchChatBackend(path, options = {}) {
+    let lastError = null;
+
+    for (const base of BACKEND_URLS) {
+      const url = `${base.replace(/\/$/, '')}${path}`;
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          const text = await response.text().catch(() => '');
+          const error = new Error(`Backend request failed (${response.status}) at ${url}: ${text}`);
+          console.error('Duct AI backend error:', { url, status: response.status, statusText: response.statusText, body: text, options });
+          lastError = error;
+          continue;
+        }
+        return response;
+      } catch (error) {
+        console.error('Duct AI backend fetch exception:', { url, error, options });
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error('All backend endpoints failed');
+  }
+
   function addMessage(text, role) {
     const item = document.createElement('div');
     item.className = `duct-ai-widget-message ${role}`;
@@ -54,18 +93,27 @@
     input.value = '';
 
     try {
-      const response = await fetch(API_PATH, {
+      const response = await fetchChatBackend('/ai-query', {
         method: 'POST',
+        mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [{ role: 'user', content: text }] })
+        body: JSON.stringify({
+          query: text,
+          session_id: getDuctAiSessionId(),
+          context: {
+            page: window.location.pathname,
+            user_agent: navigator.userAgent
+          }
+        })
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
+      if (!data || (!data.reply && !data.answer && !data.escalate)) {
+        throw new Error('Invalid chat response');
       }
-      addMessage(data.reply || 'No reply received.', 'assistant');
+      addMessage(data.reply || data.answer || 'No reply received.', 'assistant');
     } catch (error) {
-      addMessage('Error: ' + error.message, 'assistant');
+      addMessage('Sorry, I could not reach Duct AI right now. Please try again or contact us on WhatsApp.', 'assistant');
+      console.error('Duct AI widget error:', error);
     }
   }
 })();
