@@ -1,7 +1,7 @@
 const API_BASES = [
-  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
+    : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
   'https://duct-ai-backend.onrender.com',
   'https://interior-ecommerce-backend.onrender.com',
   'https://interior-ecommerce-lh3e.onrender.com'
@@ -9,28 +9,6 @@ const API_BASES = [
 const CHAT_PATH = '/ai-query';
 const TRACK_PATH = '/user-log';
 const SESSION_STORAGE_KEY = 'duct_ai_session_id';
-
-function getDuctAiSessionId() {
-  let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
-  if (!sessionId) {
-    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
-  }
-  return sessionId;
-}
-
-function isWeakChatResponse(data) {
-  if (!data) return true;
-  const text = String(data.answer || data.reply || '').trim();
-  const provider = String(data.provider || '').toLowerCase();
-  if (data.escalate && !text) return false;
-  if (!text) return true;
-  if (provider === 'fallback' || provider === 'kb_fallback') return true;
-  if (/sorry, something went wrong|could not connect|trouble connecting|no provider available|server error/i.test(text)) {
-    return true;
-  }
-  return false;
-}
 
 async function fetchWithBackendFallback(path, options = {}) {
   let lastError = null;
@@ -44,15 +22,6 @@ async function fetchWithBackendFallback(path, options = {}) {
         lastError = new Error(`Backend request failed (${response.status}) ${response.statusText} @ ${url}: ${errorText}`);
         continue;
       }
-      if (path === CHAT_PATH) {
-        const data = await response.json();
-        if (isWeakChatResponse(data)) {
-          console.warn('Weak AI response from backend, retrying next endpoint:', { url, provider: data.provider, answer: data.answer || data.reply });
-          lastError = new Error(`Weak AI response from ${url}`);
-          continue;
-        }
-        return data;
-      }
       return response;
     } catch (error) {
       console.error('Duct AI assistant fetch exception:', { url, error, options });
@@ -62,27 +31,34 @@ async function fetchWithBackendFallback(path, options = {}) {
   throw lastError || new Error('All backend endpoints failed');
 }
 
+function getDuctAiSessionId() {
+  let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
+  if (!sessionId) {
+    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+  }
+  return sessionId;
+}
+
 async function sendDuctAiChat(userMessage) {
   const sessionId = getDuctAiSessionId();
   const payload = {
     query: userMessage,
     session_id: sessionId,
-    context: {
-      page: window.location.pathname,
-      user_agent: navigator.userAgent
-    }
+    page: window.location.pathname,
+    user_agent: navigator.userAgent
   };
 
   try {
-    const data = await fetchWithBackendFallback(CHAT_PATH, {
+    const response = await fetchWithBackendFallback(CHAT_PATH, {
       method: 'POST',
-      mode: 'cors',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
 
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Duct AI chat send error:', error);
