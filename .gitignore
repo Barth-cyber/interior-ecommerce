@@ -61,3 +61,4 @@ htmlcov/
 # Uploads (keep in .gitignore but create in deployment)
 uploads/
 static/uploads/
+duct-ai-backend/

@@ -1,7 +1,0 @@
-# Ignore Node.js artifacts and local installation files for the Python backend service
-node_modules/
-package.json
-package-lock.json
-yarn.lock
-server.js
-.env
