@@ -1,7 +1,7 @@
 const API_BASES = [
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
   'https://duct-ai-backend.onrender.com',
   'https://interior-ecommerce-backend.onrender.com',
   'https://interior-ecommerce-lh3e.onrender.com'
@@ -45,8 +45,10 @@ async function sendDuctAiChat(userMessage) {
   const payload = {
     query: userMessage,
     session_id: sessionId,
-    page: window.location.pathname,
-    user_agent: navigator.userAgent
+    context: {
+      page: window.location.pathname,
+      user_agent: navigator.userAgent
+    }
   };
 
   try {

@@ -1838,7 +1838,7 @@ async function loadDuctAiKb() {
     return ductAiKb;
   }
   try {
-    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
     const res = await fetch(`${backendUrl.replace(/\/$/, '')}/kb`, { method: 'GET', mode: 'cors' });
     if (!res.ok) {
       return null;
@@ -1947,7 +1947,7 @@ async function sendMsg() {
 
   try {
     const backendUrls = [
-      window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+      window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
       'https://duct-ai-backend.onrender.com',
       'https://interior-ecommerce-backend.onrender.com',
       'https://interior-ecommerce-lh3e.onrender.com'
@@ -2935,9 +2935,7 @@ function openWhatsAppProductSlider() {
   // but use local backend when previewing on localhost.
   window.DUCT_AI_BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : (window.location.hostname.endsWith('.onrender.com')
-      ? 'https://duct-ai-backend.onrender.com'
-      : 'https://api.interiorductltd.com');
+    : 'https://duct-ai-backend.onrender.com';
   window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
   
   // Hide old embedded chat panel - use new floating widget instead

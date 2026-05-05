@@ -1,8 +1,8 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
 const BACKEND_URLS = [
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
   'https://duct-ai-backend.onrender.com',
   'https://interior-ecommerce-backend.onrender.com',
   'https://interior-ecommerce-lh3e.onrender.com'
