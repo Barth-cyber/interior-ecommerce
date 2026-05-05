@@ -1,8 +1,8 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
 const BACKEND_URLS = [
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
   'https://duct-ai-backend.onrender.com',
   'https://interior-ecommerce-backend.onrender.com',
   'https://interior-ecommerce-lh3e.onrender.com'
@@ -19,6 +19,13 @@ async function fetchBackend(path, options = {}) {
         const body = await res.text().catch(() => '');
         lastError = new Error(`Backend request failed (${res.status}) at ${url}: ${body}`);
         continue;
+      }
+      if (path === '/ai-query') {
+        const data = await res.clone().json().catch(() => null);
+        if (isWeakChatResponse(data)) {
+          lastError = new Error(`Weak AI response from ${url}`);
+          continue;
+        }
       }
       return res;
     } catch (err) {
@@ -37,6 +44,19 @@ function getDuctAiSessionId() {
   return sessionId;
 }
 
+function isWeakChatResponse(data) {
+  if (!data) return true;
+  const text = String(data.answer || data.reply || '').trim();
+  const provider = String(data.provider || '').toLowerCase();
+  if (data.escalate && !text) return false;
+  if (!text) return true;
+  if (provider === 'fallback' || provider === 'kb_fallback') return true;
+  if (/sorry, something went wrong|could not connect|trouble connecting|no provider available|server error/i.test(text)) {
+    return true;
+  }
+  return false;
+}
+
 async function askDuctAI(query, imageUrl) {
   chatHistory.push({ role: 'user', content: query, image: imageUrl || null });
   try {
@@ -44,7 +64,14 @@ async function askDuctAI(query, imageUrl) {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, session_id: getDuctAiSessionId() }),
+      body: JSON.stringify({
+        query,
+        session_id: getDuctAiSessionId(),
+        context: {
+          page: window.location.pathname,
+          user_agent: navigator.userAgent
+        }
+      }),
     });
     const data = await res.json();
     if (data.answer) {

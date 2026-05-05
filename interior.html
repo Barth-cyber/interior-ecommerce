@@ -1838,7 +1838,7 @@ async function loadDuctAiKb() {
     return ductAiKb;
   }
   try {
-    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
     const res = await fetch(`${backendUrl.replace(/\/$/, '')}/kb`, { method: 'GET', mode: 'cors' });
     if (!res.ok) {
       return null;
@@ -1923,6 +1923,19 @@ function getSessionId() {
   return sessionId;
 }
 
+function isWeakChatResponse(data) {
+  if (!data) return true;
+  const text = String(data.answer || data.reply || '').trim();
+  const provider = String(data.provider || '').toLowerCase();
+  if (data.escalate && !text) return false;
+  if (!text) return true;
+  if (provider === 'fallback' || provider === 'kb_fallback') return true;
+  if (/sorry, something went wrong|could not connect|trouble connecting|no provider available|server error/i.test(text)) {
+    return true;
+  }
+  return false;
+}
+
 function addMessage(role, message) {
   const msgs = document.getElementById('chatMsgs');
   if (!msgs) return;
@@ -1947,7 +1960,7 @@ async function sendMsg() {
 
   try {
     const backendUrls = [
-      window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+      window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
       'https://duct-ai-backend.onrender.com',
       'https://interior-ecommerce-backend.onrender.com',
       'https://interior-ecommerce-lh3e.onrender.com'
@@ -1982,6 +1995,12 @@ async function sendMsg() {
           lastError = new Error(`Chat failed (${res.status}) at ${backendUrl}: ${text}`);
           continue;
         }
+        const responseData = await res.clone().json().catch(() => null);
+        if (isWeakChatResponse(responseData)) {
+          console.warn('Weak AI response from backend, trying next endpoint', { backendUrl, provider: responseData?.provider, reply: responseData?.answer || responseData?.reply });
+          lastError = new Error(`Weak AI response from ${backendUrl}`);
+          continue;
+        }
         break;
       } catch (e) {
         console.error('Duct AI inline fetch exception:', { url: backendUrl, error: e });
@@ -1994,6 +2013,11 @@ async function sendMsg() {
     }
 
     const data = await res.json();
+    if (isWeakChatResponse(data)) {
+      console.warn('Weak AI response from backend, trying next endpoint', { backendUrl, provider: data.provider, reply: data.answer || data.reply });
+      lastError = new Error(`Weak AI response from ${backendUrl}`);
+      continue;
+    }
     const reply = data.answer || data.reply || 'No response';
 
     addMessage('bot', reply);
@@ -2933,11 +2957,9 @@ function openWhatsAppProductSlider() {
 <script>
   // Use the dedicated backend subdomain for deployed site,
   // but use local backend when previewing on localhost.
-  window.DUCT_AI_BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  window.DUCT_AI_BACKEND_URL = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : (window.location.hostname.endsWith('.onrender.com')
-      ? 'https://duct-ai-backend.onrender.com'
-      : 'https://api.interiorductltd.com');
+    : 'https://duct-ai-backend.onrender.com';
   window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
   
   // Hide old embedded chat panel - use new floating widget instead
