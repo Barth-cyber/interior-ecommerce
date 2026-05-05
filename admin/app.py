@@ -1139,9 +1139,10 @@ def _call_gemini(prompt_text, system_instruction=None, max_tokens=512):
         )
         response.raise_for_status()
         data = response.json()
-        # Extract text from Gemini response structure
-        answer = data['candidates'][0]['content']['parts'][0]['text'].strip()
-        return answer, False, None
+        answer = _extract_text_from_response(data)
+        if answer:
+            return answer, False, None
+        raise ValueError('Unable to parse Gemini response')
     except Exception as e:
         error_str = str(e)
         app.logger.error(f"Gemini API error: {error_str}")
@@ -1433,6 +1434,41 @@ def _build_drogram_prompt(products):
     )
 
 
+def _render_request_context(context):
+    if not isinstance(context, dict):
+        return ''
+    items = []
+    if context.get('page'):
+        items.append(f"Page: {context['page']}")
+    if context.get('user_agent'):
+        items.append(f"User agent: {context['user_agent']}")
+    if context.get('location'):
+        items.append(f"Location: {context['location']}")
+    return '\n'.join(items)
+
+
+def _extract_text_from_response(payload):
+    if payload is None:
+        return None
+    if isinstance(payload, str):
+        return payload.strip()
+    if isinstance(payload, dict):
+        for key in ('output_text', 'completion', 'text'):
+            if key in payload and isinstance(payload[key], str) and payload[key].strip():
+                return payload[key].strip()
+        for key in ('content', 'output', 'candidates'):
+            if key in payload:
+                answer = _extract_text_from_response(payload[key])
+                if answer:
+                    return answer
+    if isinstance(payload, list):
+        for item in payload:
+            answer = _extract_text_from_response(item)
+            if answer:
+                return answer
+    return None
+
+
 def _load_conversation_history(session_id):
     if not os.path.exists(CONVERSATION_LOG_PATH):
         return []
@@ -1503,8 +1539,10 @@ def _call_gemini_conversation(history, system_instruction=None, max_tokens=512):
         )
         response.raise_for_status()
         data = response.json()
-        answer = data['candidates'][0]['content']['parts'][0]['text'].strip()
-        return answer, False, None
+        answer = _extract_text_from_response(data)
+        if answer:
+            return answer, False, None
+        raise ValueError('Unable to parse Gemini conversation response')
     except Exception as e:
         error_str = str(e)
         app.logger.error(f"Gemini conversation API error: {error_str}")
@@ -1611,20 +1649,26 @@ def _call_anthropic(prompt_text, system_instruction=None, max_tokens=512):
         
         client = Anthropic(api_key=ANTHROPIC_API_KEY)
         
-        messages = [
-            {'role': 'user', 'content': prompt_text}
-        ]
+        if hasattr(client, 'messages') and hasattr(client.messages, 'create'):
+            response = client.messages.create(
+                model=ANTHROPIC_MODEL,
+                max_tokens=max_tokens,
+                system=system_instruction,
+                messages=[{'role': 'user', 'content': prompt_text}],
+                temperature=0.7,
+            )
+        elif hasattr(client, 'responses') and hasattr(client.responses, 'create'):
+            response = client.responses.create(
+                model=ANTHROPIC_MODEL,
+                max_tokens_to_sample=max_tokens,
+                temperature=0.7,
+                input=prompt_text,
+            )
+        else:
+            raise RuntimeError('Unsupported Anthropic SDK version')
         
-        response = client.messages.create(
-            model=ANTHROPIC_MODEL,
-            max_tokens=max_tokens,
-            system=system_instruction,
-            messages=messages,
-            temperature=0.7,
-        )
-        
-        if response.content and len(response.content) > 0:
-            answer = response.content[0].text.strip()
+        answer = _extract_text_from_response(response)
+        if answer:
             return answer, False, None
         return None, True, 'Anthropic returned no text'
     except ImportError:
@@ -1647,24 +1691,36 @@ def _call_anthropic_conversation(history, system_instruction=None, max_tokens=51
         
         client = Anthropic(api_key=ANTHROPIC_API_KEY)
         
-        # Convert history to Anthropic format (user/assistant alternating)
-        messages = []
-        for msg in history:
-            if msg['role'] == 'user':
-                messages.append({'role': 'user', 'content': msg['text']})
-            elif msg['role'] == 'assistant':
-                messages.append({'role': 'assistant', 'content': msg['text']})
+        if hasattr(client, 'messages') and hasattr(client.messages, 'create'):
+            messages = []
+            for msg in history:
+                if msg['role'] == 'user':
+                    messages.append({'role': 'user', 'content': msg['text']})
+                elif msg['role'] == 'assistant':
+                    messages.append({'role': 'assistant', 'content': msg['text']})
+            response = client.messages.create(
+                model=ANTHROPIC_MODEL,
+                max_tokens=max_tokens,
+                system=system_instruction,
+                messages=messages,
+                temperature=0.7,
+            )
+        elif hasattr(client, 'responses') and hasattr(client.responses, 'create'):
+            conversation_text = '\n'.join(
+                f"{msg['role'].capitalize()}: {msg['text']}" for msg in history if msg['role'] in ('user', 'assistant')
+            )
+            prompt_text = f"{system_instruction or ''}\n\nConversation:\n{conversation_text}"
+            response = client.responses.create(
+                model=ANTHROPIC_MODEL,
+                max_tokens_to_sample=max_tokens,
+                temperature=0.7,
+                input=prompt_text,
+            )
+        else:
+            raise RuntimeError('Unsupported Anthropic SDK version')
         
-        response = client.messages.create(
-            model=ANTHROPIC_MODEL,
-            max_tokens=max_tokens,
-            system=system_instruction,
-            messages=messages,
-            temperature=0.7,
-        )
-        
-        if response.content and len(response.content) > 0:
-            answer = response.content[0].text.strip()
+        answer = _extract_text_from_response(response)
+        if answer:
             return answer, False, None
         return None, True, 'Anthropic conversation returned no text'
     except ImportError:
@@ -1836,6 +1892,16 @@ def ai_query():
     kb = _load_kb()
     products_data = _load_products()
 
+    context = data.get('context', {}) or {}
+    history = _load_conversation_history(session_id)
+    history.append({
+        'role': 'user',
+        'text': query,
+        'page': context.get('page', ''),
+        'user_agent': context.get('user_agent', ''),
+        'timestamp': datetime.utcnow().isoformat() + 'Z'
+    })
+
     # 1. Try fast local knowledge base reply first (no API cost)
     local_answer = _get_kb_answer(query, kb)
     if local_answer:
@@ -1844,6 +1910,13 @@ def ai_query():
         
         # PART 3: Get recommendation based on user interests
         recommendation = get_recommendation(user)
+        
+        history.append({
+            'role': 'assistant',
+            'text': local_answer,
+            'timestamp': datetime.utcnow().isoformat() + 'Z'
+        })
+        _save_conversation_history(session_id, history)
         
         return jsonify({
             'answer': local_answer,
@@ -1854,14 +1927,26 @@ def ai_query():
             'visits': user.get('visits', 1)
         })
 
-    # 2. Call Gemini API
-    answer, escalate, provider, error_log = _ask_gemini_chat(query, kb, products_data)
+    # 2. Build conversation-aware prompt and call the AI provider chain
+    system_prompt = _build_drogram_prompt(products_data)
+    additional_context = _render_request_context(context)
+    if additional_context:
+        system_prompt += '\n\nUser request context:\n' + additional_context
+
+    answer, escalate, provider, error_log = _call_llm_conversation(history, system_instruction=system_prompt, max_tokens=512)
     if answer:
         # Save to MongoDB if available
         save_chat(session_id, query, answer)
         
         # PART 3: Get recommendation based on user interests
         recommendation = get_recommendation(user)
+
+        history.append({
+            'role': 'assistant',
+            'text': answer,
+            'timestamp': datetime.utcnow().isoformat() + 'Z'
+        })
+        _save_conversation_history(session_id, history)
         
         return jsonify({
             'answer': answer,
