@@ -70,8 +70,7 @@ def _call_openai(system_prompt, user_query):
         resp = requests.post(OPENAI_URL, headers=headers, json=data, timeout=20)
         resp.raise_for_status()
         result = resp.json()
-        content = result["choices"][0]["message"]["content"].strip()
-        return content, None
+        return _extract_response_text(result), None
     except Exception as e:
         return None, str(e)
 
@@ -80,8 +79,8 @@ def _call_anthropic(system_prompt, user_query):
     if not ANTHROPIC_API_KEY:
         return None, "Anthropic API key not set"
     headers = {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
+        "Authorization": f"Bearer {ANTHROPIC_API_KEY}",
+        "Anthropic-Version": "2023-06-01",
         "Content-Type": "application/json"
     }
     data = {
@@ -96,8 +95,7 @@ def _call_anthropic(system_prompt, user_query):
         resp = requests.post(ANTHROPIC_URL, headers=headers, json=data, timeout=20)
         resp.raise_for_status()
         result = resp.json()
-        content = result["content"][0]["text"].strip()
-        return content, None
+        return _extract_response_text(result), None
     except Exception as e:
         return None, str(e)
 
@@ -286,6 +284,36 @@ def _build_system_prompt():
     return f"You are Duct AI, the intelligent luxury design assistant for Interior Duct Ltd.\n\n{faq_text}\n\n{product_list}"
 
 
+def _render_context(context: dict) -> str:
+    if not isinstance(context, dict):
+        return ""
+    parts = []
+    if context.get("page"):
+        parts.append(f"Page: {context['page']}")
+    if context.get("user_agent"):
+        parts.append(f"User agent: {context['user_agent']}")
+    if context.get("location"):
+        parts.append(f"Location: {context['location']}")
+    return "\n".join(parts)
+
+
+def _load_session_history(session_id: str) -> List[dict]:
+    conversations = _read_json(CONV_LOG_PATH, [])
+    return [item for item in conversations if item.get("session_id") == session_id][-20:]
+
+
+def _render_session_history(history: List[dict]) -> str:
+    if not history:
+        return ""
+    lines = []
+    for entry in history:
+        role = entry.get("role", "user")
+        text = entry.get("text", "")
+        if role and text:
+            lines.append(f"{role.capitalize()}: {text}")
+    return "\n".join(lines)
+
+
 def _normalize_text(text: str) -> str:
     if not text:
         return ""
@@ -349,21 +377,40 @@ def _find_kb_response(query: str, kb: dict) -> Optional[str]:
 
 
 def _extract_response_text(response) -> str:
-    if response is None:
-        return ""
-    if hasattr(response, "text") and response.text:
-        return str(response.text).strip()
-    candidates = getattr(response, "candidates", None)
-    if candidates:
-        try:
-            first = candidates[0]
-            if hasattr(first, "content") and first.content:
-                return str(first.content).strip()
-            if isinstance(first, dict) and first.get("content"):
-                return str(first["content"]).strip()
-        except Exception:
+    def extract(payload):
+        if payload is None:
             return ""
-    return ""
+        if isinstance(payload, str):
+            return payload.strip()
+        if isinstance(payload, dict):
+            for key in ("text", "completion", "output_text", "content", "message", "completion_text"):
+                if key in payload and isinstance(payload[key], str) and payload[key].strip():
+                    return payload[key].strip()
+            for key in ("candidates", "items", "messages", "content"):
+                if key in payload:
+                    sub = payload[key]
+                    result = extract(sub)
+                    if result:
+                        return result
+            for value in payload.values():
+                result = extract(value)
+                if result:
+                    return result
+        if isinstance(payload, list):
+            for item in payload:
+                result = extract(item)
+                if result:
+                    return result
+        if hasattr(payload, "text") and isinstance(payload.text, str) and payload.text.strip():
+            return payload.text.strip()
+        if hasattr(payload, "completion") and isinstance(payload.completion, str) and payload.completion.strip():
+            return payload.completion.strip()
+        candidates = getattr(payload, "candidates", None)
+        if candidates:
+            return extract(candidates)
+        return ""
+
+    return extract(response)
 
 
 # Simple in-memory stores and logging helpers
@@ -413,6 +460,10 @@ def ai_query():
     if not query:
         return jsonify({"answer": None, "escalate": True})
 
+    history = _load_session_history(session_id)
+    session_text = _render_session_history(history)
+    context_text = _render_context(context)
+
     _log_conversation(session_id, "user", query, context)
 
     kb = _load_kb()
@@ -424,10 +475,16 @@ def ai_query():
 
     _init_gemini()
     system_prompt = _build_system_prompt()
+    if session_text:
+        system_prompt += f"\n\nConversation history:\n{session_text}"
+    if context_text:
+        system_prompt += f"\n\nRequest context:\n{context_text}"
     full_query = f"{system_prompt}\n\nUser: {query}"
     answer = None
     error_log = None
     provider_used = None
+    openai_error = None
+    anthropic_error = None
     
     # Try Gemini first
     if _gemini_model:
