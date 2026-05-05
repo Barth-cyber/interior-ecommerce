@@ -1061,6 +1061,48 @@ def _fuzzy_kb_match(query, kb):
     return None
 
 
+def _format_product_reply(product):
+    name = product.get('name', '').strip()
+    description = product.get('description', '').strip()
+    price = product.get('price_ngn')
+    price_text = f" Price starts at ₦{price:,}." if isinstance(price, (int, float)) else ''
+    if name and description:
+        return f"{name} — {description}.{price_text}"
+    if name:
+        return f"{name}.{price_text}"
+    return None
+
+
+def _get_kb_answer(query, kb):
+    """Use knowledge base triggers and FAQs to answer common customer questions."""
+    if not query or not kb:
+        return None
+
+    lower_query = query.lower()
+
+    # Greeting / identity triggers
+    for greeting in kb.get('greetings', []):
+        triggers = greeting.get('trigger', [])
+        if any(isinstance(trigger, str) and trigger.lower() in lower_query for trigger in triggers):
+            return greeting.get('response')
+
+    # FAQ fuzzy match
+    faq_answer = _fuzzy_kb_match(query, kb)
+    if faq_answer:
+        return faq_answer
+
+    # Simple product or category responses
+    for product in kb.get('products', []):
+        name = str(product.get('name', '')).lower()
+        category = str(product.get('category', '')).lower()
+        if name and name in lower_query:
+            return _format_product_reply(product)
+        if category and category in lower_query:
+            return _format_product_reply(product)
+
+    return None
+
+
 def _call_gemini(prompt_text, system_instruction=None, max_tokens=512):
     """
     Call the Google Gemini API (gemini-1.5-flash).
@@ -1794,8 +1836,8 @@ def ai_query():
     kb = _load_kb()
     products_data = _load_products()
 
-    # 1. Try fast local fuzzy match first (no API cost)
-    local_answer = _fuzzy_kb_match(query, kb)
+    # 1. Try fast local knowledge base reply first (no API cost)
+    local_answer = _get_kb_answer(query, kb)
     if local_answer:
         # Save to MongoDB if available
         save_chat(session_id, query, local_answer)
@@ -1807,6 +1849,7 @@ def ai_query():
             'answer': local_answer,
             'reply': local_answer,
             'escalate': False,
+            'provider': 'knowledge_base',
             'recommendation': recommendation,
             'visits': user.get('visits', 1)
         })

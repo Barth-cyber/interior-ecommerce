@@ -47,6 +47,7 @@
   const AGENT_AVATAR_URL = normalizeAvatarPath(DEFAULT_AVATAR_URL);
   const SESSION_STORAGE_KEY = 'duct_ai_session_id';
   const WHATSAPP_NUMBER = '2348036850229';
+  let knowledgeBase = null;
 
   function getDuctAiSessionId() {
     let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
@@ -56,6 +57,73 @@
     }
     return sessionId;
   }
+
+  async function loadKnowledgeBase() {
+    try {
+      const response = await fetchChatBackend('/kb', {
+        method: 'GET',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      knowledgeBase = await response.json();
+    } catch (error) {
+      console.warn('Duct AI knowledge base load failed:', error);
+      knowledgeBase = null;
+    }
+  }
+
+  function findLocalKbAnswer(query, kb) {
+    if (!query || !kb) return null;
+    const lowerQuery = query.toLowerCase();
+
+    if (Array.isArray(kb.greetings)) {
+      for (const greeting of kb.greetings) {
+        const triggers = Array.isArray(greeting.trigger) ? greeting.trigger : [];
+        for (const trigger of triggers) {
+          if (typeof trigger === 'string' && trigger.length > 0 && lowerQuery.includes(trigger.toLowerCase())) {
+            return greeting.response;
+          }
+        }
+      }
+    }
+
+    if (Array.isArray(kb.faqs)) {
+      // Exact or substring match first
+      for (const faq of kb.faqs) {
+        const question = String(faq.q || '').toLowerCase();
+        if (!question) continue;
+        if (lowerQuery === question || question.includes(lowerQuery) || lowerQuery.includes(question)) {
+          return faq.a;
+        }
+      }
+      // Fuzzy-like fallback based on common words
+      for (const faq of kb.faqs) {
+        const question = String(faq.q || '').toLowerCase();
+        if (!question) continue;
+        const words = question.split(/\W+/).filter(Boolean);
+        if (words.some(word => lowerQuery.includes(word) && word.length > 3)) {
+          return faq.a;
+        }
+      }
+    }
+
+    if (Array.isArray(kb.products)) {
+      for (const product of kb.products) {
+        const name = String(product.name || '').toLowerCase();
+        const category = String(product.category || '').toLowerCase();
+        if (name && lowerQuery.includes(name)) {
+          return `${product.name} — ${product.description || ''}`.trim();
+        }
+        if (category && lowerQuery.includes(category)) {
+          return `${product.name} — ${product.description || ''}`.trim();
+        }
+      }
+    }
+
+    return null;
+  }
+
+  loadKnowledgeBase();
 
   let chatHistory = [];
 
@@ -205,25 +273,44 @@
 
   async function fetchChatData(text) {
     const sessionId = getDuctAiSessionId();
-    const response = await fetchChatBackend('/ai-query', {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: text,
-        session_id: sessionId,
-        context: {
-          page: window.location.pathname,
-          user_agent: navigator.userAgent
-        }
-      })
-    });
+    try {
+      const response = await fetchChatBackend('/ai-query', {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: text,
+          session_id: sessionId,
+          context: {
+            page: window.location.pathname,
+            user_agent: navigator.userAgent
+          }
+        })
+      });
 
-    const data = await response.json();
-    if (!data || (!data.reply && !data.answer && !data.escalate)) {
-      throw new Error('Invalid chat response');
+      const data = await response.json();
+      if (!data || (!data.reply && !data.answer && !data.escalate)) {
+        throw new Error('Invalid chat response');
+      }
+      return data;
+    } catch (error) {
+      const fallback = await fetchChatDataFallback(text);
+      if (fallback) {
+        return fallback;
+      }
+      throw error;
     }
-    return data;
+  }
+
+  async function fetchChatDataFallback(queryText) {
+    if (!knowledgeBase) {
+      return null;
+    }
+    const reply = findLocalKbAnswer(queryText, knowledgeBase);
+    if (!reply) {
+      return null;
+    }
+    return { reply, source: 'knowledge_base' };
   }
 
   async function sendMessage() {

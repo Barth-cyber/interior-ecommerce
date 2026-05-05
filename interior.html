@@ -1832,6 +1832,74 @@ function aiLuxuryTone(reply) {
   return reply.replace(/\bjust\b|\bhey\b|\bhi\b|\bguys\b|\bcheap\b/gi,'').replace(/\bplease\b/gi,'Kindly').replace(/\bthanks\b/gi,'Thank you').replace(/\bawesome\b|\bgreat\b/gi,'excellent').replace(/\bhelp\b/gi,'assist').replace(/\bupgrade\b/gi,'premium upgrade');
 }
 
+let ductAiKb = null;
+async function loadDuctAiKb() {
+  if (ductAiKb !== null) {
+    return ductAiKb;
+  }
+  try {
+    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+    const res = await fetch(`${backendUrl.replace(/\/$/, '')}/kb`, { method: 'GET', mode: 'cors' });
+    if (!res.ok) {
+      return null;
+    }
+    ductAiKb = await res.json();
+    return ductAiKb;
+  } catch (e) {
+    console.warn('Duct AI knowledge base load failed:', e);
+    return null;
+  }
+}
+
+function getLocalKbReply(query, kb) {
+  if (!query || !kb) return null;
+  const lowerQuery = query.toLowerCase();
+
+  if (Array.isArray(kb.greetings)) {
+    for (const greeting of kb.greetings) {
+      const triggers = Array.isArray(greeting.trigger) ? greeting.trigger : [];
+      for (const trigger of triggers) {
+        if (typeof trigger === 'string' && trigger.length > 0 && lowerQuery.includes(trigger.toLowerCase())) {
+          return greeting.response;
+        }
+      }
+    }
+  }
+
+  if (Array.isArray(kb.faqs)) {
+    for (const faq of kb.faqs) {
+      const question = String(faq.q || '').toLowerCase();
+      if (!question) continue;
+      if (lowerQuery === question || question.includes(lowerQuery) || lowerQuery.includes(question)) {
+        return faq.a;
+      }
+    }
+    for (const faq of kb.faqs) {
+      const question = String(faq.q || '').toLowerCase();
+      if (!question) continue;
+      const words = question.split(/\W+/).filter(Boolean);
+      if (words.some(word => lowerQuery.includes(word) && word.length > 3)) {
+        return faq.a;
+      }
+    }
+  }
+
+  if (Array.isArray(kb.products)) {
+    for (const product of kb.products) {
+      const name = String(product.name || '').toLowerCase();
+      const category = String(product.category || '').toLowerCase();
+      if (name && lowerQuery.includes(name)) {
+        return `${product.name} — ${product.description || ''}`.trim();
+      }
+      if (category && lowerQuery.includes(category)) {
+        return `${product.name} — ${product.description || ''}`.trim();
+      }
+    }
+  }
+
+  return null;
+}
+
 // Self-learning AI - log queries for improvement
 function logQueryForLearning(query, response) {
   const logs = JSON.parse(localStorage.getItem('aiQueryLogs') || '[]');
@@ -1939,10 +2007,15 @@ async function sendMsg() {
     logQueryForLearning(message, data.reply);
 
   } catch (err) {
-    console.error(err);
-    addMessage('bot', '⚠️ Server error. Try again.');
-  }
-}
+      console.error(err);
+      const kb = await loadDuctAiKb();
+      const fallbackReply = getLocalKbReply(message, kb);
+      if (fallbackReply) {
+        addMessage('bot', fallbackReply);
+      } else {
+        addMessage('bot', '⚠️ Server error. Try again.');
+      }
+    }
 function handleKey(e) { if (e.key === 'Enter') sendMsg(); }
 
 function processChatActions(actions) {

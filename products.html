@@ -8,11 +8,12 @@
   <style>
     :root{--navy:#1B3A6B;--brown:#7B5C3E;--bg:#FAFAFA;--text:#102A44;--soft:#6B7A8D;--border:rgba(27,58,107,.08);--shadow:0 18px 40px rgba(13,27,42,.08)}
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:DM Sans,sans-serif;background:#f7f7f7;color:var(--text);line-height:1.6}
+    html{max-width:100%;overflow-x:hidden;}
+    body{font-family:DM Sans,sans-serif;background:#f7f7f7;color:var(--text);line-height:1.6;overflow-x:hidden}
     a{color:inherit;text-decoration:none}
     header{position:sticky;top:0;z-index:99;background:#fff;border-bottom:1px solid rgba(27,58,107,.08);display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;box-shadow:0 4px 16px rgba(13,27,42,.05)}
     .logo{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--navy);font-weight:700}
-    nav{display:flex;gap:1rem;align-items:center}
+    nav{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
     nav a{font-size:.94rem;color:var(--soft);padding:.45rem .75rem;border-radius:6px;transition:.25s}
     nav a:hover{background:rgba(27,58,107,.06);color:var(--navy)}
     .page-hero{padding:3.5rem 1.5rem 1.5rem;max-width:1120px;margin:0 auto}
@@ -34,7 +35,13 @@
     .product-card-actions button{flex:1;background:var(--navy);color:#fff;border:none;padding:.85rem 1rem;border-radius:8px;cursor:pointer;transition:.25s}
     .product-card-actions button:hover{background:#17315c}
     .page-footer{padding:3rem 1.5rem 2rem;text-align:center;color:var(--soft)}
-    @media(max-width:720px){.page-hero{padding:2.25rem 1rem 1rem}.product-card img{height:200px}}
+    @media(max-width:720px){
+      header{padding:1rem .9rem;gap:.75rem;}
+      nav{width:100%;justify-content:flex-end;gap:.5rem;}
+      nav a{flex:1 1 120px;text-align:center;}
+      .page-hero{padding:2.25rem 1rem 1rem}
+      .product-card img{height:200px}
+    }
   </style>
 </head>
 <body>
