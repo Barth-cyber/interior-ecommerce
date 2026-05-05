@@ -67,7 +67,7 @@
 
 /* =====================================================  RESET */
 *,*::before,*::after {box-sizing:border-box;margin:0;padding:0}
-html {scroll-behavior:smooth;font-size:16px}
+html {scroll-behavior:smooth;font-size:16px;max-width:100%;overflow-x:hidden;}
 body {font-family:var(--f-body);font-weight:400;color:var(--text-dark);background:var(--bg-white);overflow-x:hidden;}
 img {display:block;max-width:100%;height:auto}
 a {text-decoration:none;color:inherit}
@@ -532,10 +532,12 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .hero-popup-slide{min-height:360px;max-height:420px;flex-direction:column}.hero-popup-slide img{margin-right:0;max-height:220px}
 }
 @media(max-width:900px){
-  header{padding:0 1.6rem}
+  header{padding:0 1.6rem;max-width:100%;left:0;right:0;}
   nav{display:none}
   .nav-toggle{display:flex;align-items:center}
+  .hdr-right{flex-wrap:wrap;justify-content:flex-end;gap:.6rem;}
   .hdr-right .hdr-cta{display:none}
+  .curr-sel{min-width:0;max-width:120px;}
   .container{padding:0 1.6rem}
   section{padding:4rem 0}
   .products-grid{grid-template-columns:repeat(3,1fr)}
@@ -555,7 +557,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
 }
 @media(max-width:600px){
   html{font-size:14px}
-  header{padding:0 1rem;height:60px}
+  header{padding:0 1rem;height:60px;max-width:100%;left:0;right:0;}
   .logo-img-wrap{width:36px;height:36px;border:1.5px solid var(--brown-pale)}
   .logo-name{font-size:0.95rem}
   .logo-tagline{font-size:0.45rem}
@@ -574,13 +576,16 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .hero-popup-content div:first-child{font-size:1.1rem}
   .hero-stats{grid-template-columns:1fr;gap:1rem}
   .pay-grid{grid-template-columns:1fr}
-  .hero-popup-slider{margin:1rem auto;width:95vw}
+  .hero-popup-slider{margin:1rem auto;width:100%;max-width:100%;}
   .btn{padding:.5rem 1rem;font-size:.7rem}
   .sec-title{font-size:clamp(1.6rem,2.5vw,2rem)}
   .footer-grid{grid-template-columns:1fr;gap:1.5rem}
   .about-img-stack{height:300px}
   .ab-img-main{width:100%;height:60%}
   .ab-img-sec{width:60%;height:50%}
+  .hdr-right{flex-wrap:wrap;justify-content:flex-end;gap:.4rem;}
+  .curr-sel{display:none;}
+  .hdr-icon-btn{padding:.35rem .55rem;min-width:0;}
 }
 </style>
 <script src="static/3d-viewer.js"></script>
