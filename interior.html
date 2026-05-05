@@ -1,6 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    // Persistent override: force Duct AI backend to Render deployment
+    // Ensures widgets use the canonical backend at runtime before other scripts run.
+    try {
+      window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
+      (function(){
+        var url = window.DUCT_AI_BACKEND_URL;
+        try { window.BACKEND_URLS = [url]; } catch(e) {}
+        try { window.API_BASES = [url]; } catch(e) {}
+        // Some widgets use lowercase or different var names — defensively overwrite
+        try { window.backendUrls = [url]; } catch(e) {}
+        try { window.apiBases = [url]; } catch(e) {}
+      })();
+    } catch(e) {
+      console && console.warn && console.warn('DuctAI: backend override failed', e);
+    }
+  </script>
+  <script>
+    // Lightweight fetch wrapper to redirect legacy backend hosts and relative paths
+    (function(){
+      if (!window.fetch) return;
+      const oldFetch = window.fetch.bind(window);
+      function rewriteUrl(input) {
+        try {
+          const backend = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
+          if (typeof input === 'string') {
+            // Relative path -> prepend backend
+            if (input.startsWith('/')) return backend.replace(/\/$/, '') + input;
+            // Legacy host patterns -> replace host with canonical backend
+            if (/interior-ecommerce(-backend|-lh3e)?\.onrender\.com/i.test(input)) {
+              const path = input.replace(/^https?:\/\/[^\/]+/, '');
+              return backend.replace(/\/$/, '') + (path || '');
+            }
+            return input;
+          }
+          if (input instanceof Request) {
+            let url = input.url || '';
+            const newUrl = rewriteUrl(url);
+            if (newUrl !== url) return new Request(newUrl, input);
+            return input;
+          }
+          return input;
+        } catch (e) {
+          return input;
+        }
+      }
+
+      window.fetch = function(input, init) {
+        try {
+          const newInput = rewriteUrl(input);
+          return oldFetch(newInput, init);
+        } catch (e) {
+          return oldFetch(input, init);
+        }
+      };
+    })();
+  </script>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1946,12 +2003,7 @@ async function sendMsg() {
   input.value = '';
 
   try {
-    const backendUrls = [
-      window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
-      'https://duct-ai-backend.onrender.com',
-      'https://interior-ecommerce-backend.onrender.com',
-      'https://interior-ecommerce-lh3e.onrender.com'
-    ];
+    const backendUrls = [ window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com' ];
     let res = null;
     let lastError = null;
 
@@ -1994,17 +2046,23 @@ async function sendMsg() {
     }
 
     const data = await res.json();
-    const reply = data.answer || data.reply || 'No response';
+    const reply = data.answer || data.reply;
 
-    addMessage('bot', reply);
-    if (data.recommendation) {
-      addMessage('bot', data.recommendation);
-    }
-    if (Array.isArray(data.actions)) {
-      processChatActions(data.actions);
+    if (reply) {
+      addMessage('bot', reply);
+      if (data.recommendation) {
+        addMessage('bot', data.recommendation);
+      }
+      if (Array.isArray(data.actions)) {
+        processChatActions(data.actions);
+      }
+    } else {
+      const kb = await loadDuctAiKb();
+      const fallbackReply = getLocalKbReply(message, kb);
+      addMessage('bot', fallbackReply || '⚠️ I’m sorry, I couldn’t get an answer from AI right now. Please try again or contact us on WhatsApp.');
     }
 
-    logQueryForLearning(message, data.reply);
+    logQueryForLearning(message, reply || '');
 
   } catch (err) {
       console.error(err);
@@ -2388,7 +2446,7 @@ function getAdminApiBase() {
   // Auto-detect environment: use production URL if not localhost
   return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:5000'                                    // local dev
-    : 'https://interior-ecommerce-backend.onrender.com';         // production
+    : 'https://duct-ai-backend.onrender.com';                    // production
 }
 
 function apiUrl(path) {

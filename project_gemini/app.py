@@ -53,7 +53,7 @@ CORS(app, resources={r"/api/*": {"origins": [
     "https://interiorductltd.com",
     "https://www.interiorductltd.com",
     "https://duct-ai-backend.onrender.com",
-    "https://api.interiorductltd.com",
+    "https://duct-ai-backend.onrender.com",
     "https://main.d3v5c9s0p0.amplifyapp.com",
     "https://your-app.netlify.app",
     "https://your-app.vercel.app",

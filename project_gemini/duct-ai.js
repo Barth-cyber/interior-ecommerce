@@ -3,9 +3,7 @@ const BACKEND_URLS = [
   (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
     : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
-  'https://duct-ai-backend.onrender.com',
-  'https://interior-ecommerce-backend.onrender.com',
-  'https://interior-ecommerce-lh3e.onrender.com'
+  'https://duct-ai-backend.onrender.com'
 ];
 let chatHistory = [];
 
@@ -55,6 +53,13 @@ async function askDuctAI(query, imageUrl) {
       renderChat();
     } else if (data.escalate) {
       escalateToHuman(query, imageUrl);
+    } else {
+      console.warn('Duct AI backend returned no answer:', data);
+      const fallbackText = data.error_log
+        ? `Sorry, I’m having trouble right now: ${data.error_log}`
+        : 'Sorry, I’m having trouble right now. Please try again or contact us on WhatsApp.';
+      chatHistory.push({ role: 'ai', content: fallbackText });
+      renderChat();
     }
   } catch (e) {
     chatHistory.push({ role: 'ai', content: 'Sorry, I could not connect right now. Please try again or contact us on WhatsApp.' });
