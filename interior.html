@@ -3446,11 +3446,10 @@ function openWhatsAppProductSlider() {
   window.DUCT_AI_BACKEND_URL = backendUrl;
   window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
   
-  // Hide old embedded chat panel - use new floating widget instead
-  const style = document.createElement('style');
-  style.textContent = '.ai-grid { display: none !important; }';
-  document.head.appendChild(style);
+  // RESTORED: Enable embedded Duct AI chat panel with full functionality
+  // The chat interface is now visible and operational as part of the AI Design section
 </script>
+<!-- Duct AI Widget CSS and JS - Optional floating widget for additional support -->
 <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
 <script src="duct-ai-widget.js?v=20260429" data-backend-url="https://api.interiorductltd.com" defer></script>
 
