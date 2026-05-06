@@ -271,6 +271,69 @@
   window.openDuctAIChat = openDuctAIChat;
   window.openDuctAIWidget = openDuctAIChat;
 
+  // Smart AI response patterns for enhanced responses
+  const SMART_RESPONSES = {
+    furniture: {
+      keywords: ['chair', 'table', 'sofa', 'bed', 'cabinet', 'desk', 'shelf', 'couch', 'seating', 'dining'],
+      responses: [
+        'We offer premium furniture crafted from solid timber with exquisite detail. What type of furniture are you looking for?',
+        'Our furniture collections range from luxury seating to bespoke dining sets. What room are you furnishing?',
+        'All our furniture is locally manufactured with quality materials. Tell me your style preference - modern, classic, or traditional?'
+      ]
+    },
+    doors: {
+      keywords: ['door', 'entrance', 'entrance door', 'exit', 'portal'],
+      responses: [
+        'We specialize in bespoke doors and entrances in Benin City, Abuja, and Port Harcourt. What style interests you?',
+        'Our doors feature premium finishes and durable hardware. Are you looking for interior or exterior doors?',
+        'Customized door designs available with various wood types and finishes. What\'s your requirement?'
+      ]
+    },
+    pricing: {
+      keywords: ['price', 'cost', 'how much', 'quote', 'payment', 'afford', 'budget'],
+      responses: [
+        'Our pricing is competitive with factory-direct savings. Send me details of what you need and I\'ll get you a quote via WhatsApp!',
+        'We offer flexible payment options including Paystack and Stripe. Let me collect your preferences for a formal quote.',
+        'Each product is customized, so pricing varies. Tell me what you\'re looking for and I can provide an estimate.'
+      ]
+    },
+    delivery: {
+      keywords: ['delivery', 'shipping', 'transport', 'send', 'available', 'location'],
+      responses: [
+        'We serve Benin City, Abuja, and Port Harcourt with reliable delivery. What\'s your location?',
+        'We offer factory-direct delivery to multiple Nigerian cities. Where are you located?',
+        'Delivery arrangements available nationwide. Which city should we deliver to?'
+      ]
+    },
+    design: {
+      keywords: ['design', 'style', 'aesthetic', 'customize', 'bespoke', 'custom', 'visualize', 'see'],
+      responses: [
+        'Our 3D room visualization tool helps you see furniture in your space before purchasing. Would you like to try it?',
+        'We offer AI-powered design recommendations. Tell me about your room dimensions and style preferences!',
+        'Custom design available - describe your vision and we\'ll create it for you.',
+        'Try our 3D visualizer to see how furniture fits your room. What\'s your room style?'
+      ]
+    }
+  };
+
+  function generateSmartResponse(query) {
+    const lowerQuery = query.toLowerCase();
+    
+    // Find matching response category
+    for (const category in SMART_RESPONSES) {
+      const { keywords, responses } = SMART_RESPONSES[category];
+      if (keywords.some(keyword => lowerQuery.includes(keyword))) {
+        // Return a random response from the category
+        return responses[Math.floor(Math.random() * responses.length)];
+      }
+    }
+    
+    return null;
+  }
+
+  window.openDuctAIChat = openDuctAIChat;
+  window.openDuctAIWidget = openDuctAIChat;
+
   async function fetchChatData(text) {
     const sessionId = getDuctAiSessionId();
     try {
@@ -318,10 +381,20 @@
 
   async function fetchChatDataFallback(queryText) {
     if (!knowledgeBase) {
+      // Use smart responses if KB is not available
+      const smartResponse = generateSmartResponse(queryText);
+      if (smartResponse) {
+        return { reply: smartResponse, source: 'smart_response' };
+      }
       return null;
     }
     const reply = findLocalKbAnswer(queryText, knowledgeBase);
     if (!reply) {
+      // Fallback to smart response if KB doesn't have answer
+      const smartResponse = generateSmartResponse(queryText);
+      if (smartResponse) {
+        return { reply: smartResponse, source: 'smart_response' };
+      }
       return null;
     }
     return { reply, source: 'knowledge_base' };
