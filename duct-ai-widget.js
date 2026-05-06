@@ -2,7 +2,8 @@
   const BACKEND_URLS = [
     (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
-      : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
+      : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+    'https://api.interiorductltd.com',
     'https://duct-ai-backend.onrender.com',
     'https://interior-ecommerce-backend.onrender.com'
   ];
