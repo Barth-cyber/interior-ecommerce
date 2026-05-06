@@ -3,25 +3,22 @@
 <head>
   <meta name="backend-url" content="https://api.interiorductltd.com">
   <script>
-    // Ensure page-level override for the canonical backend
+    // Ensure canonical backend URL is set before any scripts load
+    // This supports the improved widget that accepts data-backend-url attribute
     window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
   </script>
   <script src="static/backend-config.js"></script>
   <script>
-    // Persistent override: force Duct AI backend to Render deployment
-    // Ensures widgets use the canonical backend at runtime before other scripts run.
+    // Additional redundancy: ensure canonical backend URL across multiple variable names
+    // Supports legacy code paths that may reference different variable names
     try {
-      window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
-      (function(){
-        var url = window.DUCT_AI_BACKEND_URL;
-        try { window.BACKEND_URLS = [url]; } catch(e) {}
-        try { window.API_BASES = [url]; } catch(e) {}
-        // Some widgets use lowercase or different var names — defensively overwrite
-        try { window.backendUrls = [url]; } catch(e) {}
-        try { window.apiBases = [url]; } catch(e) {}
-      })();
+      const backend = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+      window.BACKEND_URLS = [backend];
+      window.API_BASES = [backend];
+      window.backendUrls = [backend];
+      window.apiBases = [backend];
     } catch(e) {
-      console && console.warn && console.warn('DuctAI: backend override failed', e);
+      // Silently continue if any variable fails
     }
   </script>
   <script>
@@ -3439,11 +3436,14 @@ function openWhatsAppProductSlider() {
 </div>
 
 <script>
-  // Use the dedicated backend subdomain for deployed site,
-  // but use local backend when previewing on localhost.
-  window.DUCT_AI_BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  // Configure backend URL for widget
+  // Use local backend for localhost, canonical backend for production
+  const backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : 'https://duct-ai-backend.onrender.com';
+    : 'https://api.interiorductltd.com';
+  
+  // Set window variable for backward compatibility
+  window.DUCT_AI_BACKEND_URL = backendUrl;
   window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
   
   // Hide old embedded chat panel - use new floating widget instead
@@ -3452,7 +3452,7 @@ function openWhatsAppProductSlider() {
   document.head.appendChild(style);
 </script>
 <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
-<script src="duct-ai-widget.js?v=20260429" defer></script>
+<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://api.interiorductltd.com" defer></script>
 
 </body>
 </html>
