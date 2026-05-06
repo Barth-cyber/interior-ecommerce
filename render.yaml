@@ -14,7 +14,7 @@ services:
     root: duct-ai-backend
     runtime: python311
     buildCommand: "python -m pip install -r requirements.txt"
-    startCommand: "gunicorn -w 1 -b 0.0.0.0:$PORT application:app"
+    startCommand: "gunicorn -w 1 -b 0.0.0.0:$PORT app:app"
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"

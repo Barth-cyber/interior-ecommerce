@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const API_BASES = [
   (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
@@ -7,31 +8,17 @@ const API_BASES = [
   'https://interior-ecommerce-backend.onrender.com',
   'https://interior-ecommerce-lh3e.onrender.com'
 ];
+=======
+const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : '';
+const API_BASES = [];
+if (LOCAL_DEFAULT) API_BASES.push(LOCAL_DEFAULT);
+if (CANONICAL_BACKEND) API_BASES.push(CANONICAL_BACKEND);
+if (!API_BASES.includes('https://duct-ai-backend.onrender.com')) API_BASES.push('https://duct-ai-backend.onrender.com');
+>>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
 const CHAT_PATH = '/ai-query';
 const TRACK_PATH = '/user-log';
 const SESSION_STORAGE_KEY = 'duct_ai_session_id';
-
-function getDuctAiSessionId() {
-  let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
-  if (!sessionId) {
-    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
-  }
-  return sessionId;
-}
-
-function isWeakChatResponse(data) {
-  if (!data) return true;
-  const text = String(data.answer || data.reply || '').trim();
-  const provider = String(data.provider || '').toLowerCase();
-  if (data.escalate && !text) return false;
-  if (!text) return true;
-  if (provider === 'fallback' || provider === 'kb_fallback') return true;
-  if (/sorry, something went wrong|could not connect|trouble connecting|no provider available|server error/i.test(text)) {
-    return true;
-  }
-  return false;
-}
 
 async function fetchWithBackendFallback(path, options = {}) {
   let lastError = null;
@@ -45,15 +32,6 @@ async function fetchWithBackendFallback(path, options = {}) {
         lastError = new Error(`Backend request failed (${response.status}) ${response.statusText} @ ${url}: ${errorText}`);
         continue;
       }
-      if (path === CHAT_PATH) {
-        const data = await response.json();
-        if (isWeakChatResponse(data)) {
-          console.warn('Weak AI response from backend, retrying next endpoint:', { url, provider: data.provider, answer: data.answer || data.reply });
-          lastError = new Error(`Weak AI response from ${url}`);
-          continue;
-        }
-        return data;
-      }
       return response;
     } catch (error) {
       console.error('Duct AI assistant fetch exception:', { url, error, options });
@@ -63,6 +41,15 @@ async function fetchWithBackendFallback(path, options = {}) {
   throw lastError || new Error('All backend endpoints failed');
 }
 
+function getDuctAiSessionId() {
+  let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
+  if (!sessionId) {
+    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+  }
+  return sessionId;
+}
+
 async function sendDuctAiChat(userMessage) {
   const sessionId = getDuctAiSessionId();
   const payload = {
@@ -70,20 +57,24 @@ async function sendDuctAiChat(userMessage) {
     session_id: sessionId,
     context: {
       page: window.location.pathname,
-      user_agent: navigator.userAgent
+      page_title: document.title || '',
+      page_description: (document.querySelector('meta[name="description"]')||{}).content || '',
+      url: window.location.href,
+      user_agent: navigator.userAgent,
+      locale: navigator.language || ''
     }
   };
 
   try {
-    const data = await fetchWithBackendFallback(CHAT_PATH, {
+    const response = await fetchWithBackendFallback(CHAT_PATH, {
       method: 'POST',
-      mode: 'cors',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
 
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Duct AI chat send error:', error);

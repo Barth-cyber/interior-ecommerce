@@ -1,6 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Version: 2026-05-06-v2 | Cache Buster for GitHub Pages Deployment -->
+  <meta name="backend-url" content="https://api.interiorductltd.com">
+  <script>
+    // Ensure canonical backend URL is set before any scripts load
+    // This supports the improved widget that accepts data-backend-url attribute
+    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+  </script>
+  <script src="static/backend-config.js"></script>
+  <script>
+    // Additional redundancy: ensure canonical backend URL across multiple variable names
+    // Supports legacy code paths that may reference different variable names
+    try {
+      const backend = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+      window.BACKEND_URLS = [backend];
+      window.API_BASES = [backend];
+      window.backendUrls = [backend];
+      window.apiBases = [backend];
+    } catch(e) {
+      // Silently continue if any variable fails
+    }
+  </script>
+  <script>
+    // Lightweight fetch wrapper to redirect legacy backend hosts and relative paths
+    (function(){
+      if (!window.fetch) return;
+      const oldFetch = window.fetch.bind(window);
+      function rewriteUrl(input) {
+        try {
+          const backend = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
+          if (typeof input === 'string') {
+            // Relative path -> prepend backend
+            if (input.startsWith('/')) return backend.replace(/\/$/, '') + input;
+            // Legacy host patterns -> replace host with canonical backend
+            if (/interior-ecommerce(-backend|-lh3e)?\.onrender\.com/i.test(input)) {
+              const path = input.replace(/^https?:\/\/[^\/]+/, '');
+              return backend.replace(/\/$/, '') + (path || '');
+            }
+            return input;
+          }
+          if (input instanceof Request) {
+            let url = input.url || '';
+            const newUrl = rewriteUrl(url);
+            if (newUrl !== url) return new Request(newUrl, input);
+            return input;
+          }
+          return input;
+        } catch (e) {
+          return input;
+        }
+      }
+
+      window.fetch = function(input, init) {
+        try {
+          const newInput = rewriteUrl(input);
+          return oldFetch(newInput, init);
+        } catch (e) {
+          return oldFetch(input, init);
+        }
+      };
+    })();
+  </script>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +70,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* HERO POPUP SLIDER STYLES */
-.hero-popup-slider { box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; background: rgba(242,243,245,0.98); margin-bottom: 2.5rem; }
-.hero-popup-slide { min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; background: rgba(255,255,255,0.97); box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; min-height: 360px; max-height: 420px; height: 420px !important; overflow: hidden !important; gap: 2rem; flex-wrap: wrap; }
-.hero-popup-slide img { width: auto !important; max-width: 220px !important; max-height: 220px !important; height: auto !important; object-fit: cover; border-radius: 8px; flex-shrink: 0; box-shadow: 0 2px 12px rgba(13,27,42,0.08); display: block; }
+.hero-popup-slider { box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; background: rgba(242,243,245,0.98); margin-bottom: 2.5rem; min-height: 360px; max-height: 420px; height: 400px; overflow:hidden; }
+.hero-popup-slide { min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem 1.5rem; background: rgba(255,255,255,0.97); box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; min-height: 340px; max-height: 400px; height: 400px !important; overflow: hidden !important; gap: 1.6rem; flex-wrap: wrap; }
+.hero-popup-slide img { width: auto !important; max-width: 200px !important; max-height: 200px !important; height: auto !important; object-fit: cover; border-radius: 8px; flex-shrink: 0; box-shadow: 0 2px 12px rgba(13,27,42,0.08); display: block; }
 .hero-popup-content { flex: 1; min-width: 250px; }
 /* =====================================================
    BRAND TOKENS — Navy · Brown · White · Light Grey
@@ -266,9 +327,9 @@ section{padding:6rem 0}
 .slides-section{background:var(--bg-white);padding-bottom:0}
 .slider-outer{position:relative;overflow:hidden}
 .slides-track{display:flex;transition:transform .65s cubic-bezier(.77,0,.175,1)}
-.slide{min-width:100%;display:grid;grid-template-columns:55% 45%;min-height:80vh}
+.slide{min-width:100%;display:grid;grid-template-columns:55% 45%;min-height:62vh}
 /* image side */
-.sl-img{position:relative;overflow:hidden;background:#0D0D0D}
+.sl-img{position:relative;overflow:hidden;background:#0D0D0D;min-height:320px}
 .sl-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s ease}
 .slide:hover .sl-img img{transform:scale(1.03)}
 .sl-img-ov{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,var(--bg-white) 100%)}
@@ -300,6 +361,13 @@ section{padding:6rem 0}
 
 /* =====================================================  PRODUCT GRID  (Light grey bg) */
 .products-section{background:var(--bg-lgrey)}
+.custom-made-section{background:var(--bg-lgrey);padding-top:3rem;padding-bottom:3rem}
+.custom-made-grid{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:1.5rem;margin-top:2rem}
+.custom-made-card{background:var(--bg-white);border-radius:18px;overflow:hidden;box-shadow:var(--shadow-md);border:1px solid rgba(27,58,107,0.08)}
+.custom-made-card img{width:100%;height:230px;object-fit:cover;display:block}
+.custom-made-card-body{padding:1.5rem}
+.custom-made-card-title{font-family:var(--f-head);font-size:1.05rem;color:var(--navy);margin-bottom:.6rem}
+.custom-made-card-desc{font-family:var(--f-sub);font-size:.95rem;color:var(--text-mid);line-height:1.65}
 .cat-tabs{display:flex;gap:0;margin-bottom:2.8rem;border-bottom:2px solid var(--bg-mgrey);flex-wrap:wrap}
 .cat-tab{padding:.65rem 1.4rem;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-soft);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;border-left:none;border-right:none;border-top:none;transition:var(--t)}
 .cat-tab:hover,.cat-tab.active{color:var(--navy);border-bottom-color:var(--navy);background:transparent}
@@ -521,7 +589,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
 /* =====================================================  RESPONSIVE */
 @media(max-width:1200px){
   .hero{grid-template-columns:1fr}.hero-right{display:none}
-  .slide{grid-template-columns:1fr}.sl-img{min-height:360px}
+  .slide{grid-template-columns:1fr}.sl-img{min-height:280px}
   .sl-img-ov{background:linear-gradient(to top,var(--bg-white) 0%,transparent 40%)}
   .products-grid{grid-template-columns:repeat(4,1fr)}
   .doors-grid{grid-template-columns:repeat(2,1fr)}
@@ -576,7 +644,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .hero-popup-content div:first-child{font-size:1.1rem}
   .hero-stats{grid-template-columns:1fr;gap:1rem}
   .pay-grid{grid-template-columns:1fr}
-  .hero-popup-slider{margin:1rem auto;width:100%;max-width:100%;}
+  .hero-popup-slider{margin:1rem auto;width:100%;max-width:100%;min-height:320px;max-height:420px;height:380px;}
   .btn{padding:.5rem 1rem;font-size:.7rem}
   .sec-title{font-size:clamp(1.6rem,2.5vw,2rem)}
   .footer-grid{grid-template-columns:1fr;gap:1.5rem}
@@ -613,7 +681,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   <nav>
     <a href="#home">Home</a>
     <a href="#showroom">Showroom</a>
-    <a href="products.html">Products</a>
+    <a href="#custom-made-products">Products</a>
     <a href="#doors">Doors</a>
     <a href="#ai-design">AI Design</a>
     <a href="#about">About</a>
@@ -625,23 +693,60 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       <option value="USD">&#36; USD</option>
       <option value="GBP">&#163; GBP</option>
       <option value="EUR">&#8364; EUR</option>
-    </select
+    </select>
     <button class="hdr-icon-btn" title="Cart" id="cartBtn">&#128722; <sup id="cartCount">0</sup></button>
+    <button class="hdr-cta btn" onclick="openQrOverlay()">Connect With Us</button>
     <button class="hdr-cta btn" onclick="scrollTo('ai-design')">AI Designer</button>
     <button class="nav-toggle" id="navToggle" onclick="toggleMobileNav()" aria-label="Menu">&#9776;</button>
   </div>
 </header>
 
+<div id="qrOverlay" class="qr-overlay" onclick="closeQrOverlay(event)">
+  <div class="qr-overlay-panel" onclick="event.stopPropagation()">
+    <button class="qr-close" onclick="closeQrOverlay()" aria-label="Close QR overlay">&times;</button>
+    <div class="qr-head">
+      <div>
+        <div class="qr-head-title">QR App — Scan and follow IDL instantly</div>
+        <div class="qr-head-sub">Press Escape or click outside to close.</div>
+      </div>
+      <div class="qr-head-badge">Live QR App</div>
+    </div>
+    <iframe id="qrFrame" src="https://barth-cyber.github.io/IDL-QrGen/scan.html" loading="lazy" allow="clipboard-read;camera;microphone" title="IDL QR Scan App"></iframe>
+  </div>
+</div>
+
+<div class="social-strip">
+  <div class="social-banner">
+    <div class="social-copy">
+      <strong>Multi-channel updates live:</strong>
+      <span id="socialUpdateText">New product reels, handy furniture safety tips and inspiring stories are one tap away.</span>
+      <span class="social-note">Always visible as a sticky strip so visitors can connect across YouTube, TikTok, Instagram, Facebook, LinkedIn and QR scan.</span>
+    </div>
+    <div class="social-actions">
+      <button class="btn btn-outline-white" onclick="scrollTo('payments')">Visit Media Hub</button>
+      <div class="social-links">
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="social-link youtube">YouTube</a>
+        <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="social-link tiktok">TikTok</a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="social-link instagram">Instagram</a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="social-link facebook">Facebook</a>
+        <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a>
+        <a href="#" onclick="openQrOverlay(); return false;" class="social-link qr">QR Scan</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Mobile Nav -->
 <div class="mobile-nav" id="mobileNav">
   <a href="#home" onclick="closeMobileNav()">Home</a>
   <a href="#showroom" onclick="closeMobileNav()">Showroom</a>
+  <a href="#custom-made-products" onclick="closeMobileNav()">Products</a>
   <a href="#doors" onclick="closeMobileNav()">Doors</a>
-  <a href="#showroom" onclick="closeMobileNav()">Showroom</a>
   <a href="#ai-design" onclick="closeMobileNav()">AI Design</a>
   <a href="#about" onclick="closeMobileNav()">About Us</a>
   <a href="#contact" onclick="closeMobileNav()">Contact</a>
   <a href="#" onclick="openWhatsApp('');closeMobileNav()">&#128242; WhatsApp</a>
+  <a href="#" onclick="openQrOverlay(); closeMobileNav(); return false;">&#128247; Connect With Us</a>
 </div>
 
 <!-- ========================================================= HERO  (Dark Navy) -->
@@ -813,10 +918,10 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       </div>
       <div class="machine-card fade-up">
         <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
-          <img src="IDL_Product_branding/Metal_Drill_Machine.jpg" alt="Laser Cutter" style="width:100%;height:100%;object-fit:cover;">
+          <img src="IDL_Product_branding/Metal_Drill_Machine.jpg" alt="Precision Drill Press" style="width:100%;height:100%;object-fit:cover;">
         </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Industrial Laser Cutter</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">High-speed laser cutting for metal, acrylic, and wood inlays.</div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Precision Drill Press</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Accurate hole drilling for metal and timber assemblies.</div>
       </div>
       <div class="machine-card fade-up">
         <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
@@ -827,24 +932,59 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       </div>
       <div class="machine-card fade-up">
         <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
-          <img src="IDL_Product_branding/Sanding_Machine1.jpg" alt="3D Printer" style="width:100%;height:100%;object-fit:cover;">
+          <img src="IDL_Product_branding/Bandsaw_Machine.jpg" alt="Band Saw" style="width:100%;height:100%;object-fit:cover;">
         </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Precision Sanding System</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Fine finishing and surface refinement for premium results.</div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Vertical Bandsaw Cutting</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Smooth contours and accurate panel cutting for furniture parts.</div>
       </div>
       <div class="machine-card fade-up">
         <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
-          <img src="IDL_Product_branding/Docktailing_Machine.jpg" alt="Spray Booth" style="width:100%;height:100%;object-fit:cover;">
+          <img src="IDL_Product_branding/Mortisin_Machine1.jpg" alt="Mortising Machine" style="width:100%;height:100%;object-fit:cover;">
         </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Dovetail Joinery System</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Precision joinery for high-strength, elegant connections.</div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Mortise &amp; Tenon Machine</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">High-strength joinery for durable furniture and frame connections.</div>
       </div>
       <div class="machine-card fade-up">
         <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
-          <img src="IDL_Product_branding/Factory_Interior_Machine_Space.jpg" alt="AI Design Station" style="width:100%;height:100%;object-fit:cover;">
+          <img src="IDL_Product_branding/Planer_Big1.jpg" alt="Heavy-Duty Planer" style="width:100%;height:100%;object-fit:cover;">
         </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Integrated Manufacturing Floor</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Fully coordinated workspace for seamless production workflow.</div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Heavy-Duty Thickness Planer</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Uniform board thickness for premium cabinetry and panels.</div>
+      </div>
+      <div class="machine-card fade-up">
+        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
+          <img src="IDL_Product_branding/Planer_Mini2.jpg" alt="Multi-Purpose Planer" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Multi-Purpose Planer</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Fine surface preparation for perfect panel joining.</div>
+      </div>
+      <div class="machine-card fade-up">
+        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
+          <img src="IDL_Product_branding/Sanding_Machine1.jpg" alt="Precision Sanding" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Precision Sanding Station</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Smooth surface finish for flawless final appearance.</div>
+      </div>
+      <div class="machine-card fade-up">
+        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
+          <img src="IDL_Product_branding/Compressor1.jpg" alt="Industrial Compressor" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Industrial Compressor</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Supporting pneumatic tools, finishing stations, and metal work.</div>
+      </div>
+      <div class="machine-card fade-up">
+        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
+          <img src="IDL_Product_branding/Multi_Purpose_Planer_and_cutting_Machine.jpg" alt="Multi-Purpose Cutting" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Multi-Purpose Cutting Station</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Integrated cutting and sizing for fast production flow.</div>
+      </div>
+      <div class="machine-card fade-up">
+        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;">
+          <img src="IDL_Product_branding/Factory_Interior_Machine_Space.jpg" alt="Production Floor" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Integrated Production Floor</div>
+        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Coordinated workflow connecting design, cutting, assembly and finishing.</div>
       </div>
     </div>
   </div>
@@ -976,6 +1116,103 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       <button class="cat-tab" data-category="doors">Doors</button>
     </div>
     <div class="products-grid" id="productGrid"></div>
+  </div>
+</section>
+
+<section class="custom-made-section" id="custom-made-products">
+  <div class="sec-hdr container">
+    <span class="sec-tag">Custom-Made Products</span>
+    <h2 class="sec-title">Our <em>Custom-Made</em> Product Range</h2>
+    <div class="divider"></div>
+    <p style="color:var(--text-soft);font-family:var(--f-sub);font-size:1.05rem;max-width:720px;margin:1.2rem auto 0;line-height:1.8;">Discover our premium furniture pieces crafted from the IDL branding archive. Each item combines comfort, elegance, and functional living space benefits for bedrooms, living rooms, kitchens, dining settings, and entryways.</p>
+  </div>
+  <div class="container">
+    <div class="custom-made-grid">
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Chair_Royal.jpg" alt="Royal Lounge Chair">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Royal Lounge Chair</div>
+          <div class="custom-made-card-desc">Regal seating designed for premium comfort, posture support, and elevated living room appeal.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Dining_Set.jpg" alt="Grand Dining Set">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Grand Dining Set</div>
+          <div class="custom-made-card-desc">Family-ready dining furniture crafted for entertaining, durability, and refined mealtime experiences.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Bedside.jpg" alt="Bedroom Bedside Cabinet">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Bedside Cabinet</div>
+          <div class="custom-made-card-desc">Elegant bedroom storage with soft-close drawers, ideal for a restful and organized sleep space.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Office_Desk.jpg" alt="Executive Office Desk">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Executive Office Desk</div>
+          <div class="custom-made-card-desc">Professional workspace furniture designed for productivity, clean cable management, and executive finishes.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Kitchen_Cabinet.jpg" alt="Signature Kitchen Cabinetry">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Kitchen Cabinetry</div>
+          <div class="custom-made-card-desc">Tailored kitchen storage with premium finishes and smart organization for day-to-day convenience.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Living_Room_set.jpg" alt="Premium Living Room Set">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Living Room Set</div>
+          <div class="custom-made-card-desc">Comfortable seating and tables curated for family living and sophisticated lounge spaces.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/tv_console_white1.jpg" alt="Modern TV Console">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">TV Console</div>
+          <div class="custom-made-card-desc">Minimalist media storage with elegant lines and smart cable management for sleek interiors.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Table_coffee_mahogany.jpg" alt="Coffee Table">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Coffee Table</div>
+          <div class="custom-made-card-desc">Centerpiece table for lounge areas that brings warmth, style, and practical surface space.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Door_Black_Mahogany.jpg" alt="Black Mahogany Door">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Mahogany Entry Door</div>
+          <div class="custom-made-card-desc">A striking entry door that adds security, privacy, and premium first impressions.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Door_Patterned.jpg" alt="Patterned Wooden Door">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Patterned Wooden Door</div>
+          <div class="custom-made-card-desc">Artisan door design with carved details for luxury interiors and elegant room transitions.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/tvconsole3.jpg" alt="Premium Media Wall Unit">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Media Wall Unit</div>
+          <div class="custom-made-card-desc">Integrated media furniture built for modern entertainment and living room staging.</div>
+        </div>
+      </div>
+      <div class="custom-made-card">
+        <img src="IDL_Product_branding/Red_Kitchen_Cab.jpg" alt="Modern Kitchen Cabinet">
+        <div class="custom-made-card-body">
+          <div class="custom-made-card-title">Modern Kitchen Cabinet</div>
+          <div class="custom-made-card-desc">High-impact kitchen cabinetry with bold color and organized storage for efficient cooking spaces.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1406,51 +1643,125 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
   </div>
 </section>
 
-<!-- ========================================================= PAYMENTS  (White bg) -->
-<section class="pay-section" id="payments">
+<!-- ========================================================= MEDIA HUB  (Live Videos & Social) -->
+<section class="media-section" id="payments">
   <div class="container">
     <div class="sec-hdr">
-      <span class="sec-tag">Secure Payments</span>
-      <h2 class="sec-title">Pay <em>Your Way</em></h2>
+      <span class="sec-tag">Media Hub</span>
+      <h2 class="sec-title">Furniture Videos, Safety Shorts & Social Feeds</h2>
       <div class="divider"></div>
     </div>
-    <div class="pay-grid">
-      <div class="pay-card fade-up">
-        <div class="pay-icon">&#127475;&#127468;</div>
-        <div class="pay-title">Nigeria &mdash; Paystack</div>
-        <div class="pay-desc">Bank transfer, USSD, card, and mobile money. Instant payment confirmation and factory notification.</div>
-        <div class="curr-row"><span class="curr-chip">&#8358; NGN</span></div>
-      </div>
-      <div class="pay-card fade-up">
-        <div class="pay-icon">&#127758;</div>
-        <div class="pay-title">International &mdash; Stripe</div>
-        <div class="pay-desc">Visa, Mastercard, Apple Pay, Google Pay, and bank debits. PCI-DSS Level 1 compliant for your security.</div>
-        <div class="curr-row">
-          <span class="curr-chip">&#36; USD</span>
-          <span class="curr-chip">&#163; GBP</span>
-          <span class="curr-chip">&#8364; EUR</span>
-        </div>
-      </div>
-      <div class="pay-card fade-up">
-        <div class="pay-icon">&#128274;</div>
-        <div class="pay-title">Safe &amp; Secure</div>
-        <div class="pay-desc">All transactions are encrypted and verified. Your data is protected with industry-leading security standards throughout every purchase.</div>
-        <div class="curr-row">
-          <span class="curr-chip">3D Secure</span>
-          <span class="curr-chip">TLS 1.3</span>
-        </div>
+    <div class="media-topbar">
+      <div class="media-notice" id="mediaNotification">NEW upload: Furniture Care Reel just posted on YouTube.</div>
+      <div class="media-actions">
+        <button class="btn btn-outline-navy" onclick="switchMediaTab('videosTab')">Watch Videos</button>
+        <button class="btn btn-outline-navy" onclick="switchMediaTab('galleryTab')">Open Gallery</button>
+        <button class="btn btn-outline-navy" onclick="switchMediaTab('vacanciesTab')">View Jobs</button>
       </div>
     </div>
-    <div class="pay-action-row" style="margin-top:2rem;display:grid;grid-template-columns:1fr;gap:1rem;">
-      <div style="padding:1.6rem;border:1px solid #e5e7eb;border-radius:16px;background:#f9fafb;">
-        <div style="font-size:1rem;font-weight:700;color:#1B3A6B;margin-bottom:.75rem;">Start a secure checkout</div>
-        <label style="display:block;font-size:.9rem;color:#555;margin-bottom:.5rem;">Amount in NGN</label>
-        <input id="idt-custom-amount" type="number" min="1000" value="250000" style="width:100%;padding:.9rem 1rem;border:1.5px solid #d1d5db;border-radius:12px;font-size:.95rem;outline:none;box-sizing:border-box;margin-bottom:1rem;" />
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
-          <button class="btn btn-brown" onclick="IDTPayment.open('Custom Interior Order', Number(document.getElementById('idt-custom-amount').value), window.location.origin + '/IDL_Product_branding/IDL_Cover_Photo.jpg')" style="flex:1;min-width:180px;">Checkout with Paystack / Stripe</button>
-          <button class="btn btn-outline-navy" onclick="IDTPayment.open('Custom Interior Order', Number(document.getElementById('idt-custom-amount').value), window.location.origin + '/IDL_Product_branding/IDL_Cover_Photo.jpg')" style="flex:1;min-width:180px;">Open Checkout Modal</button>
+    <div class="media-platforms">
+      <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="platform-chip youtube">YouTube: Fresh reels live</a>
+      <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="platform-chip tiktok">TikTok: Quick home tips</a>
+      <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="platform-chip instagram">Instagram: Styling stories</a>
+      <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="platform-chip facebook">Facebook: Customer spotlights</a>
+      <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="platform-chip linkedin">LinkedIn: Career updates</a>
+      <a href="#" onclick="openQrOverlay(); return false;" class="platform-chip qr">QR Scan: Instant connect</a>
+    </div>
+    <div class="media-grid">
+      <div class="video-card fade-up">
+        <div class="video-card-header">
+          <div>
+            <div class="video-label">Featured Furniture Reel</div>
+            <div class="video-title">Quick craftsmanship highlights & safety best practice</div>
+          </div>
+          <span class="badge new">NEW</span>
         </div>
-        <p style="margin-top:.85rem;font-size:.85rem;color:#555;line-height:1.5;">Enter your order amount and choose the gateway inside the checkout modal. Paystack is for NGN; Stripe supports USD, GBP, EUR.</p>
+        <div class="video-player">
+          <iframe id="heroVideoFrame" src="https://www.youtube.com/embed/ScMzIvxBSi4?rel=0&autoplay=1&mute=1&modestbranding=1" title="Interior Duct Video Player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="video-body">
+          <p>Auto-playing short furniture adverts, motion text briefs, and education clips in a compact TV-style view. Update the playlist with your own YouTube and TikTok embeds for the real channel experience.</p>
+          <div class="video-text-slide" id="videoTextSlide">Expert installation leads to stronger furniture and longer product life. Choose certified materials and professional assembly.</div>
+        </div>
+      </div>
+      <div class="playlist-card fade-up">
+        <div class="playlist-header">
+          <div><span class="playlist-title">Video Playlist</span><span class="playlist-sub">Shorts, ads, safety, product stories</span></div>
+          <span class="badge">TV</span>
+        </div>
+        <div class="playlist-items" id="playlistItems"></div>
+      </div>
+    </div>
+    <div class="media-tabs">
+      <button class="media-tab-btn active" data-target="videosTab" onclick="switchMediaTab('videosTab')">Videos</button>
+      <button class="media-tab-btn" data-target="galleryTab" onclick="switchMediaTab('galleryTab')">Gallery</button>
+      <button class="media-tab-btn" data-target="vacanciesTab" onclick="switchMediaTab('vacanciesTab')">Vacancies</button>
+      <button class="media-tab-btn" data-target="statusTab" onclick="switchMediaTab('statusTab')">Status</button>
+      <button class="media-tab-btn" data-target="setupGuideTab" onclick="switchMediaTab('setupGuideTab')">Setup Guide</button>
+    </div>
+    <div class="media-panels">
+      <div class="media-tab-panel active" id="videosTab">
+        <div class="tab-row">
+          <div class="tab-card">
+            <div class="tab-card-head">YouTube & TikTok</div>
+            <p>Embedded playlist sidebar with sample short-form reels. Replace the IDs and URLs with your real video credentials once the channel is live.</p>
+            <ul>
+              <li>Short furniture ads and installation behind-the-scenes.</li>
+              <li>Safety tips for lifting, screwing, and maintaining quality fittings.</li>
+              <li>Product benefit highlights for customer trust and conversion.</li>
+            </ul>
+          </div>
+          <div class="tab-card badge-card">
+            <div class="tab-card-head">Notification</div>
+            <div class="notification-pill">NEW upload: Ergonomic sofa build demo.</div>
+            <div class="notification-pill">Live: QR app scan feature online.</div>
+          </div>
+        </div>
+      </div>
+      <div class="media-tab-panel" id="galleryTab">
+        <div class="gallery-grid">
+          <div class="gallery-item"><img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=700&q=60" alt="Furniture gallery" /><span>Instagram feed</span><strong>New</strong></div>
+          <div class="gallery-item"><img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=700&q=60" alt="Modern living room" /><span>Facebook highlights</span></div>
+          <div class="gallery-item"><img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=700&q=60" alt="Stylish chair" /><span>Product stories</span></div>
+        </div>
+      </div>
+      <div class="media-tab-panel" id="vacanciesTab">
+        <div class="jobs-list">
+          <div class="job-card"><strong>Production Coordinator</strong><span>LinkedIn sync status: Live</span><p>Support furniture builds, manage tooling schedules and vendor delivery. Apply now for an on-site role in our workshop.</p><button class="btn btn-brown">Apply Now</button></div>
+          <div class="job-card"><strong>Sales & Fulfillment</strong><span>Applying via LinkedIn</span><p>Be the voice of IDL to clients and guide them through design, pricing and delivery. Great commission structure.</p><button class="btn btn-outline-navy">Apply Now</button></div>
+        </div>
+      </div>
+      <div class="media-tab-panel" id="statusTab">
+        <div class="status-grid">
+          <div class="status-card"><strong>YouTube</strong><span>Connected</span></div>
+          <div class="status-card"><strong>TikTok</strong><span>Connected</span></div>
+          <div class="status-card"><strong>Instagram</strong><span>Connected</span></div>
+          <div class="status-card"><strong>Facebook</strong><span>Connected</span></div>
+          <div class="status-card"><strong>LinkedIn</strong><span>Connected</span></div>
+          <div class="status-card"><strong>QR App</strong><span>Live</span></div>
+          <div class="status-card"><strong>VR / 3D</strong><span>Pending</span></div>
+        </div>
+      </div>
+      <div class="media-tab-panel" id="setupGuideTab">
+        <div class="setup-card">
+          <div class="tab-card-head">Developer Setup Guide</div>
+          <p>To go live, replace the placeholder API yanked URLs with your real platform credentials and profile links. Deploy the backend sync script on your server and keep the QR overlay live.</p>
+          <pre><code>const socialLinks = {
+  youtube: 'https://www.youtube.com/@YOUR_CHANNEL',
+  tiktok: 'https://www.tiktok.com/@YOUR_HANDLE',
+  instagram: 'https://www.instagram.com/YOUR_PROFILE',
+  facebook: 'https://www.facebook.com/YOUR_PAGE',
+  linkedin: 'https://www.linkedin.com/company/YOUR_COMPANY',
+  qrApp: 'https://barth-cyber.github.io/IDL-QrGen/scan.html'
+};
+
+function syncSocialFeed() {
+  // Replace fetch placeholders with your API endpoints.
+  fetch('/api/social-feed').then(r => r.json()).then(renderSocialFeed);
+}
+</code></pre>
+          <p>Important: use the same anchor IDs and keep the `#payments` route available for landing pages that still point to payment options. The new section now showcases your videos and social engagement while the back-end sync and VR strategy can be added in the next release.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1711,6 +2022,103 @@ function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function openQrOverlay() {
+  document.getElementById('qrOverlay').classList.add('active');
+}
+function closeQrOverlay(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('qrOverlay').classList.remove('active');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeQrOverlay();
+  }
+});
+
+const videoSources = [
+  { id: 'ScMzIvxBSi4', label: 'Furniture craftsmanship teaser', note: 'Short advert promoting premium workmanship.', badge: 'NEW' },
+  { id: 'M7lc1UVf-VE', label: 'Safety best practice in furniture handling', note: 'Quick material and assembly safety tips.', badge: 'SAFETY' },
+  { id: 'Ks-_Mh1QhMc', label: 'Ergonomic living room styling', note: 'Motion text-style benefit reel for modern interiors.', badge: 'STYLE' }
+];
+const videoTextSlides = [
+  'Install furniture on level floors only and always tighten all fasteners during delivery.',
+  'Choose treated wood and corrosion-resistant fittings for longer-lasting performance.',
+  'A well-planned living space reduces strain, improves comfort, and elevates room value.',
+  'Use soft-close hinges and drawer runners to protect furniture from shock damage.',
+  'Trusted factory-direct build quality means faster delivery and better warranty support.'
+];
+const socialUpdates = [
+  { text: 'YouTube: New furniture reels and installation shorts are live now.', note: 'NEW upload: Furniture care reel just posted on YouTube.' },
+  { text: 'TikTok: Quick home styling tips and safe assembly hacks are rolling now.', note: 'LIVE: Quick furniture care shorts on TikTok.' },
+  { text: 'Instagram: Behind-the-scenes showroom stories and product inspiration.', note: 'NEW story: Instagram showroom highlight published.' },
+  { text: 'Facebook: Customer spotlights and collection announcements available.', note: 'UPDATE: Facebook product showcase featured.' },
+  { text: 'LinkedIn: Team updates and workshop progress reports are ready.', note: 'NEWS: LinkedIn brand update and job posts available.' }
+];
+let currentVideoIndex = 0;
+let currentTextIndex = 0;
+let currentSocialIndex = 0;
+
+function setSocialUpdate(index) {
+  if (!Array.isArray(socialUpdates) || socialUpdates.length === 0) return;
+  currentSocialIndex = index % socialUpdates.length;
+  const update = socialUpdates[currentSocialIndex];
+  const textEl = document.getElementById('socialUpdateText');
+  const notif = document.getElementById('mediaNotification');
+  if (textEl) textEl.textContent = update.text;
+  if (notif) notif.textContent = update.note;
+}
+
+function rotateSocialUpdate() {
+  setSocialUpdate(currentSocialIndex + 1);
+}
+
+function setActiveVideo(index) {
+  currentVideoIndex = index % videoSources.length;
+  const source = videoSources[currentVideoIndex];
+  const iframe = document.getElementById('heroVideoFrame');
+  iframe.src = `https://www.youtube.com/embed/${source.id}?rel=0&autoplay=1&mute=1&modestbranding=1`;
+  document.getElementById('videoTextSlide').textContent = source.note;
+  document.querySelectorAll('.playlist-item').forEach((item, idx) => {
+    item.classList.toggle('active', idx === currentVideoIndex);
+  });
+}
+
+function buildVideoPlaylist() {
+  const container = document.getElementById('playlistItems');
+  if (!container) return;
+  container.innerHTML = videoSources.map((video, index) => `
+    <div class="playlist-item${index === 0 ? ' active' : ''}" onclick="setActiveVideo(${index})">
+      <div class="playlist-thumb"><img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" alt="${video.label}" /></div>
+      <div class="playlist-info"><strong>${video.label}</strong><small>${video.note}</small></div>
+    </div>
+  `).join('');
+}
+
+function rotateVideoText() {
+  const textEl = document.getElementById('videoTextSlide');
+  if (!textEl) return;
+  currentTextIndex = (currentTextIndex + 1) % videoTextSlides.length;
+  textEl.textContent = videoTextSlides[currentTextIndex];
+}
+
+function switchMediaTab(targetId) {
+  document.querySelectorAll('.media-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
+  document.querySelectorAll('.media-tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === targetId));
+}
+
+window.addEventListener('load', () => {
+  buildVideoPlaylist();
+  setActiveVideo(0);
+  setSocialUpdate(0);
+  setInterval(rotateVideoText, 6000);
+  setInterval(rotateSocialUpdate, 5200);
+  setTimeout(() => {
+    const notif = document.getElementById('mediaNotification');
+    if (notif) notif.classList.add('pulse');
+  }, 2800);
+});
+
 // SLIDER
 let slide = 0, total = 4;
 const track = document.getElementById('slidesTrack');
@@ -1923,19 +2331,6 @@ function getSessionId() {
   return sessionId;
 }
 
-function isWeakChatResponse(data) {
-  if (!data) return true;
-  const text = String(data.answer || data.reply || '').trim();
-  const provider = String(data.provider || '').toLowerCase();
-  if (data.escalate && !text) return false;
-  if (!text) return true;
-  if (provider === 'fallback' || provider === 'kb_fallback') return true;
-  if (/sorry, something went wrong|could not connect|trouble connecting|no provider available|server error/i.test(text)) {
-    return true;
-  }
-  return false;
-}
-
 function addMessage(role, message) {
   const msgs = document.getElementById('chatMsgs');
   if (!msgs) return;
@@ -1959,6 +2354,7 @@ async function sendMsg() {
   input.value = '';
 
   try {
+<<<<<<< HEAD
     const backendUrls = [
       window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
       'https://api.interiorductltd.com',
@@ -1966,6 +2362,9 @@ async function sendMsg() {
       'https://interior-ecommerce-backend.onrender.com',
       'https://interior-ecommerce-lh3e.onrender.com'
     ];
+=======
+    const backendUrls = [ window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com' ];
+>>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
     let res = null;
     let lastError = null;
 
@@ -1996,12 +2395,6 @@ async function sendMsg() {
           lastError = new Error(`Chat failed (${res.status}) at ${backendUrl}: ${text}`);
           continue;
         }
-        const responseData = await res.clone().json().catch(() => null);
-        if (isWeakChatResponse(responseData)) {
-          console.warn('Weak AI response from backend, trying next endpoint', { backendUrl, provider: responseData?.provider, reply: responseData?.answer || responseData?.reply });
-          lastError = new Error(`Weak AI response from ${backendUrl}`);
-          continue;
-        }
         break;
       } catch (e) {
         console.error('Duct AI inline fetch exception:', { url: backendUrl, error: e });
@@ -2014,22 +2407,23 @@ async function sendMsg() {
     }
 
     const data = await res.json();
-    if (isWeakChatResponse(data)) {
-      console.warn('Weak AI response from backend, trying next endpoint', { backendUrl, provider: data.provider, reply: data.answer || data.reply });
-      lastError = new Error(`Weak AI response from ${backendUrl}`);
-      continue;
-    }
-    const reply = data.answer || data.reply || 'No response';
+    const reply = data.answer || data.reply;
 
-    addMessage('bot', reply);
-    if (data.recommendation) {
-      addMessage('bot', data.recommendation);
-    }
-    if (Array.isArray(data.actions)) {
-      processChatActions(data.actions);
+    if (reply) {
+      addMessage('bot', reply);
+      if (data.recommendation) {
+        addMessage('bot', data.recommendation);
+      }
+      if (Array.isArray(data.actions)) {
+        processChatActions(data.actions);
+      }
+    } else {
+      const kb = await loadDuctAiKb();
+      const fallbackReply = getLocalKbReply(message, kb);
+      addMessage('bot', fallbackReply || '⚠️ I’m sorry, I couldn’t get an answer from AI right now. Please try again or contact us on WhatsApp.');
     }
 
-    logQueryForLearning(message, data.reply);
+    logQueryForLearning(message, reply || '');
 
   } catch (err) {
       console.error(err);
@@ -2413,7 +2807,7 @@ function getAdminApiBase() {
   // Auto-detect environment: use production URL if not localhost
   return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:5000'                                    // local dev
-    : 'https://interior-ecommerce-backend.onrender.com';         // production
+    : 'https://duct-ai-backend.onrender.com';                    // production
 }
 
 function apiUrl(path) {
@@ -2934,10 +3328,118 @@ function openWhatsAppProductSlider() {
   background: var(--navy);
   color: #fff;
 }
-</style>
 
-<!-- Product Modal -->
-<div id="productModal">
+  .social-strip { position: sticky; top: 72px; z-index:290; background: rgba(27,58,107,0.98); border-bottom:1px solid rgba(196,168,130,0.18); }
+  .social-banner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 4rem; color:#fff; font-size:.92rem; }
+  .social-copy { display:flex; flex-direction:column; gap:.35rem; max-width:52%; }
+  .social-copy strong { font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+  .social-copy span { color:rgba(255,255,255,.8); font-size:.92rem; line-height:1.4; }
+  .social-copy .social-note { font-size:.82rem; color:rgba(255,255,255,.68); }
+  .social-actions { display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; justify-content:flex-end; }
+  .social-links { display:flex; flex-wrap:wrap; gap:.55rem; }
+  .social-link { display:inline-flex; align-items:center; justify-content:center; padding:.55rem 1rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:999px; color:#fff; font-size:.78rem; transition:var(--t); }
+  .social-link:hover { background:rgba(255,255,255,0.16); }
+  .social-link.youtube { color:#FF0000; }
+  .social-link.tiktok { color:#fff; background:rgba(0,0,0,.22); }
+  .social-link.instagram { color:#F77737; }
+  .social-link.facebook { color:#1877F2; }
+  .social-link.linkedin { color:#0A66C2; }
+  .social-link.qr { color:#fff; border-color:#C4A882; }
+  .social-actions .btn { white-space:nowrap; }
+
+  .media-platforms { display:flex; flex-wrap:wrap; gap:.85rem; margin-bottom:1.8rem; }
+  .platform-chip { display:inline-flex; align-items:center; justify-content:center; padding:.75rem 1rem; border-radius:999px; border:1px solid rgba(27,58,107,.15); background:#F7F6F4; color:var(--navy); font-size:.88rem; transition:var(--t); text-decoration:none; }
+  .platform-chip:hover { transform:translateY(-1px); box-shadow:0 10px 24px rgba(27,58,107,.08); }
+  .platform-chip.youtube { color:#FF0000; }
+  .platform-chip.tiktok { color:#000; }
+  .platform-chip.instagram { color:#F77737; }
+  .platform-chip.facebook { color:#1877F2; }
+  .platform-chip.linkedin { color:#0A66C2; }
+  .platform-chip.qr { border-color:#C4A882; color:var(--navy); }
+  .video-player { position:relative; width:100%; min-height:320px; aspect-ratio:16/9; overflow:hidden; border-radius:18px; background:#000; }
+  .video-player iframe { width:100%; height:100%; }
+
+  .qr-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(10,18,36,0.85); z-index:995; padding:1.5rem; }
+  .qr-overlay.active { display:flex; }
+  .qr-overlay-panel { width:100%; max-width:1100px; background:rgba(255,255,255,0.98); border-radius:22px; overflow:hidden; box-shadow:0 32px 70px rgba(0,0,0,.35); border:1px solid rgba(27,58,107,.1); }
+  .qr-close { position:absolute; top:1rem; right:1rem; background:var(--navy); color:#fff; border:none; width:44px; height:44px; border-radius:50%; font-size:1.5rem; cursor:pointer; z-index:10; }
+  .qr-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.6rem 2rem; background:linear-gradient(90deg, rgba(27,58,107,.95), rgba(123,92,62,.95)); color:#fff; }
+  .qr-head-title { font-family:var(--f-head); font-size:1.45rem; line-height:1.1; }
+  .qr-head-sub { margin-top:.4rem; color:rgba(255,255,255,.8); font-size:.9rem; }
+  .qr-head-badge { background:rgba(255,255,255,.15); color:#fff; padding:.45rem .95rem; border-radius:999px; font-size:.78rem; text-transform:uppercase; letter-spacing:.12em; }
+  #qrFrame { width:100%; height:calc(80vh - 96px); min-height:420px; border:none; }
+
+  .media-section { background:var(--bg-white); padding-top:3rem; }
+  .media-topbar { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; align-items:flex-start; margin-bottom:2rem; }
+  .media-notice { background:linear-gradient(90deg, rgba(196,168,130,.14), rgba(27,58,107,.08)); color:var(--navy); padding:.9rem 1rem; border-radius:14px; border:1px solid rgba(196,168,130,.22); font-size:.92rem; }
+  .media-actions { display:flex; gap:.8rem; flex-wrap:wrap; }
+  .media-grid { display:grid; grid-template-columns:2.2fr 1fr; gap:1.8rem; align-items:start; }
+  .video-card, .playlist-card { background:#fff; border-radius:22px; border:1px solid rgba(27,58,107,.08); box-shadow:var(--shadow-sm); padding:1.8rem; }
+  .video-card-header, .playlist-header { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:1.35rem; }
+  .video-label { font-size:.82rem; letter-spacing:.25em; text-transform:uppercase; color:var(--brown); margin-bottom:.35rem; display:block; }
+  .video-title { font-family:var(--f-head); font-size:1.4rem; color:var(--navy); line-height:1.25; }
+  .badge, .notification-pill { display:inline-flex; align-items:center; justify-content:center; border-radius:999px; padding:.45rem .9rem; font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; font-weight:700; }
+  .badge.new { background:var(--brown); color:#fff; }
+  .badge { background:var(--bg-lgrey); color:var(--navy); }
+  .video-player { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; border-radius:18px; background:#000; }
+  .video-player iframe { width:100%; height:100%; }
+  .video-body { margin-top:1.2rem; color:var(--text-mid); line-height:1.8; }
+  .video-text-slide { margin-top:1rem; padding:1rem 1.1rem; background:rgba(196,168,130,.1); border-radius:14px; font-size:.95rem; color:var(--navy); font-weight:600; }
+  .playlist-card { display:flex; flex-direction:column; gap:1rem; }
+  .playlist-title { font-family:var(--f-head); font-size:1.05rem; color:var(--navy); }
+  .playlist-sub { display:block; margin-top:.35rem; color:var(--text-soft); font-size:.9rem; }
+  .playlist-items { display:grid; gap:.85rem; }
+  .playlist-item { display:flex; gap:.9rem; padding:1rem; border-radius:16px; border:1px solid rgba(27,58,107,.08); cursor:pointer; transition:var(--t); background:#faf9f7; }
+  .playlist-item:hover { transform:translateX(2px); background:#fff; }
+  .playlist-item.active { background:rgba(27,58,107,.05); }
+  .playlist-thumb { width:84px; min-width:84px; height:64px; border-radius:14px; overflow:hidden; background:#000; }
+  .playlist-thumb img { width:100%; height:100%; object-fit:cover; }
+  .playlist-info { flex:1; }
+  .playlist-info strong { display:block; font-size:.95rem; color:var(--navy); margin-bottom:.25rem; }
+  .playlist-info small { display:block; color:var(--text-soft); font-size:.82rem; }
+
+  .media-tabs { display:flex; gap:.75rem; flex-wrap:wrap; margin:2.5rem 0 1.5rem; }
+  .media-tab-btn { border:1px solid rgba(27,58,107,.16); background:#fff; color:var(--navy); padding:.75rem 1.2rem; border-radius:999px; cursor:pointer; transition:var(--t); font-size:.84rem; }
+  .media-tab-btn.active, .media-tab-btn:hover { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .media-panels { border:1px solid rgba(27,58,107,.08); border-radius:22px; overflow:hidden; }
+  .media-tab-panel { display:none; padding:1.8rem 2rem; background:var(--bg-white); }
+  .media-tab-panel.active { display:block; }
+  .tab-row { display:grid; grid-template-columns:1.5fr .9fr; gap:1.4rem; }
+  .tab-card, .setup-card { background:var(--bg-white); border:1px solid rgba(27,58,107,.08); border-radius:18px; padding:1.5rem; }
+  .tab-card-head { font-family:var(--f-head); font-size:1.05rem; color:var(--navy); margin-bottom:.8rem; }
+  .tab-card ul { list-style:none; padding-left:0; margin:0; display:grid; gap:.7rem; }
+  .tab-card ul li::before { content:'•'; color:var(--brown); margin-right:.5rem; }
+  .notification-pill { background:rgba(196,168,130,.14); color:var(--navy); margin:0.5rem 0; }
+  .gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  .gallery-item { position:relative; border-radius:18px; overflow:hidden; min-height:200px; display:flex; flex-direction:column; justify-content:flex-end; color:#fff; background:#000; }
+  .gallery-item img { width:100%; height:100%; object-fit:cover; filter:brightness(.75); }
+  .gallery-item span, .gallery-item strong { position:relative; z-index:1; margin:0 0 .35rem .9rem; }
+  .gallery-item strong { font-size:.82rem; letter-spacing:.12em; text-transform:uppercase; color:#fff; }
+  .jobs-list { display:grid; gap:1rem; }
+  .job-card { padding:1.4rem; border-radius:18px; border:1px solid rgba(27,58,107,.08); background:var(--bg-white); }
+  .job-card strong { font-family:var(--f-head); color:var(--navy); display:block; margin-bottom:.5rem; }
+  .job-card span { display:block; color:var(--text-soft); margin-bottom:.9rem; font-size:.82rem; }
+  .job-card p { color:var(--text-mid); line-height:1.8; margin-bottom:1rem; }
+  .status-grid { display:grid; grid-template-columns:repeat(4,minmax(160px,1fr)); gap:1rem; padding:1rem 0; }
+  .status-card { padding:1.3rem; border-radius:18px; border:1px solid rgba(27,58,107,.08); background:var(--bg-lgrey); }
+  .status-card strong { display:block; margin-bottom:.5rem; color:var(--navy); }
+  .status-card span { color:var(--text-soft); }
+  .setup-card pre { background:rgba(27,58,107,.05); border-radius:14px; padding:1rem; overflow-x:auto; font-size:.82rem; line-height:1.55; }
+  .setup-card code { color:var(--text-dark); }
+
+  /* EXPLICIT VISIBILITY RULES - Ensure key sections are never hidden */
+  .ai-section { display: block !important; visibility: visible !important; }
+  .ai-grid { display: grid !important; visibility: visible !important; }
+  .machines-section { display: block !important; visibility: visible !important; }
+  .machines-grid { display: grid !important; visibility: visible !important; }
+  .machine-card { display: block !important; visibility: visible !important; }
+  .machine-img { display: block !important; visibility: visible !important; height: 220px !important; }
+  .featured-section { display: block !important; visibility: visible !important; }
+  .category-showcase-section { display: block !important; visibility: visible !important; }
+  .chat-box { display: block !important; visibility: visible !important; }
+
+  @media(max-width:1100px) { .media-grid { grid-template-columns:1fr; } .tab-row { grid-template-columns:1fr; } .gallery-grid { grid-template-columns:1fr 1fr; } }
+  @media(max-width:780px) { .social-banner { padding:1rem 1.2rem; flex-direction:column; align-items:flex-start; } .social-copy { max-width:100%; } .media-actions { width:100%; } .media-notice { width:100%; } .gallery-grid { grid-template-columns:1fr; } .status-grid { grid-template-columns:1fr 1fr; } }
   <div class="modal-content">
     <div class="modal-header">
       <img id="modalProductImage" src="" alt="Product">
@@ -2956,20 +3458,45 @@ function openWhatsAppProductSlider() {
 </div>
 
 <script>
-  // Use the dedicated backend subdomain for deployed site,
-  // but use local backend when previewing on localhost.
-  window.DUCT_AI_BACKEND_URL = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  // Configure backend URL for widget
+  // Use local backend for localhost, canonical backend for production
+  const backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
     : 'https://api.interiorductltd.com';
+<<<<<<< HEAD
+=======
+  
+  // Set window variable for backward compatibility
+  window.DUCT_AI_BACKEND_URL = backendUrl;
+>>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
   window.DUCT_AI_AVATAR_URL = 'static/duct-ai-agent.jpg';
   
-  // Hide old embedded chat panel - use new floating widget instead
-  const style = document.createElement('style');
-  style.textContent = '.ai-grid { display: none !important; }';
-  document.head.appendChild(style);
+  // RESTORED: Enable embedded Duct AI chat panel with full functionality
+  // The chat interface is now visible and operational as part of the AI Design section
 </script>
+<!-- Duct AI Widget CSS and JS - Optional floating widget for additional support -->
 <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
-<script src="duct-ai-widget.js?v=20260429" defer></script>
+<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://api.interiorductltd.com" defer></script>
+
+<script>
+  // Fix hash routing issue - clean up trailing hash if needed
+  window.addEventListener('load', function() {
+    if (window.location.hash === '#' && window.location.pathname === '/') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    // Ensure all image paths are absolute for GitHub Pages
+    const images = document.querySelectorAll('img[src^="IDL_Product_branding/"]');
+    images.forEach(img => {
+      if (!img.src.startsWith('http')) {
+        const path = img.src.replace(/^\.\//, '');
+        if (!img.src.startsWith('/')) {
+          img.src = '/' + path;
+        }
+      }
+    });
+  });
+</script>
 
 </body>
 </html>

@@ -2,11 +2,16 @@
 const BACKEND_URLS = [
   (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
+<<<<<<< HEAD
     : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
   'https://api.interiorductltd.com',
   'https://duct-ai-backend.onrender.com',
   'https://interior-ecommerce-backend.onrender.com',
   'https://interior-ecommerce-lh3e.onrender.com'
+=======
+    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
+  'https://duct-ai-backend.onrender.com'
+>>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
 ];
 let chatHistory = [];
 
@@ -20,13 +25,6 @@ async function fetchBackend(path, options = {}) {
         const body = await res.text().catch(() => '');
         lastError = new Error(`Backend request failed (${res.status}) at ${url}: ${body}`);
         continue;
-      }
-      if (path === '/ai-query') {
-        const data = await res.clone().json().catch(() => null);
-        if (isWeakChatResponse(data)) {
-          lastError = new Error(`Weak AI response from ${url}`);
-          continue;
-        }
       }
       return res;
     } catch (err) {
@@ -45,19 +43,6 @@ function getDuctAiSessionId() {
   return sessionId;
 }
 
-function isWeakChatResponse(data) {
-  if (!data) return true;
-  const text = String(data.answer || data.reply || '').trim();
-  const provider = String(data.provider || '').toLowerCase();
-  if (data.escalate && !text) return false;
-  if (!text) return true;
-  if (provider === 'fallback' || provider === 'kb_fallback') return true;
-  if (/sorry, something went wrong|could not connect|trouble connecting|no provider available|server error/i.test(text)) {
-    return true;
-  }
-  return false;
-}
-
 async function askDuctAI(query, imageUrl) {
   chatHistory.push({ role: 'user', content: query, image: imageUrl || null });
   try {
@@ -65,14 +50,7 @@ async function askDuctAI(query, imageUrl) {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query,
-        session_id: getDuctAiSessionId(),
-        context: {
-          page: window.location.pathname,
-          user_agent: navigator.userAgent
-        }
-      }),
+      body: JSON.stringify({ query, session_id: getDuctAiSessionId() }),
     });
     const data = await res.json();
     if (data.answer) {
@@ -83,6 +61,13 @@ async function askDuctAI(query, imageUrl) {
       renderChat();
     } else if (data.escalate) {
       escalateToHuman(query, imageUrl);
+    } else {
+      console.warn('Duct AI backend returned no answer:', data);
+      const fallbackText = data.error_log
+        ? `Sorry, I’m having trouble right now: ${data.error_log}`
+        : 'Sorry, I’m having trouble right now. Please try again or contact us on WhatsApp.';
+      chatHistory.push({ role: 'ai', content: fallbackText });
+      renderChat();
     }
   } catch (e) {
     chatHistory.push({ role: 'ai', content: 'Sorry, I could not connect right now. Please try again or contact us on WhatsApp.' });

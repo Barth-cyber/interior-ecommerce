@@ -1,4 +1,5 @@
 (function () {
+<<<<<<< HEAD
   const BACKEND_URLS = [
     (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
@@ -7,6 +8,16 @@
     'https://duct-ai-backend.onrender.com',
     'https://interior-ecommerce-backend.onrender.com'
   ];
+=======
+  const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+  const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
+    : '';
+  const BACKEND_URLS = [];
+  if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
+  if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
+  if (!BACKEND_URLS.includes('https://duct-ai-backend.onrender.com')) BACKEND_URLS.push('https://duct-ai-backend.onrender.com');
+>>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
 
   async function fetchChatBackend(path, options = {}) {
@@ -56,47 +67,6 @@
       localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
     }
     return sessionId;
-  }
-
-  function isWeakChatResponse(data) {
-    if (!data) return true;
-    const text = String(data.answer || data.reply || '').trim();
-    const provider = String(data.provider || '').toLowerCase();
-    if (data.escalate && !text) return false;
-    if (!text) return true;
-    if (provider === 'fallback' || provider === 'kb_fallback') return true;
-    if (/sorry, something went wrong|could not connect|trouble connecting|no provider available|server error/i.test(text)) {
-      return true;
-    }
-    return false;
-  }
-
-  async function fetchChatBackendJson(path, options = {}) {
-    let lastError = null;
-    for (const base of BACKEND_URLS) {
-      const url = `${base.replace(/\/$/, '')}${path}`;
-      try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-          const text = await response.text().catch(() => '');
-          const error = new Error(`Backend request failed (${response.status}) at ${url}: ${text}`);
-          console.error('Duct AI backend error:', { url, status: response.status, statusText: response.statusText, body: text, options });
-          lastError = error;
-          continue;
-        }
-        const data = await response.json();
-        if (path === '/ai-query' && isWeakChatResponse(data)) {
-          console.warn('Weak AI response from backend, retrying next endpoint:', { url, provider: data.provider, answer: data.answer || data.reply });
-          lastError = new Error(`Weak AI response from ${url}`);
-          continue;
-        }
-        return data;
-      } catch (error) {
-        console.error('Duct AI backend fetch exception:', { url, error, options });
-        lastError = error;
-      }
-    }
-    throw lastError || new Error('All backend endpoints failed');
   }
 
   async function loadKnowledgeBase() {
@@ -315,19 +285,35 @@
   async function fetchChatData(text) {
     const sessionId = getDuctAiSessionId();
     try {
-      const data = await fetchChatBackendJson('/ai-query', {
+      const pageTitle = document.title || '';
+      const metaDescEl = document.querySelector('meta[name="description"]');
+      const pageDescription = metaDescEl && metaDescEl.content ? String(metaDescEl.content).slice(0, 1000) : '';
+      const productEls = Array.from(document.querySelectorAll('[data-product-name]')).map(e => e.dataset.productName).filter(Boolean).slice(0,8);
+      const recentMessages = chatHistory.slice(-6).map(m => ({ role: m.role, text: m.text }));
+
+      const payload = {
+        query: text,
+        session_id: sessionId,
+        context: {
+          page: window.location.pathname,
+          page_title: pageTitle,
+          page_description: pageDescription,
+          url: window.location.href,
+          user_agent: navigator.userAgent,
+          locale: navigator.language || '',
+          visible_products: productEls,
+          recent_messages: recentMessages
+        }
+      };
+
+      const response = await fetchChatBackend('/ai-query', {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: text,
-          session_id: sessionId,
-          context: {
-            page: window.location.pathname,
-            user_agent: navigator.userAgent
-          }
-        })
+        body: JSON.stringify(payload)
       });
+
+      const data = await response.json();
       if (!data || (!data.reply && !data.answer && !data.escalate)) {
         throw new Error('Invalid chat response');
       }
