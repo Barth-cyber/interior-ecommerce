@@ -72,9 +72,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* HERO POPUP SLIDER STYLES */
-.hero-popup-slider { box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; background: rgba(242,243,245,0.98); margin-bottom: 2.5rem; }
-.hero-popup-slide { min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; background: rgba(255,255,255,0.97); box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; min-height: 360px; max-height: 420px; height: 420px !important; overflow: hidden !important; gap: 2rem; flex-wrap: wrap; }
-.hero-popup-slide img { width: auto !important; max-width: 220px !important; max-height: 220px !important; height: auto !important; object-fit: cover; border-radius: 8px; flex-shrink: 0; box-shadow: 0 2px 12px rgba(13,27,42,0.08); display: block; }
+.hero-popup-slider { box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; background: rgba(242,243,245,0.98); margin-bottom: 2.5rem; min-height: 360px; max-height: 420px; height: 400px; overflow:hidden; }
+.hero-popup-slide { min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem 1.5rem; background: rgba(255,255,255,0.97); box-shadow: 0 8px 32px rgba(27,58,107,0.12); border-radius: 12px; min-height: 340px; max-height: 400px; height: 400px !important; overflow: hidden !important; gap: 1.6rem; flex-wrap: wrap; }
+.hero-popup-slide img { width: auto !important; max-width: 200px !important; max-height: 200px !important; height: auto !important; object-fit: cover; border-radius: 8px; flex-shrink: 0; box-shadow: 0 2px 12px rgba(13,27,42,0.08); display: block; }
 .hero-popup-content { flex: 1; min-width: 250px; }
 /* =====================================================
    BRAND TOKENS — Navy · Brown · White · Light Grey
@@ -646,7 +646,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .hero-popup-content div:first-child{font-size:1.1rem}
   .hero-stats{grid-template-columns:1fr;gap:1rem}
   .pay-grid{grid-template-columns:1fr}
-  .hero-popup-slider{margin:1rem auto;width:100%;max-width:100%;}
+  .hero-popup-slider{margin:1rem auto;width:100%;max-width:100%;min-height:320px;max-height:420px;height:380px;}
   .btn{padding:.5rem 1rem;font-size:.7rem}
   .sec-title{font-size:clamp(1.6rem,2.5vw,2rem)}
   .footer-grid{grid-template-columns:1fr;gap:1.5rem}
@@ -720,16 +720,20 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
 <div class="social-strip">
   <div class="social-banner">
     <div class="social-copy">
-      <strong>Multi-channel updates live:</strong> new product reels, handy furniture safety tips and inspiring stories now just one tap away.
-      <span>Always visible as a sticky strip so visitors can connect across YouTube, TikTok, Instagram, Facebook, LinkedIn and QR scan.</span>
+      <strong>Multi-channel updates live:</strong>
+      <span id="socialUpdateText">New product reels, handy furniture safety tips and inspiring stories are one tap away.</span>
+      <span class="social-note">Always visible as a sticky strip so visitors can connect across YouTube, TikTok, Instagram, Facebook, LinkedIn and QR scan.</span>
     </div>
-    <div class="social-links">
-      <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="social-link youtube">YouTube</a>
-      <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="social-link tiktok">TikTok</a>
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="social-link instagram">Instagram</a>
-      <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="social-link facebook">Facebook</a>
-      <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a>
-      <a href="#" onclick="openQrOverlay(); return false;" class="social-link qr">QR Scan</a>
+    <div class="social-actions">
+      <button class="btn btn-outline-white" onclick="scrollTo('payments')">Visit Media Hub</button>
+      <div class="social-links">
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="social-link youtube">YouTube</a>
+        <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="social-link tiktok">TikTok</a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="social-link instagram">Instagram</a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="social-link facebook">Facebook</a>
+        <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a>
+        <a href="#" onclick="openQrOverlay(); return false;" class="social-link qr">QR Scan</a>
+      </div>
     </div>
   </div>
 </div>
@@ -1657,6 +1661,14 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
         <button class="btn btn-outline-navy" onclick="switchMediaTab('vacanciesTab')">View Jobs</button>
       </div>
     </div>
+    <div class="media-platforms">
+      <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="platform-chip youtube">YouTube: Fresh reels live</a>
+      <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="platform-chip tiktok">TikTok: Quick home tips</a>
+      <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="platform-chip instagram">Instagram: Styling stories</a>
+      <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="platform-chip facebook">Facebook: Customer spotlights</a>
+      <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="platform-chip linkedin">LinkedIn: Career updates</a>
+      <a href="#" onclick="openQrOverlay(); return false;" class="platform-chip qr">QR Scan: Instant connect</a>
+    </div>
     <div class="media-grid">
       <div class="video-card fade-up">
         <div class="video-card-header">
@@ -2038,8 +2050,30 @@ const videoTextSlides = [
   'Use soft-close hinges and drawer runners to protect furniture from shock damage.',
   'Trusted factory-direct build quality means faster delivery and better warranty support.'
 ];
+const socialUpdates = [
+  { text: 'YouTube: New furniture reels and installation shorts are live now.', note: 'NEW upload: Furniture care reel just posted on YouTube.' },
+  { text: 'TikTok: Quick home styling tips and safe assembly hacks are rolling now.', note: 'LIVE: Quick furniture care shorts on TikTok.' },
+  { text: 'Instagram: Behind-the-scenes showroom stories and product inspiration.', note: 'NEW story: Instagram showroom highlight published.' },
+  { text: 'Facebook: Customer spotlights and collection announcements available.', note: 'UPDATE: Facebook product showcase featured.' },
+  { text: 'LinkedIn: Team updates and workshop progress reports are ready.', note: 'NEWS: LinkedIn brand update and job posts available.' }
+];
 let currentVideoIndex = 0;
 let currentTextIndex = 0;
+let currentSocialIndex = 0;
+
+function setSocialUpdate(index) {
+  if (!Array.isArray(socialUpdates) || socialUpdates.length === 0) return;
+  currentSocialIndex = index % socialUpdates.length;
+  const update = socialUpdates[currentSocialIndex];
+  const textEl = document.getElementById('socialUpdateText');
+  const notif = document.getElementById('mediaNotification');
+  if (textEl) textEl.textContent = update.text;
+  if (notif) notif.textContent = update.note;
+}
+
+function rotateSocialUpdate() {
+  setSocialUpdate(currentSocialIndex + 1);
+}
 
 function setActiveVideo(index) {
   currentVideoIndex = index % videoSources.length;
@@ -2078,7 +2112,9 @@ function switchMediaTab(targetId) {
 window.addEventListener('load', () => {
   buildVideoPlaylist();
   setActiveVideo(0);
+  setSocialUpdate(0);
   setInterval(rotateVideoText, 6000);
+  setInterval(rotateSocialUpdate, 5200);
   setTimeout(() => {
     const notif = document.getElementById('mediaNotification');
     if (notif) notif.classList.add('pulse');
@@ -3287,9 +3323,11 @@ function openWhatsAppProductSlider() {
 
   .social-strip { position: sticky; top: 72px; z-index:290; background: rgba(27,58,107,0.98); border-bottom:1px solid rgba(196,168,130,0.18); }
   .social-banner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 4rem; color:#fff; font-size:.92rem; }
-  .social-copy { display:flex; flex-direction:column; gap:.35rem; max-width:58%; }
-  .social-copy strong { font-weight:700; }
-  .social-copy span { color:rgba(255,255,255,.75); font-size:.84rem; }
+  .social-copy { display:flex; flex-direction:column; gap:.35rem; max-width:52%; }
+  .social-copy strong { font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+  .social-copy span { color:rgba(255,255,255,.8); font-size:.92rem; line-height:1.4; }
+  .social-copy .social-note { font-size:.82rem; color:rgba(255,255,255,.68); }
+  .social-actions { display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; justify-content:flex-end; }
   .social-links { display:flex; flex-wrap:wrap; gap:.55rem; }
   .social-link { display:inline-flex; align-items:center; justify-content:center; padding:.55rem 1rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:999px; color:#fff; font-size:.78rem; transition:var(--t); }
   .social-link:hover { background:rgba(255,255,255,0.16); }
@@ -3299,6 +3337,19 @@ function openWhatsAppProductSlider() {
   .social-link.facebook { color:#1877F2; }
   .social-link.linkedin { color:#0A66C2; }
   .social-link.qr { color:#fff; border-color:#C4A882; }
+  .social-actions .btn { white-space:nowrap; }
+
+  .media-platforms { display:flex; flex-wrap:wrap; gap:.85rem; margin-bottom:1.8rem; }
+  .platform-chip { display:inline-flex; align-items:center; justify-content:center; padding:.75rem 1rem; border-radius:999px; border:1px solid rgba(27,58,107,.15); background:#F7F6F4; color:var(--navy); font-size:.88rem; transition:var(--t); text-decoration:none; }
+  .platform-chip:hover { transform:translateY(-1px); box-shadow:0 10px 24px rgba(27,58,107,.08); }
+  .platform-chip.youtube { color:#FF0000; }
+  .platform-chip.tiktok { color:#000; }
+  .platform-chip.instagram { color:#F77737; }
+  .platform-chip.facebook { color:#1877F2; }
+  .platform-chip.linkedin { color:#0A66C2; }
+  .platform-chip.qr { border-color:#C4A882; color:var(--navy); }
+  .video-player { position:relative; width:100%; min-height:320px; aspect-ratio:16/9; overflow:hidden; border-radius:18px; background:#000; }
+  .video-player iframe { width:100%; height:100%; }
 
   .qr-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(10,18,36,0.85); z-index:995; padding:1.5rem; }
   .qr-overlay.active { display:flex; }
