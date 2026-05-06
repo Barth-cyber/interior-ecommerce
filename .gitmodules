@@ -1,0 +1,3 @@
+[submodule "duct-ai-backend"]
+	path = duct-ai-backend
+	url = https://github.com/Barth-cyber/duct-ai-backend.git
