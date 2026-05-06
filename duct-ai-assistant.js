@@ -1,9 +1,9 @@
-const API_BASES = [
-  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000'
-    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
-  'https://duct-ai-backend.onrender.com'
-];
+const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : '';
+const API_BASES = [];
+if (LOCAL_DEFAULT) API_BASES.push(LOCAL_DEFAULT);
+if (CANONICAL_BACKEND) API_BASES.push(CANONICAL_BACKEND);
+if (!API_BASES.includes('https://duct-ai-backend.onrender.com')) API_BASES.push('https://duct-ai-backend.onrender.com');
 const CHAT_PATH = '/ai-query';
 const TRACK_PATH = '/user-log';
 const SESSION_STORAGE_KEY = 'duct_ai_session_id';
@@ -45,7 +45,11 @@ async function sendDuctAiChat(userMessage) {
     session_id: sessionId,
     context: {
       page: window.location.pathname,
-      user_agent: navigator.userAgent
+      page_title: document.title || '',
+      page_description: (document.querySelector('meta[name="description"]')||{}).content || '',
+      url: window.location.href,
+      user_agent: navigator.userAgent,
+      locale: navigator.language || ''
     }
   };
 

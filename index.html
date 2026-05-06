@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta name="backend-url" content="https://api.interiorductltd.com">
+  <script>
+    // Ensure a global override is available early for pages that rely on inline scripts
+    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+  </script>
+  <script src="static/backend-config.js"></script>
   <meta charset="utf-8">
   <title>Interior Duct Ltd</title>
   <meta http-equiv="refresh" content="0;url=interior.html">

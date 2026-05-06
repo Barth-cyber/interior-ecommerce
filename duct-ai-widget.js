@@ -1,10 +1,12 @@
 (function () {
-  const BACKEND_URLS = [
-    (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
-      : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
-    'https://duct-ai-backend.onrender.com'
-  ];
+  const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+  const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
+    : '';
+  const BACKEND_URLS = [];
+  if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
+  if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
+  if (!BACKEND_URLS.includes('https://duct-ai-backend.onrender.com')) BACKEND_URLS.push('https://duct-ai-backend.onrender.com');
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
 
   async function fetchChatBackend(path, options = {}) {
@@ -272,18 +274,32 @@
   async function fetchChatData(text) {
     const sessionId = getDuctAiSessionId();
     try {
+      const pageTitle = document.title || '';
+      const metaDescEl = document.querySelector('meta[name="description"]');
+      const pageDescription = metaDescEl && metaDescEl.content ? String(metaDescEl.content).slice(0, 1000) : '';
+      const productEls = Array.from(document.querySelectorAll('[data-product-name]')).map(e => e.dataset.productName).filter(Boolean).slice(0,8);
+      const recentMessages = chatHistory.slice(-6).map(m => ({ role: m.role, text: m.text }));
+
+      const payload = {
+        query: text,
+        session_id: sessionId,
+        context: {
+          page: window.location.pathname,
+          page_title: pageTitle,
+          page_description: pageDescription,
+          url: window.location.href,
+          user_agent: navigator.userAgent,
+          locale: navigator.language || '',
+          visible_products: productEls,
+          recent_messages: recentMessages
+        }
+      };
+
       const response = await fetchChatBackend('/ai-query', {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: text,
-          session_id: sessionId,
-          context: {
-            page: window.location.pathname,
-            user_agent: navigator.userAgent
-          }
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
