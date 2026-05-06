@@ -3417,6 +3417,17 @@ function openWhatsAppProductSlider() {
   .setup-card pre { background:rgba(27,58,107,.05); border-radius:14px; padding:1rem; overflow-x:auto; font-size:.82rem; line-height:1.55; }
   .setup-card code { color:var(--text-dark); }
 
+  /* EXPLICIT VISIBILITY RULES - Ensure key sections are never hidden */
+  .ai-section { display: block !important; visibility: visible !important; }
+  .ai-grid { display: grid !important; visibility: visible !important; }
+  .machines-section { display: block !important; visibility: visible !important; }
+  .machines-grid { display: grid !important; visibility: visible !important; }
+  .machine-card { display: block !important; visibility: visible !important; }
+  .machine-img { display: block !important; visibility: visible !important; height: 220px !important; }
+  .featured-section { display: block !important; visibility: visible !important; }
+  .category-showcase-section { display: block !important; visibility: visible !important; }
+  .chat-box { display: block !important; visibility: visible !important; }
+
   @media(max-width:1100px) { .media-grid { grid-template-columns:1fr; } .tab-row { grid-template-columns:1fr; } .gallery-grid { grid-template-columns:1fr 1fr; } }
   @media(max-width:780px) { .social-banner { padding:1rem 1.2rem; flex-direction:column; align-items:flex-start; } .social-copy { max-width:100%; } .media-actions { width:100%; } .media-notice { width:100%; } .gallery-grid { grid-template-columns:1fr; } .status-grid { grid-template-columns:1fr 1fr; } }
   <div class="modal-content">
@@ -3453,6 +3464,26 @@ function openWhatsAppProductSlider() {
 <!-- Duct AI Widget CSS and JS - Optional floating widget for additional support -->
 <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
 <script src="duct-ai-widget.js?v=20260429" data-backend-url="https://api.interiorductltd.com" defer></script>
+
+<script>
+  // Fix hash routing issue - clean up trailing hash if needed
+  window.addEventListener('load', function() {
+    if (window.location.hash === '#' && window.location.pathname === '/') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    // Ensure all image paths are absolute for GitHub Pages
+    const images = document.querySelectorAll('img[src^="IDL_Product_branding/"]');
+    images.forEach(img => {
+      if (!img.src.startsWith('http')) {
+        const path = img.src.replace(/^\.\//, '');
+        if (!img.src.startsWith('/')) {
+          img.src = '/' + path;
+        }
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
