@@ -82,19 +82,80 @@ CORS(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
+# HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def is_env_value_valid(value):
+    if not value:
+        return False
+
+    normalized = value.strip()
+    if not normalized:
+        return False
+
+    lowered = normalized.lower()
+    placeholder_prefixes = (
+        "your_",
+        "change",
+        "replace",
+        "dummy",
+        "example",
+        "test_",
+        "none",
+        "null"
+    )
+
+    if lowered.startswith(placeholder_prefixes):
+        return False
+
+    if normalized.startswith("AIza") and len(normalized) < 40:
+        return False
+
+    return True
+
+
+def get_env_var(*names, default=""):
+    for name in names:
+        value = os.environ.get(name)
+        if is_env_value_valid(value):
+            return value.strip()
+    return default
+
+
+def first_env_name(*names):
+    for name in names:
+        value = os.environ.get(name)
+        if is_env_value_valid(value):
+            return name
+    return None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # GEMINI CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
-
-# USE ONE MODEL ONLY
-# Prevents SDK/API confusion
 GEMINI_MODEL = "gemini-1.5-flash"
 
-GEMINI_URL = (
-    f"https://generativelanguage.googleapis.com/v1beta/models/"
-    f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+GEMINI_API_KEY = get_env_var(
+    "GEMINI_API_KEY",
+    "Gemini_API_Key",
+    "GOOGLE_API_KEY",
+    "GOOGLE_GEMINI_API_KEY"
 )
+
+GEMINI_API_KEY_SOURCE = first_env_name(
+    "GEMINI_API_KEY",
+    "Gemini_API_Key",
+    "GOOGLE_API_KEY",
+    "GOOGLE_GEMINI_API_KEY"
+)
+
+GEMINI_URL = None
+if GEMINI_API_KEY:
+    GEMINI_URL = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+    )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STARTUP LOGS
@@ -106,17 +167,25 @@ logger.info(f"Gemini Model: {GEMINI_MODEL}")
 logger.info(f"GEMINI_API_KEY Loaded: {bool(GEMINI_API_KEY)}")
 
 if GEMINI_API_KEY:
+    logger.info(f"Gemini key found in: {GEMINI_API_KEY_SOURCE}")
     logger.info(f"Key Prefix: {GEMINI_API_KEY[:8]}...")
 else:
     logger.warning("⚠️ GEMINI_API_KEY NOT FOUND")
+
+mongo_uri = get_env_var("MONGO_URI", "MONGODB_URI", "MONGO_URL", "DATABASE_URL")
+mongo_source = first_env_name("MONGO_URI", "MONGODB_URI", "MONGO_URL", "DATABASE_URL")
+
+if mongo_uri:
+    logger.info(f"MONGO_URI Loaded: True")
+    logger.info(f"Mongo connection string found in: {mongo_source}")
+else:
+    logger.warning("⚠️ MONGO_URI missing")
 
 logger.info("=" * 60)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MONGODB CONNECTION
 # ─────────────────────────────────────────────────────────────────────────────
-
-mongo_uri = os.environ.get("MONGO_URI")
 
 chats = None
 users = None
@@ -136,9 +205,6 @@ if mongo_uri:
 
     except Exception as e:
         logger.error(f"MongoDB error: {e}")
-
-else:
-    logger.warning("⚠️ MONGO_URI missing")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # OPTIONAL S3 STORAGE
@@ -222,6 +288,9 @@ def health():
         "service": "Duct AI Backend",
         "model": GEMINI_MODEL,
         "apiKeyLoaded": bool(GEMINI_API_KEY),
+        "apiKeySource": GEMINI_API_KEY_SOURCE,
+        "mongoUriLoaded": bool(mongo_uri),
+        "mongoUriSource": mongo_source,
         "time": datetime.utcnow().isoformat() + "Z"
     }), 200
 
