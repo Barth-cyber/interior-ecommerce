@@ -1643,12 +1643,7 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
       <div class="divider"></div>
     </div>
     <div class="media-topbar">
-      <div class="media-notice" id="mediaNotification">Latest social feed notifications appear here.</div>
-      <div class="media-actions">
-        <button class="btn btn-outline-navy" onclick="switchMediaTab('videosTab')">Watch Videos</button>
-        <button class="btn btn-outline-navy" onclick="switchMediaTab('galleryTab')">Open Gallery</button>
-        <button class="btn btn-outline-navy" onclick="switchMediaTab('vacanciesTab')">View Jobs</button>
-      </div>
+      <div class="media-notice" id="mediaNotification">Latest feed updates appear here.</div>
     </div>
     <div class="media-grid">
       <div class="video-card fade-up">
@@ -1673,68 +1668,6 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
           <span class="badge">TV</span>
         </div>
         <div class="playlist-items" id="playlistItems"></div>
-      </div>
-    </div>
-    <div class="media-tabs">
-      <button class="media-tab-btn active" data-target="videosTab" onclick="switchMediaTab('videosTab')">Videos</button>
-      <button class="media-tab-btn" data-target="galleryTab" onclick="switchMediaTab('galleryTab')">Gallery</button>
-      <button class="media-tab-btn" data-target="vacanciesTab" onclick="switchMediaTab('vacanciesTab')">Vacancies</button>
-      <button class="media-tab-btn" data-target="statusTab" onclick="switchMediaTab('statusTab')">Status</button>
-      <button class="media-tab-btn" data-target="setupGuideTab" onclick="switchMediaTab('setupGuideTab')">Setup Guide</button>
-    </div>
-    <div class="media-panels">
-      <div class="media-tab-panel active" id="videosTab">
-        <div class="tab-row">
-          <div class="tab-card">
-            <div class="tab-card-head">YouTube & TikTok</div>
-            <p>Featured social videos and short-form updates are shown here in the Media Hub.</p>
-          </div>
-        </div>
-      </div>
-      <div class="media-tab-panel" id="galleryTab">
-        <div class="gallery-grid">
-          <div class="gallery-item"><img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=700&q=60" alt="Furniture gallery" /><span>Instagram feed</span><strong>New</strong></div>
-          <div class="gallery-item"><img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=700&q=60" alt="Modern living room" /><span>Facebook highlights</span></div>
-          <div class="gallery-item"><img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=700&q=60" alt="Stylish chair" /><span>Product stories</span></div>
-        </div>
-      </div>
-      <div class="media-tab-panel" id="vacanciesTab">
-        <div class="jobs-list">
-          <div class="job-card"><strong>Production Coordinator</strong><span>LinkedIn sync status: Live</span><p>Support furniture builds, manage tooling schedules and vendor delivery. Apply now for an on-site role in our workshop.</p><button class="btn btn-brown">Apply Now</button></div>
-          <div class="job-card"><strong>Sales & Fulfillment</strong><span>Applying via LinkedIn</span><p>Be the voice of IDL to clients and guide them through design, pricing and delivery. Great commission structure.</p><button class="btn btn-outline-navy">Apply Now</button></div>
-        </div>
-      </div>
-      <div class="media-tab-panel" id="statusTab">
-        <div class="status-grid">
-          <div class="status-card"><strong>YouTube</strong><span>Connected</span></div>
-          <div class="status-card"><strong>TikTok</strong><span>Connected</span></div>
-          <div class="status-card"><strong>Instagram</strong><span>Connected</span></div>
-          <div class="status-card"><strong>Facebook</strong><span>Connected</span></div>
-          <div class="status-card"><strong>LinkedIn</strong><span>Connected</span></div>
-          <div class="status-card"><strong>QR App</strong><span>Live</span></div>
-          <div class="status-card"><strong>VR / 3D</strong><span>Pending</span></div>
-        </div>
-      </div>
-      <div class="media-tab-panel" id="setupGuideTab">
-        <div class="setup-card">
-          <div class="tab-card-head">Developer Setup Guide</div>
-          <p>To go live, replace the placeholder API yanked URLs with your real platform credentials and profile links. Deploy the backend sync script on your server and keep the QR overlay live.</p>
-          <pre><code>const socialLinks = {
-  youtube: 'https://www.youtube.com/@YOUR_CHANNEL',
-  tiktok: 'https://www.tiktok.com/@YOUR_HANDLE',
-  instagram: 'https://www.instagram.com/YOUR_PROFILE',
-  facebook: 'https://www.facebook.com/YOUR_PAGE',
-  linkedin: 'https://www.linkedin.com/company/YOUR_COMPANY',
-  qrApp: 'https://barth-cyber.github.io/IDL-QrGen/scan.html'
-};
-
-function syncSocialFeed() {
-  // Replace fetch placeholders with your API endpoints.
-  fetch('/api/social-feed').then(r => r.json()).then(renderSocialFeed);
-}
-</code></pre>
-          <p>Important: use the same anchor IDs and keep the `#payments` route available for landing pages that still point to payment options. The new section now showcases your videos and social engagement while the back-end sync and VR strategy can be added in the next release.</p>
-        </div>
       </div>
     </div>
   </div>
@@ -2073,11 +2006,6 @@ function rotateVideoText() {
   if (!textEl) return;
   currentTextIndex = (currentTextIndex + 1) % videoTextSlides.length;
   textEl.textContent = videoTextSlides[currentTextIndex];
-}
-
-function switchMediaTab(targetId) {
-  document.querySelectorAll('.media-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
-  document.querySelectorAll('.media-tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === targetId));
 }
 
 window.addEventListener('load', () => {
@@ -3210,9 +3138,8 @@ function openWhatsAppProductSlider() {
   #qrFrame { width:100%; height:calc(80vh - 96px); min-height:420px; border:none; }
 
   .media-section { background:var(--bg-white); padding-top:3rem; }
-  .media-topbar { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; align-items:flex-start; margin-bottom:2rem; }
+  .media-topbar { display:flex; justify-content:flex-start; gap:1rem; flex-wrap:wrap; align-items:flex-start; margin-bottom:2rem; }
   .media-notice { background:linear-gradient(90deg, rgba(196,168,130,.14), rgba(27,58,107,.08)); color:var(--navy); padding:.9rem 1rem; border-radius:14px; border:1px solid rgba(196,168,130,.22); font-size:.92rem; }
-  .media-actions { display:flex; gap:.8rem; flex-wrap:wrap; }
   .media-grid { display:grid; grid-template-columns:2.2fr 1fr; gap:1.8rem; align-items:start; }
   .video-card, .playlist-card { background:#fff; border-radius:22px; border:1px solid rgba(27,58,107,.08); box-shadow:var(--shadow-sm); padding:1.8rem; }
   .video-card-header, .playlist-header { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:1.35rem; }
@@ -3238,35 +3165,6 @@ function openWhatsAppProductSlider() {
   .playlist-info strong { display:block; font-size:.95rem; color:var(--navy); margin-bottom:.25rem; }
   .playlist-info small { display:block; color:var(--text-soft); font-size:.82rem; }
 
-  .media-tabs { display:flex; gap:.75rem; flex-wrap:wrap; margin:2.5rem 0 1.5rem; }
-  .media-tab-btn { border:1px solid rgba(27,58,107,.16); background:#fff; color:var(--navy); padding:.75rem 1.2rem; border-radius:999px; cursor:pointer; transition:var(--t); font-size:.84rem; }
-  .media-tab-btn.active, .media-tab-btn:hover { background:var(--navy); color:#fff; border-color:var(--navy); }
-  .media-panels { border:1px solid rgba(27,58,107,.08); border-radius:22px; overflow:hidden; }
-  .media-tab-panel { display:none; padding:1.8rem 2rem; background:var(--bg-white); }
-  .media-tab-panel.active { display:block; }
-  .tab-row { display:grid; grid-template-columns:1.5fr .9fr; gap:1.4rem; }
-  .tab-card, .setup-card { background:var(--bg-white); border:1px solid rgba(27,58,107,.08); border-radius:18px; padding:1.5rem; }
-  .tab-card-head { font-family:var(--f-head); font-size:1.05rem; color:var(--navy); margin-bottom:.8rem; }
-  .tab-card ul { list-style:none; padding-left:0; margin:0; display:grid; gap:.7rem; }
-  .tab-card ul li::before { content:'•'; color:var(--brown); margin-right:.5rem; }
-  .notification-pill { background:rgba(196,168,130,.14); color:var(--navy); margin:0.5rem 0; }
-  .gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-  .gallery-item { position:relative; border-radius:18px; overflow:hidden; min-height:200px; display:flex; flex-direction:column; justify-content:flex-end; color:#fff; background:#000; }
-  .gallery-item img { width:100%; height:100%; object-fit:cover; filter:brightness(.75); }
-  .gallery-item span, .gallery-item strong { position:relative; z-index:1; margin:0 0 .35rem .9rem; }
-  .gallery-item strong { font-size:.82rem; letter-spacing:.12em; text-transform:uppercase; color:#fff; }
-  .jobs-list { display:grid; gap:1rem; }
-  .job-card { padding:1.4rem; border-radius:18px; border:1px solid rgba(27,58,107,.08); background:var(--bg-white); }
-  .job-card strong { font-family:var(--f-head); color:var(--navy); display:block; margin-bottom:.5rem; }
-  .job-card span { display:block; color:var(--text-soft); margin-bottom:.9rem; font-size:.82rem; }
-  .job-card p { color:var(--text-mid); line-height:1.8; margin-bottom:1rem; }
-  .status-grid { display:grid; grid-template-columns:repeat(4,minmax(160px,1fr)); gap:1rem; padding:1rem 0; }
-  .status-card { padding:1.3rem; border-radius:18px; border:1px solid rgba(27,58,107,.08); background:var(--bg-lgrey); }
-  .status-card strong { display:block; margin-bottom:.5rem; color:var(--navy); }
-  .status-card span { color:var(--text-soft); }
-  .setup-card pre { background:rgba(27,58,107,.05); border-radius:14px; padding:1rem; overflow-x:auto; font-size:.82rem; line-height:1.55; }
-  .setup-card code { color:var(--text-dark); }
-
   /* EXPLICIT VISIBILITY RULES - Ensure key sections are never hidden */
   .ai-section { display: block !important; visibility: visible !important; }
   .ai-grid { display: grid !important; visibility: visible !important; }
@@ -3278,8 +3176,8 @@ function openWhatsAppProductSlider() {
   .category-showcase-section { display: block !important; visibility: visible !important; }
   .chat-box { display: block !important; visibility: visible !important; }
 
-  @media(max-width:1100px) { .media-grid { grid-template-columns:1fr; } .tab-row { grid-template-columns:1fr; } .gallery-grid { grid-template-columns:1fr 1fr; } }
-  @media(max-width:780px) { .social-banner { padding:1rem 1.2rem; flex-direction:column; align-items:flex-start; } .social-copy { max-width:100%; } .media-actions { width:100%; } .media-notice { width:100%; } .gallery-grid { grid-template-columns:1fr; } .status-grid { grid-template-columns:1fr 1fr; } }
+  @media(max-width:1100px) { .media-grid { grid-template-columns:1fr; } }
+  @media(max-width:780px) { .social-banner { padding:1rem 1.2rem; flex-direction:column; align-items:flex-start; } .social-copy { max-width:100%; } .media-notice { width:100%; } }
   </style>
 
 <script>
