@@ -8,12 +8,4 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: MONGO_URI
-        sync: false
-      - key: SECRET_KEY
-        sync: false
-      - key: ALLOWED_ORIGINS
-        sync: false
 

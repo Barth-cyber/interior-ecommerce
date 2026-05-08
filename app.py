@@ -15,11 +15,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # LOAD ENV VARIABLES
 # ─────────────────────────────────────────────────────────────────────────────
 
-dotenv_path = find_dotenv()
-if dotenv_path:
-    load_dotenv(dotenv_path)
-else:
-    load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+load_dotenv(find_dotenv())
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING
@@ -89,12 +85,7 @@ CORS(
 # GEMINI CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 
-GEMINI_API_KEY = (
-    os.environ.get("GEMINI_API_KEY") or
-    os.environ.get("GOOGLE_API_KEY") or
-    os.environ.get("OPENAI_API_KEY") or
-    ""
-).strip()
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
 # USE ONE MODEL ONLY
 # Prevents SDK/API confusion
@@ -125,12 +116,7 @@ logger.info("=" * 60)
 # MONGODB CONNECTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-mongo_uri = (
-    os.environ.get("MONGO_URI") or
-    os.environ.get("MONGODB_URI") or
-    os.environ.get("MONGO_URL") or
-    os.environ.get("DATABASE_URL")
-)
+mongo_uri = os.environ.get("MONGO_URI")
 
 chats = None
 users = None
