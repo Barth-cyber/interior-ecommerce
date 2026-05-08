@@ -1,4 +1,4 @@
-from admin.app import app
+from app import app
 
 print("Available routes:")
 for rule in app.url_map.iter_rules():

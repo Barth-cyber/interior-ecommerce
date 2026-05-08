@@ -4,31 +4,8 @@ services:
     runtime: python
     pythonVersion: "3.11.9"
     buildCommand: python -m pip install -r requirements.txt
-    startCommand: gunicorn -w 1 -b 0.0.0.0:$PORT application:app
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT application:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
 
-  - type: web
-    name: duct-ai-backend
-    root: duct-ai-backend
-    runtime: python311
-    buildCommand: "python -m pip install -r requirements.txt"
-    startCommand: "gunicorn -w 1 -b 0.0.0.0:$PORT app:app"
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11"
-      - key: GEMINI_API_KEY
-        sync: false       # Set manually in Render dashboard
-      - key: ALLOWED_ORIGINS
-        sync: false       # Comma-separated allowed origins for CORS (e.g. https://interiorductltd.com,https://api.interiorductltd.com)
-      - key: ANALYTICS_TOKEN
-        generateValue: true   # Random token for /analytics endpoint
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: AWS_S3_BUCKET_NAME
-        sync: false
-      - key: STRIPE_SECRET_KEY
-        sync: false

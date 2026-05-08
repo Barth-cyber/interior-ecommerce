@@ -1,4 +1,4 @@
-from admin.app import app
+from app import app
 
 print("Flask Routes Registered:")
 print("=" * 50)
