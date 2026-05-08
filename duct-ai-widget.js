@@ -11,13 +11,20 @@
   if (!BACKEND_URLS.includes('https://interior-ecommerce-backend.onrender.com')) BACKEND_URLS.push('https://interior-ecommerce-backend.onrender.com');
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
 
+  function fetchWithTimeout(url, options = {}, timeout = 3000) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const timer = setTimeout(() => controller.abort(), timeout);
+    return fetch(url, { ...options, signal }).finally(() => clearTimeout(timer));
+  }
+
   async function fetchChatBackend(path, options = {}) {
     let lastError = null;
 
     for (const base of BACKEND_URLS) {
       const url = `${base.replace(/\/$/, '')}${path}`;
       try {
-        const response = await fetch(url, options);
+        const response = await fetchWithTimeout(url, options, 3000);
         if (!response.ok) {
           const text = await response.text().catch(() => '');
           const error = new Error(`Backend request failed (${response.status}) at ${url}: ${text}`);
@@ -74,9 +81,50 @@
     }
   }
 
+  const knowledgeBaseReady = loadKnowledgeBase();
+  async function ensureKnowledgeBaseReady() {
+    if (!knowledgeBaseReady) return;
+    try {
+      await knowledgeBaseReady;
+    } catch (error) {
+      console.warn('Knowledge base preparation failed:', error);
+    }
+  }
+
+  function normalizeText(text) {
+    return String(text || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
   function findLocalKbAnswer(query, kb) {
     if (!query || !kb) return null;
     const lowerQuery = query.toLowerCase();
+    const normalized = normalizeText(query);
+    const queryWords = normalized.split(' ').filter(Boolean);
+
+    const quickResponses = [
+      {
+        triggers: ['mahogany', 'glass top', 'luxury dining', 'premium wood', 'modern dining table', 'dining room'],
+        response: 'A luxury mahogany dining table with a glass top is a beautiful choice for modern interiors. I can recommend matching chairs, finishes, and a tailored quote for your room.'
+      },
+      {
+        triggers: ['living room', 'sofa', 'lounge', 'sectional', 'coffee table', 'tv console'],
+        response: 'For a luxury living room, I recommend a statement sofa, a premium coffee table, and layered accents. Share your room style and I’ll help you choose the right pieces.'
+      },
+      {
+        triggers: ['office', 'desk', 'workstation', 'executive desk', 'reception', 'conference'],
+        response: 'For a refined office, our executive desks, storage units, and reception systems combine premium wood finishes with modern functionality. I can help you select the right solution.'
+      },
+      {
+        triggers: ['quote', 'pricing', 'price', 'budget', 'estimate'],
+        response: 'I can prepare an instant quote for your chosen furniture or room package. Tell me the product, style, and room so I can tailor it to your budget.'
+      }
+    ];
+
+    for (const item of quickResponses) {
+      if (item.triggers.some(trigger => lowerQuery.includes(trigger))) {
+        return item.response;
+      }
+    }
 
     if (Array.isArray(kb.greetings)) {
       for (const greeting of kb.greetings) {
@@ -90,7 +138,6 @@
     }
 
     if (Array.isArray(kb.faqs)) {
-      // Exact or substring match first
       for (const faq of kb.faqs) {
         const question = String(faq.q || '').toLowerCase();
         if (!question) continue;
@@ -98,7 +145,6 @@
           return faq.a;
         }
       }
-      // Fuzzy-like fallback based on common words
       for (const faq of kb.faqs) {
         const question = String(faq.q || '').toLowerCase();
         if (!question) continue;
@@ -113,11 +159,10 @@
       for (const product of kb.products) {
         const name = String(product.name || '').toLowerCase();
         const category = String(product.category || '').toLowerCase();
-        if (name && lowerQuery.includes(name)) {
-          return `${product.name} — ${product.description || ''}`.trim();
-        }
-        if (category && lowerQuery.includes(category)) {
-          return `${product.name} — ${product.description || ''}`.trim();
+        const description = String(product.description || '').toLowerCase();
+        const fields = [name, category, description].filter(Boolean);
+        if (fields.some(field => queryWords.some(word => word.length > 3 && field.includes(word)))) {
+          return `${product.name} — ${product.description || product.category || 'Premium custom furniture for your space.'}`.trim();
         }
       }
     }
@@ -149,15 +194,15 @@
         <button class="duct-ai-widget-close" aria-label="Close chat">×</button>
       </div>
       <div class="duct-ai-widget-messages" id="ductAiMessages"></div>
+      <div class="duct-ai-widget-footer">
+        <input id="ductAiInput" type="text" placeholder="Ask about furniture, materials, pricing, room design..." />
+        <button id="ductAiSend" aria-label="Send message">→</button>
+      </div>
       <div class="duct-ai-widget-actions">
         <button class="duct-ai-action-btn" id="ductAiWhatsApp" title="Get human agent on WhatsApp">
           <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="18" alt="WhatsApp" />Agent
         </button>
         <button class="duct-ai-action-btn" id="ductAiQuote" title="Request quote for products">💰 Quote</button>
-      </div>
-      <div class="duct-ai-widget-footer">
-        <input id="ductAiInput" type="text" placeholder="Ask about furniture, materials, pricing..." />
-        <button id="ductAiSend" aria-label="Send message">→</button>
       </div>
     </div>
   `;
@@ -315,6 +360,14 @@
         'Custom design available - describe your vision and we\'ll create it for you.',
         'Try our 3D visualizer to see how furniture fits your room. What\'s your room style?'
       ]
+    },
+    luxury: {
+      keywords: ['luxury', 'premium', 'mahogany', 'glass top', 'fine wood', 'dining table', 'dining room'],
+      responses: [
+        'A luxury mahogany dining table with a glass top looks stunning with warm metallic accents and premium leather or velvet chairs. Would you like matching chair options?',
+        'For a modern premium dining table, I recommend rich wood finishes and a tempered glass top for a luxury feel that still feels light and contemporary.',
+        'I can suggest luxury dining tables with premium wood and glass finishes, plus quote options matched to your style. Shall I focus on modern or classic designs?'
+      ]
     }
   };
 
@@ -337,6 +390,12 @@
   window.openDuctAIWidget = openDuctAIChat;
 
   async function fetchChatData(text) {
+    await ensureKnowledgeBaseReady();
+    const localReply = findLocalKbAnswer(text, knowledgeBase);
+    if (localReply) {
+      return { reply: localReply, source: 'knowledge_base' };
+    }
+
     const sessionId = getDuctAiSessionId();
     try {
       const pageTitle = document.title || '';
@@ -382,24 +441,44 @@
   }
 
   async function fetchChatDataFallback(queryText) {
+    const smartResponse = generateSmartResponse(queryText);
+
     if (!knowledgeBase) {
-      // Use smart responses if KB is not available
-      const smartResponse = generateSmartResponse(queryText);
       if (smartResponse) {
         return { reply: smartResponse, source: 'smart_response' };
       }
-      return null;
+      return {
+        reply: 'I’m having trouble reaching the server right now, but I can still help with furniture recommendations and quotes. Tell me what room or style you are planning.',
+        source: 'fallback'
+      };
     }
-    const reply = findLocalKbAnswer(queryText, knowledgeBase);
-    if (!reply) {
-      // Fallback to smart response if KB doesn't have answer
-      const smartResponse = generateSmartResponse(queryText);
-      if (smartResponse) {
-        return { reply: smartResponse, source: 'smart_response' };
-      }
-      return null;
+
+    const reply = findLocalKbAnswer(queryText, knowledgeBase) || smartResponse;
+    if (reply) {
+      return { reply, source: smartResponse ? 'smart_response' : 'knowledge_base' };
     }
-    return { reply, source: 'knowledge_base' };
+
+    return {
+      reply: 'I’m having trouble reaching the server right now, but I can still help with furniture recommendations and quotes. Tell me what room or style you are planning.',
+      source: 'fallback'
+    };
+  }
+
+  function addTypingIndicator() {
+    const item = document.createElement('div');
+    item.className = 'duct-ai-widget-message assistant duct-ai-typing active';
+    let dotCount = 0;
+    item.textContent = 'Typing';
+    messages.appendChild(item);
+    messages.scrollTop = messages.scrollHeight;
+
+    item.typingInterval = setInterval(() => {
+      dotCount = (dotCount + 1) % 4;
+      item.textContent = 'Typing' + '.'.repeat(dotCount);
+      messages.scrollTop = messages.scrollHeight;
+    }, 450);
+
+    return item;
   }
 
   async function sendMessage() {
@@ -411,9 +490,18 @@
     input.value = '';
     send.disabled = true;
 
+    const typingIndicator = addTypingIndicator();
+
     try {
       const data = await fetchChatData(text);
       const reply = data.reply || data.answer;
+
+      if (typingIndicator) {
+        clearInterval(typingIndicator.typingInterval);
+        if (typingIndicator.parentNode) {
+          typingIndicator.parentNode.removeChild(typingIndicator);
+        }
+      }
 
       if (reply) {
         addMessage(reply, 'assistant');
@@ -434,8 +522,20 @@
         processChatActions(data.actions);
       }
     } catch (error) {
+      if (typingIndicator) {
+        clearInterval(typingIndicator.typingInterval);
+        if (typingIndicator.parentNode) {
+          typingIndicator.parentNode.removeChild(typingIndicator);
+        }
+      }
       console.error('Chat error:', error);
-      addMessage('Sorry, I had trouble connecting to the server. Please check your internet and try again.', 'assistant');
+      const fallback = await fetchChatDataFallback(text);
+      if (fallback && fallback.reply) {
+        addMessage(fallback.reply, 'assistant');
+        chatHistory.push({ role: 'assistant', text: fallback.reply });
+      } else {
+        addMessage('Sorry, I had trouble connecting to the server. Please check your internet and try again.', 'assistant');
+      }
     } finally {
       send.disabled = false;
       input.focus();

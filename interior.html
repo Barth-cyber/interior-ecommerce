@@ -455,8 +455,8 @@ section{padding:6rem 0}
 /* =====================================================  AI SECTION  (Navy bg — dark) */
 .ai-section{background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 100%);color:#fff}
 .ai-section .sec-tag{color:var(--brown-pale)}
-.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
-.chat-box{background:rgba(255,255,255,.05);border:1px solid rgba(196,168,130,.2);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-xl)}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:stretch}
+.chat-box{background:rgba(255,255,255,.05);border:1px solid rgba(196,168,130,.2);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-xl);display:flex;flex-direction:column;height:100%}
 .chat-hdr{padding:.9rem 1.3rem;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(196,168,130,.15);display:flex;align-items:center;gap:.85rem}
 .chat-av{width:36px;height:36px;border-radius:50%;overflow:hidden;border:1.5px solid var(--brown-pale);flex-shrink:0}
 .chat-av img{width:100%;height:100%;object-fit:cover}
@@ -465,7 +465,7 @@ section{padding:6rem 0}
 .chat-online{margin-left:auto;font-size:.66rem;color:var(--brown-pale);display:flex;align-items:center;gap:.35rem}
 .pulse{width:6px;height:6px;border-radius:50%;background:#4CAF50;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.chat-msgs{height:300px;overflow-y:auto;padding:1.3rem;display:flex;flex-direction:column;gap:.85rem}
+.chat-msgs{flex:1;min-height:0;overflow-y:auto;padding:1.3rem;display:flex;flex-direction:column;gap:.85rem}
 .cmsg{max-width:82%;font-size:.82rem;line-height:1.65}
 .cmsg.ai{background:rgba(255,255,255,.07);border:1px solid rgba(196,168,130,.12);border-radius:0 10px 10px 10px;padding:.75rem 1rem;color:rgba(255,255,255,.75)}
 .cmsg.ai .mn{font-size:.64rem;color:var(--brown-pale);margin-bottom:.25rem;letter-spacing:.1em;text-transform:uppercase}
@@ -474,7 +474,7 @@ section{padding:6rem 0}
 .td{width:5px;height:5px;border-radius:50%;background:var(--brown-pale);animation:td .8s ease-in-out infinite}
 .td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
 @keyframes td{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.chat-inp-row{padding:.85rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:.6rem}
+.chat-inp-row{padding:.85rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:.6rem;flex-shrink:0}
 .chat-inp{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;padding:.55rem .85rem;border-radius:4px;font-size:.8rem;font-family:var(--f-body)}
 .chat-inp::placeholder{color:rgba(255,255,255,.35)}
 .chat-inp:focus{outline:none;border-color:var(--brown-pale)}
@@ -2241,22 +2241,58 @@ function aiLuxuryTone(reply) {
 }
 
 let ductAiKb = null;
+
+function getBackendUrls() {
+  const urls = [];
+  if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    urls.push('http://localhost:5000');
+  }
+  const configured = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+  if (configured) urls.push(configured);
+  urls.push('https://duct-ai-backend.onrender.com');
+  urls.push('https://interior-ecommerce-backend.onrender.com');
+  urls.push('https://interior-ecommerce-lh3e.onrender.com');
+  return [...new Set(urls)];
+}
+
+function fetchWithTimeout(url, options = {}, timeout = 3000) {
+  const controller = new AbortController();
+  const signal = controller.signal;
+  const timer = setTimeout(() => controller.abort(), timeout);
+  return fetch(url, { ...options, signal }).finally(() => clearTimeout(timer));
+}
+
 async function loadDuctAiKb() {
   if (ductAiKb !== null) {
     return ductAiKb;
   }
-  try {
-    const backendUrl = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
-    const res = await fetch(`${backendUrl.replace(/\/$/, '')}/kb`, { method: 'GET', mode: 'cors' });
-    if (!res.ok) {
-      return null;
+
+  const backendUrls = getBackendUrls();
+  for (const backendUrl of backendUrls) {
+    try {
+      const res = await fetchWithTimeout(`${backendUrl.replace(/\/$/, '')}/kb`, { method: 'GET', mode: 'cors' }, 2500);
+      if (res.ok) {
+        ductAiKb = await res.json();
+        return ductAiKb;
+      }
+    } catch (e) {
+      console.warn('Duct AI knowledge base fetch failed from', backendUrl, e);
     }
-    ductAiKb = await res.json();
-    return ductAiKb;
-  } catch (e) {
-    console.warn('Duct AI knowledge base load failed:', e);
-    return null;
   }
+
+  // Local static fallback for file:// browsing or when backend is unavailable
+  try {
+    const res = await fetchWithTimeout('admin/knowledge_base.json', { method: 'GET' }, 2500);
+    if (res.ok) {
+      ductAiKb = await res.json();
+      return ductAiKb;
+    }
+  } catch (e) {
+    console.warn('Duct AI local knowledge base fetch failed:', e);
+  }
+
+  ductAiKb = null;
+  return null;
 }
 
 function getLocalKbReply(query, kb) {
@@ -2353,24 +2389,22 @@ async function sendMsg() {
   addMessage('user', message);
   input.value = '';
 
+  const kb = await loadDuctAiKb();
+  const localReply = getLocalKbReply(message, kb);
+  if (localReply) {
+    addMessage('bot', aiLuxuryTone(localReply));
+    logQueryForLearning(message, localReply);
+    return;
+  }
+
   try {
-<<<<<<< HEAD
-    const backendUrls = [
-      window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
-      'https://api.interiorductltd.com',
-      'https://duct-ai-backend.onrender.com',
-      'https://interior-ecommerce-backend.onrender.com',
-      'https://interior-ecommerce-lh3e.onrender.com'
-    ];
-=======
-    const backendUrls = [ window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com' ];
->>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
+    const backendUrls = getBackendUrls();
     let res = null;
     let lastError = null;
 
     for (const backendUrl of backendUrls) {
       try {
-        res = await fetch(`${backendUrl.replace(/\/$/, '')}/ai-query`, {
+        res = await fetchWithTimeout(`${backendUrl.replace(/\/$/, '')}/ai-query`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -2383,7 +2417,7 @@ async function sendMsg() {
               user_agent: navigator.userAgent
             }
           })
-        });
+        }, 3000);
         if (!res.ok) {
           const text = await res.text().catch(() => '');
           console.error('Duct AI inline backend error:', {
@@ -2393,12 +2427,14 @@ async function sendMsg() {
             body: text
           });
           lastError = new Error(`Chat failed (${res.status}) at ${backendUrl}: ${text}`);
+          res = null;
           continue;
         }
         break;
       } catch (e) {
         console.error('Duct AI inline fetch exception:', { url: backendUrl, error: e });
         lastError = e;
+        res = null;
       }
     }
 
@@ -2419,7 +2455,7 @@ async function sendMsg() {
       }
     } else {
       const kb = await loadDuctAiKb();
-      const fallbackReply = getLocalKbReply(message, kb);
+      const fallbackReply = getLocalKbReply(message, kb) || aiLuxuryTone(aiDetectIntent(message));
       addMessage('bot', fallbackReply || '⚠️ I’m sorry, I couldn’t get an answer from AI right now. Please try again or contact us on WhatsApp.');
     }
 
@@ -2428,13 +2464,11 @@ async function sendMsg() {
   } catch (err) {
       console.error(err);
       const kb = await loadDuctAiKb();
-      const fallbackReply = getLocalKbReply(message, kb);
-      if (fallbackReply) {
-        addMessage('bot', fallbackReply);
-      } else {
-        addMessage('bot', '⚠️ Server error. Try again.');
-      }
-    }
+      const fallbackReply = getLocalKbReply(message, kb) || aiLuxuryTone(aiDetectIntent(message));
+      addMessage('bot', fallbackReply || '⚠️ Server error. Try again.');
+  }
+}
+
 function handleKey(e) { if (e.key === 'Enter') sendMsg(); }
 
 function processChatActions(actions) {
@@ -2446,7 +2480,7 @@ function processChatActions(actions) {
       const target = document.getElementById(targetId) || document.querySelector(`[name="${targetId}"]`);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        addMessage('assistant', `Scrolling to ${targetId} section...`);
+        addMessage('bot', `Scrolling to ${targetId} section...`);
       }
     }
     if (action.type === 'highlight_product' && action.name) {
@@ -2454,7 +2488,7 @@ function processChatActions(actions) {
       if (match) {
         match.classList.add('duct-ai-highlight');
         setTimeout(() => match.classList.remove('duct-ai-highlight'), 4200);
-        addMessage('assistant', `Highlighted product: ${action.name}`);
+        addMessage('bot', `Highlighted product: ${action.name}`);
       }
     }
   });
