@@ -1,0 +1,9 @@
+Short summary of change (max 50 chars)
+
+More detailed explanation of what changed and why. Use imperative mood.
+
+- What was changed
+- Why it was changed
+- Any important notes or follow-up work
+
+References: issue, ticket, or PR if applicable
