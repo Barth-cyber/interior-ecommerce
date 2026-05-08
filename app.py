@@ -5,7 +5,7 @@ from datetime import datetime
 from time import time
 
 import requests
-from flask import Flask, request, jsonify, session, Response
+from flask import Flask, request, jsonify, session, Response, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv, find_dotenv
 from pymongo import MongoClient
@@ -428,10 +428,25 @@ def backend_config_js():
 @app.route("/")
 def root():
 
-    return jsonify({
-        "status": "online",
-        "service": "Duct AI Backend"
-    })
+    return send_from_directory('.', 'interior.html')
+
+
+@app.route('/<path:path>')
+def serve_static(path):
+
+    # Serve frontend static assets from either the root or the static folder
+    if path.startswith('static/'):
+        return send_from_directory('static', path[len('static/'):])
+
+    if os.path.isfile(path):
+        return send_from_directory('.', path)
+
+    static_path = os.path.join('static', path)
+    if os.path.isfile(static_path):
+        return send_from_directory('static', path)
+
+    return send_from_directory('.', 'interior.html')
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOCAL DEV ENTRY
