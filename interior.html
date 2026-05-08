@@ -720,18 +720,9 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
     <div class="social-copy">
       <strong>Multi-channel updates live:</strong>
       <span id="socialUpdateText">New product reels, handy furniture safety tips and inspiring stories are one tap away.</span>
-      <span class="social-note">Always visible as a sticky strip so visitors can connect across YouTube, TikTok, Instagram, Facebook, LinkedIn and QR scan.</span>
     </div>
     <div class="social-actions">
       <button class="btn btn-outline-white" onclick="scrollTo('payments')">Visit Media Hub</button>
-      <div class="social-links">
-        <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="social-link youtube">YouTube</a>
-        <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="social-link tiktok">TikTok</a>
-        <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="social-link instagram">Instagram</a>
-        <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="social-link facebook">Facebook</a>
-        <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a>
-        <a href="#" onclick="openQrOverlay(); return false;" class="social-link qr">QR Scan</a>
-      </div>
     </div>
   </div>
 </div>
@@ -1652,20 +1643,12 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
       <div class="divider"></div>
     </div>
     <div class="media-topbar">
-      <div class="media-notice" id="mediaNotification">NEW upload: Furniture Care Reel just posted on YouTube.</div>
+      <div class="media-notice" id="mediaNotification">Latest social feed notifications appear here.</div>
       <div class="media-actions">
         <button class="btn btn-outline-navy" onclick="switchMediaTab('videosTab')">Watch Videos</button>
         <button class="btn btn-outline-navy" onclick="switchMediaTab('galleryTab')">Open Gallery</button>
         <button class="btn btn-outline-navy" onclick="switchMediaTab('vacanciesTab')">View Jobs</button>
       </div>
-    </div>
-    <div class="media-platforms">
-      <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="platform-chip youtube">YouTube: Fresh reels live</a>
-      <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="platform-chip tiktok">TikTok: Quick home tips</a>
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="platform-chip instagram">Instagram: Styling stories</a>
-      <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="platform-chip facebook">Facebook: Customer spotlights</a>
-      <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="platform-chip linkedin">LinkedIn: Career updates</a>
-      <a href="#" onclick="openQrOverlay(); return false;" class="platform-chip qr">QR Scan: Instant connect</a>
     </div>
     <div class="media-grid">
       <div class="video-card fade-up">
@@ -1680,7 +1663,7 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
           <iframe id="heroVideoFrame" src="https://www.youtube.com/embed/ScMzIvxBSi4?rel=0&autoplay=1&mute=1&modestbranding=1" title="Interior Duct Video Player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
         </div>
         <div class="video-body">
-          <p>Auto-playing short furniture adverts, motion text briefs, and education clips in a compact TV-style view. Update the playlist with your own YouTube and TikTok embeds for the real channel experience.</p>
+          <p>Featured videos refresh automatically with the latest updates and short-form creative highlights.</p>
           <div class="video-text-slide" id="videoTextSlide">Expert installation leads to stronger furniture and longer product life. Choose certified materials and professional assembly.</div>
         </div>
       </div>
@@ -1704,17 +1687,7 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
         <div class="tab-row">
           <div class="tab-card">
             <div class="tab-card-head">YouTube & TikTok</div>
-            <p>Embedded playlist sidebar with sample short-form reels. Replace the IDs and URLs with your real video credentials once the channel is live.</p>
-            <ul>
-              <li>Short furniture ads and installation behind-the-scenes.</li>
-              <li>Safety tips for lifting, screwing, and maintaining quality fittings.</li>
-              <li>Product benefit highlights for customer trust and conversion.</li>
-            </ul>
-          </div>
-          <div class="tab-card badge-card">
-            <div class="tab-card-head">Notification</div>
-            <div class="notification-pill">NEW upload: Ergonomic sofa build demo.</div>
-            <div class="notification-pill">Live: QR app scan feature online.</div>
+            <p>Featured social videos and short-form updates are shown here in the Media Hub.</p>
           </div>
         </div>
       </div>
@@ -2023,6 +1996,8 @@ function scrollTo(id) {
 }
 
 function openQrOverlay() {
+  const frame = document.getElementById('qrFrame');
+  if (frame) frame.src = 'https://barth-cyber.github.io/IDL-QrGen/scan.html';
   document.getElementById('qrOverlay').classList.add('active');
 }
 function closeQrOverlay(event) {
@@ -2049,11 +2024,9 @@ const videoTextSlides = [
   'Trusted factory-direct build quality means faster delivery and better warranty support.'
 ];
 const socialUpdates = [
-  { text: 'YouTube: New furniture reels and installation shorts are live now.', note: 'NEW upload: Furniture care reel just posted on YouTube.' },
-  { text: 'TikTok: Quick home styling tips and safe assembly hacks are rolling now.', note: 'LIVE: Quick furniture care shorts on TikTok.' },
-  { text: 'Instagram: Behind-the-scenes showroom stories and product inspiration.', note: 'NEW story: Instagram showroom highlight published.' },
-  { text: 'Facebook: Customer spotlights and collection announcements available.', note: 'UPDATE: Facebook product showcase featured.' },
-  { text: 'LinkedIn: Team updates and workshop progress reports are ready.', note: 'NEWS: LinkedIn brand update and job posts available.' }
+  { text: 'New social feed updates are available now.', note: 'Latest social feed notification.' },
+  { text: 'Fresh furniture stories and short-form videos are rolling in.', note: 'Latest social feed notification.' },
+  { text: 'Design tips, safety shorts, and media highlights are refreshed.', note: 'Latest social feed notification.' }
 ];
 let currentVideoIndex = 0;
 let currentTextIndex = 0;
@@ -3216,180 +3189,13 @@ function openWhatsAppProductSlider() {
   .wa-fab-product { right: 1rem !important; bottom: 1rem !important; }
 }
 
-/* Product Modal Styles */
-#productModal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  align-items: center;
-  justify-content: center;
-}
-
-#productModal.show {
-  display: flex;
-}
-
-.modal-content {
-  background-color: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(13, 27, 42, 0.25);
-  overflow: hidden;
-  max-width: 650px;
-  width: 90%;
-  animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(-50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.modal-header {
-  position: relative;
-  height: 400px;
-  overflow: hidden;
-  background: #f5f0e8;
-}
-
-#modalProductImage {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 1rem;
-}
-
-.modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: var(--navy);
-  color: #fff;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.modal-close:hover {
-  background: var(--brown);
-  transform: scale(1.1);
-}
-
-.modal-body {
-  padding: 2rem 1.8rem;
-}
-
-#modalProductName {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
-  color: var(--navy);
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-}
-
-#modalProductCategory {
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--brown);
-  margin-bottom: 1rem;
-}
-
-#modalProductPrice {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  color: var(--brown);
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.modal-actions button {
-  flex: 1;
-  min-width: 150px;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-primary {
-  background: var(--brown);
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: var(--brown-light);
-  box-shadow: 0 0 28px rgba(196, 168, 130, 0.45);
-  transform: translateY(-2px);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--navy);
-  border: 1.5px solid var(--navy);
-}
-
-.btn-secondary:hover {
-  background: var(--navy);
-  color: #fff;
-}
-
   .social-strip { position: sticky; top: 72px; z-index:290; background: rgba(27,58,107,0.98); border-bottom:1px solid rgba(196,168,130,0.18); }
   .social-banner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 4rem; color:#fff; font-size:.92rem; }
   .social-copy { display:flex; flex-direction:column; gap:.35rem; max-width:52%; }
   .social-copy strong { font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
   .social-copy span { color:rgba(255,255,255,.8); font-size:.92rem; line-height:1.4; }
-  .social-copy .social-note { font-size:.82rem; color:rgba(255,255,255,.68); }
   .social-actions { display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; justify-content:flex-end; }
-  .social-links { display:flex; flex-wrap:wrap; gap:.55rem; }
-  .social-link { display:inline-flex; align-items:center; justify-content:center; padding:.55rem 1rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:999px; color:#fff; font-size:.78rem; transition:var(--t); }
-  .social-link:hover { background:rgba(255,255,255,0.16); }
-  .social-link.youtube { color:#FF0000; }
-  .social-link.tiktok { color:#fff; background:rgba(0,0,0,.22); }
-  .social-link.instagram { color:#F77737; }
-  .social-link.facebook { color:#1877F2; }
-  .social-link.linkedin { color:#0A66C2; }
-  .social-link.qr { color:#fff; border-color:#C4A882; }
   .social-actions .btn { white-space:nowrap; }
-
-  .media-platforms { display:flex; flex-wrap:wrap; gap:.85rem; margin-bottom:1.8rem; }
-  .platform-chip { display:inline-flex; align-items:center; justify-content:center; padding:.75rem 1rem; border-radius:999px; border:1px solid rgba(27,58,107,.15); background:#F7F6F4; color:var(--navy); font-size:.88rem; transition:var(--t); text-decoration:none; }
-  .platform-chip:hover { transform:translateY(-1px); box-shadow:0 10px 24px rgba(27,58,107,.08); }
-  .platform-chip.youtube { color:#FF0000; }
-  .platform-chip.tiktok { color:#000; }
-  .platform-chip.instagram { color:#F77737; }
-  .platform-chip.facebook { color:#1877F2; }
-  .platform-chip.linkedin { color:#0A66C2; }
-  .platform-chip.qr { border-color:#C4A882; color:var(--navy); }
   .video-player { position:relative; width:100%; min-height:320px; aspect-ratio:16/9; overflow:hidden; border-radius:18px; background:#000; }
   .video-player iframe { width:100%; height:100%; }
 
@@ -3475,22 +3281,6 @@ function openWhatsAppProductSlider() {
   @media(max-width:1100px) { .media-grid { grid-template-columns:1fr; } .tab-row { grid-template-columns:1fr; } .gallery-grid { grid-template-columns:1fr 1fr; } }
   @media(max-width:780px) { .social-banner { padding:1rem 1.2rem; flex-direction:column; align-items:flex-start; } .social-copy { max-width:100%; } .media-actions { width:100%; } .media-notice { width:100%; } .gallery-grid { grid-template-columns:1fr; } .status-grid { grid-template-columns:1fr 1fr; } }
   </style>
-  <div class="modal-content">
-    <div class="modal-header">
-      <img id="modalProductImage" src="" alt="Product">
-      <button class="modal-close" onclick="closeProductModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div id="modalProductCategory"></div>
-      <div id="modalProductName"></div>
-      <div class="modal-actions" style="display:flex;gap:.75rem;flex-wrap:wrap;">
-        <button class="btn-primary" onclick="openWhatsAppForCurrentProduct()">Request Quote via WhatsApp</button>
-        <button class="btn btn-brown" onclick="openPayment(window.currentProduct?.name || 'Interior Product', Number(String(window.currentProduct?.price || '').replace(/[^0-9]/g, '')) || 0, window.currentProduct?.image)">Checkout</button>
-        <button class="btn-secondary" onclick="closeProductModal()">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
   // Configure backend URL for widget
