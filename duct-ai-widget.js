@@ -6,9 +6,6 @@
   const BACKEND_URLS = [];
   if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
   if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
-  if (!BACKEND_URLS.includes('https://api.interiorductltd.com')) BACKEND_URLS.push('https://api.interiorductltd.com');
-  if (!BACKEND_URLS.includes('https://duct-ai-backend.onrender.com')) BACKEND_URLS.push('https://duct-ai-backend.onrender.com');
-  if (!BACKEND_URLS.includes('https://interior-ecommerce-backend.onrender.com')) BACKEND_URLS.push('https://interior-ecommerce-backend.onrender.com');
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
 
   function fetchWithTimeout(url, options = {}, timeout = 3000) {

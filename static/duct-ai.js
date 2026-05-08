@@ -1,18 +1,11 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
-const BACKEND_URLS = [
-  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000'
-<<<<<<< HEAD
-    : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
-  'https://api.interiorductltd.com',
-  'https://duct-ai-backend.onrender.com',
-  'https://interior-ecommerce-backend.onrender.com',
-  'https://interior-ecommerce-lh3e.onrender.com'
-=======
-    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
-  'https://duct-ai-backend.onrender.com'
->>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
-];
+const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
+  : '';
+const BACKEND_URLS = [];
+if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
+if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
 let chatHistory = [];
 
 async function fetchBackend(path, options = {}) {
