@@ -1,8 +1,21 @@
+<<<<<<< HEAD
+const API_BASES = [
+  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000'
+    : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
+  'https://api.interiorductltd.com',
+  'https://duct-ai-backend.onrender.com',
+  'https://interior-ecommerce-backend.onrender.com',
+  'https://interior-ecommerce-lh3e.onrender.com'
+];
+=======
 const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
 const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : '';
 const API_BASES = [];
 if (LOCAL_DEFAULT) API_BASES.push(LOCAL_DEFAULT);
 if (CANONICAL_BACKEND) API_BASES.push(CANONICAL_BACKEND);
+if (!API_BASES.includes('https://duct-ai-backend.onrender.com')) API_BASES.push('https://duct-ai-backend.onrender.com');
+>>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
 const CHAT_PATH = '/ai-query';
 const TRACK_PATH = '/user-log';
 const SESSION_STORAGE_KEY = 'duct_ai_session_id';

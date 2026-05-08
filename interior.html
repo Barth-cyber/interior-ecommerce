@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <!-- Version: 2026-05-06-v2 | Cache Buster for GitHub Pages Deployment -->
-  <meta name="backend-url" content="https://duct-ai-backend.onrender.com">
+  <meta name="backend-url" content="https://api.interiorductltd.com">
   <script>
     // Ensure canonical backend URL is set before any scripts load
-    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
+    // This supports the improved widget that accepts data-backend-url attribute
+    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
   </script>
   <script src="/backend-config.js"></script>
   <script>
     // Additional redundancy: ensure canonical backend URL across multiple variable names
+    // Supports legacy code paths that may reference different variable names
     try {
-      const backend = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
+      const backend = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
       window.BACKEND_URLS = [backend];
       window.API_BASES = [backend];
       window.backendUrls = [backend];
@@ -2245,8 +2247,11 @@ function getBackendUrls() {
   if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     urls.push('http://localhost:5000');
   }
-  const configured = window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+  const configured = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
   if (configured) urls.push(configured);
+  urls.push('https://duct-ai-backend.onrender.com');
+  urls.push('https://interior-ecommerce-backend.onrender.com');
+  urls.push('https://interior-ecommerce-lh3e.onrender.com');
   return [...new Set(urls)];
 }
 
@@ -2833,10 +2838,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Admin Modal Functions
 function getAdminApiBase() {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
-    return 'http://127.0.0.1:5000';
-  }
-  return window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || 'https://duct-ai-backend.onrender.com';
+  // Auto-detect environment: use production URL if not localhost
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5000'                                    // local dev
+    : 'https://duct-ai-backend.onrender.com';                    // production
 }
 
 function apiUrl(path) {
@@ -3492,7 +3497,7 @@ function openWhatsAppProductSlider() {
   // Use local backend for localhost or file protocol, canonical backend for production
   const backendUrl = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : (window.DUCT_AI_BACKEND_URL || window.getBackendUrl?.() || 'https://duct-ai-backend.onrender.com');
+    : 'https://api.interiorductltd.com';
   
   // Set window variable for backward compatibility
   window.DUCT_AI_BACKEND_URL = backendUrl;
@@ -3606,7 +3611,7 @@ function openWhatsAppProductSlider() {
 <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
 
 <!-- Duct AI Widget JS - Load immediately (no defer) -->
-<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://duct-ai-backend.onrender.com"></script>
+<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://api.interiorductltd.com"></script>
 
 <!-- Fallback: Ensure widget appears if external script fails -->
 <script>
