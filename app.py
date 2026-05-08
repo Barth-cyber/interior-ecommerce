@@ -5,7 +5,7 @@ from datetime import datetime
 from time import time
 
 import requests
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, Response
 from flask_cors import CORS
 from dotenv import load_dotenv, find_dotenv
 from pymongo import MongoClient
@@ -403,6 +403,23 @@ def chat():
         return jsonify({
             "error": "Internal server error"
         }), 500
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FRONTEND CONFIG
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route("/backend-config.js")
+def backend_config_js():
+
+    backend_url = os.environ.get("DUCT_AI_BACKEND_URL", "").strip()
+    if not backend_url:
+        backend_url = os.environ.get("BACKEND_URL", "").strip()
+
+    js = f"window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || {json.dumps(backend_url)};\n"
+    js += "window.__BACKEND_URL__ = window.__BACKEND_URL__ || window.DUCT_AI_BACKEND_URL || '';\n"
+
+    return Response(js, mimetype="application/javascript")
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ROOT
