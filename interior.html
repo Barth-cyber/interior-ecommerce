@@ -706,23 +706,23 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
     <button class="qr-close" onclick="closeQrOverlay()" aria-label="Close QR overlay">&times;</button>
     <div class="qr-head">
       <div>
-        <div class="qr-head-title">QR App — Scan and follow IDL instantly</div>
+        <div class="qr-head-title">Social Handles App — Follow IDL instantly</div>
         <div class="qr-head-sub">Press Escape or click outside to close.</div>
       </div>
-      <div class="qr-head-badge">Live QR App</div>
+      <div class="qr-head-badge">Live Social App</div>
     </div>
-    <iframe id="qrFrame" src="https://barth-cyber.github.io/IDL-QrGen/scan.html" loading="lazy" allow="clipboard-read;camera;microphone" title="IDL QR Scan App"></iframe>
+    <iframe id="qrFrame" src="https://barth-cyber.github.io/idl-social-handles/idl.app/" loading="lazy" allow="clipboard-read;camera;microphone" title="IDL Social Handles App"></iframe>
   </div>
 </div>
 
 <div class="social-strip">
   <div class="social-banner">
     <div class="social-copy">
-      <strong>Multi-channel updates live:</strong>
-      <span id="socialUpdateText">New product reels, handy furniture safety tips and inspiring stories are one tap away.</span>
+      <strong>MULTI-CHANNEL UPDATES LIVE</strong>
+      <span id="socialUpdateText">Latest social feed notification.</span>
     </div>
     <div class="social-actions">
-      <button class="btn btn-outline-white" onclick="scrollTo('payments')">Visit Media Hub</button>
+      <a class="btn btn-outline-white" href="#payments">Visit Media Hub</a>
     </div>
   </div>
 </div>
@@ -1642,9 +1642,6 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
       <h2 class="sec-title">Furniture Videos, Safety Shorts & Social Feeds</h2>
       <div class="divider"></div>
     </div>
-    <div class="media-topbar">
-      <div class="media-notice" id="mediaNotification">Latest feed updates appear here.</div>
-    </div>
     <div class="media-grid">
       <div class="video-card fade-up">
         <div class="video-card-header">
@@ -1930,7 +1927,7 @@ function scrollTo(id) {
 
 function openQrOverlay() {
   const frame = document.getElementById('qrFrame');
-  if (frame) frame.src = 'https://barth-cyber.github.io/IDL-QrGen/scan.html';
+  if (frame) frame.src = 'https://barth-cyber.github.io/idl-social-handles/idl.app/';
   document.getElementById('qrOverlay').classList.add('active');
 }
 function closeQrOverlay(event) {
@@ -1970,9 +1967,7 @@ function setSocialUpdate(index) {
   currentSocialIndex = index % socialUpdates.length;
   const update = socialUpdates[currentSocialIndex];
   const textEl = document.getElementById('socialUpdateText');
-  const notif = document.getElementById('mediaNotification');
   if (textEl) textEl.textContent = update.text;
-  if (notif) notif.textContent = update.note;
 }
 
 function rotateSocialUpdate() {
@@ -3117,8 +3112,9 @@ function openWhatsAppProductSlider() {
   .wa-fab-product { right: 1rem !important; bottom: 1rem !important; }
 }
 
-  .social-strip { position: sticky; top: 72px; z-index:290; background: rgba(27,58,107,0.98); border-bottom:1px solid rgba(196,168,130,0.18); }
+  .social-strip { position: fixed; top: 68px; left: 0; right: 0; width: 100%; z-index: 295; background: rgba(27,58,107,0.98); border-bottom:1px solid rgba(196,168,130,0.18); }
   .social-banner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 4rem; color:#fff; font-size:.92rem; }
+  @media(min-width:900px) { .social-strip { top: 102px; } }
   .social-copy { display:flex; flex-direction:column; gap:.35rem; max-width:52%; }
   .social-copy strong { font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
   .social-copy span { color:rgba(255,255,255,.8); font-size:.92rem; line-height:1.4; }
