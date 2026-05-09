@@ -164,20 +164,25 @@ button {font-family:var(--f-body);cursor:pointer}
 @media(min-width:900px){
   .top-announcement{display:flex;}
   header{top:34px;}
-  .hero{padding-top:106px;}
+  .hero{padding-top:154px;}
   .hero-eyebrow{display:none;}
 }
 
 /* =====================================================  HEADER */
 header{
   position:fixed;top:0;left:0;right:0;z-index:300;
-  height:72px;padding:0 4rem;
-  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 4rem;
+  display:flex;flex-direction:column;align-items:flex-start;gap:.85rem;
   background:var(--navy);
   border-bottom:1px solid rgba(196,168,130,0.18);
   backdrop-filter:blur(20px);
   transition:var(--t);
 }
+header .header-row{display:flex;align-items:center;justify-content:space-between;width:100%;gap:1rem;}
+header .header-row nav{flex:1;margin:0 1rem;}
+.header-announcement{width:100%;display:flex;align-items:center;justify-content:space-between;gap:1rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:.75rem 1rem;color:rgba(255,255,255,.95);font-size:.85rem;}
+.header-announcement .ann-text{flex:1;line-height:1.4;color:rgba(255,255,255,.96);}
+.header-announcement .ann-cta{white-space:nowrap;}
 header.scrolled{background:var(--navy);box-shadow:0 4px 30px rgba(0,0,0,.35)}
 .logo-wrap{display:flex;align-items:center;gap:.85rem}
 .logo-img-wrap{
@@ -240,7 +245,7 @@ nav a:hover::after{width:100%}
 /* Mobile nav toggle */
 .nav-toggle{display:none;background:none;border:1px solid rgba(255,255,255,0.25);color:#fff;padding:.35rem .6rem;border-radius:3px;font-size:1rem}
 .mobile-nav{
-  display:none;position:fixed;top:72px;left:0;right:0;z-index:299;
+  display:none;position:fixed;top:120px;left:0;right:0;z-index:299;
   background:var(--navy-deep);border-bottom:2px solid var(--brown-pale);
   padding:1.5rem 2rem;flex-direction:column;gap:1.2rem;
 }
@@ -280,7 +285,7 @@ section{padding:6rem 0}
 
 /* =====================================================  HERO  (Dark navy bg) */
 .hero{
-  min-height:100vh;padding-top:72px;
+  min-height:100vh;padding-top:136px;
   background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 55%,#2A3F6F 100%);
   display:grid;grid-template-columns:1fr 1fr;overflow:hidden;position:relative;
 }
@@ -316,6 +321,25 @@ section{padding:6rem 0}
 }
 .hero-badge strong{display:block;font-family:var(--f-head);font-size:.95rem;color:var(--brown-pale)}
 .hero-badge span{font-size:.68rem;color:rgba(255,255,255,.55);letter-spacing:.08em}
+
+.review-section{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(242,243,245,.98));padding:5rem 0;}
+.review-section .container{display:block;}
+.review-grid{display:grid;grid-template-columns:repeat(3,minmax(240px,1fr));gap:1.5rem;margin-top:2.5rem;}
+.review-card{background:#fff;border:1px solid rgba(27,58,107,.08);border-radius:18px;padding:2rem;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:1rem;min-height:260px;}
+.review-rating{color:var(--brown);letter-spacing:.12em;font-size:.95rem;font-weight:700;}
+.review-card p{font-family:var(--f-sub);font-size:.95rem;color:var(--text-mid);line-height:1.8;flex:1;}
+.review-author{font-weight:600;color:var(--navy);font-size:.9rem;}
+.review-banner{margin-top:2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:space-between;}
+.review-hint{color:var(--text-soft);font-size:.92rem;max-width:68%;}
+.review-popup{position:fixed;bottom:2rem;right:2rem;display:none;z-index:350;width:min(320px,92vw);max-width:340px;}
+.review-popup.active{display:block;}
+.review-popup-card{background:rgba(255,255,255,.88);backdrop-filter:blur(18px);border-radius:18px;max-width:100%;width:100%;padding:1.35rem;position:relative;box-shadow:0 16px 42px rgba(15,35,71,.16);border:1px solid rgba(255,255,255,.85);}
+.review-popup-close{position:absolute;top:.75rem;right:.75rem;background:transparent;border:none;color:var(--navy);font-size:1.4rem;cursor:pointer;}
+.review-popup-rating{color:var(--brown);font-size:.95rem;font-weight:700;letter-spacing:.12em;margin-bottom:.55rem;}
+.review-popup-card h3{font-family:var(--f-head);font-size:1.15rem;color:var(--navy);margin-bottom:.85rem;line-height:1.25;}
+.review-popup-card p{font-family:var(--f-sub);font-size:.94rem;color:var(--text-dark);line-height:1.75;margin-bottom:1rem;}
+.review-popup-author{font-weight:700;color:var(--navy);font-size:.88rem;}
+@media(max-width:900px){.review-grid{grid-template-columns:1fr;}.review-banner{flex-direction:column;align-items:flex-start;}.review-hint{max-width:100%;}.review-popup{right:1rem;bottom:1rem;width:min(90vw,320px);}.review-popup-card{padding:1.1rem;}.review-popup-card h3{font-size:1.05rem;}.review-popup-card p{font-size:.92rem;}.review-popup-close{top:.55rem;right:.55rem;font-size:1.25rem;}}
 
 /* =====================================================  TICKER  (Navy bg) */
 .ticker-wrap{background:var(--navy-deep);border-top:1px solid rgba(196,168,130,.15);border-bottom:1px solid rgba(196,168,130,.15);padding:.5rem 0;overflow:hidden}
@@ -621,11 +645,38 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .f-bot{flex-direction:column;text-align:center}
   .form-row{grid-template-columns:1fr}
   .cat-tabs{gap:.2rem}
-  .hero-popup-slide{flex-direction:column;min-height:auto;padding:1.5rem;max-height:none;gap:1rem}.hero-popup-slide img{width:200px;max-height:200px;height:auto;margin-right:0}
+  .header-announcement{padding:.65rem .9rem;font-size:.82rem;gap:.65rem;flex-wrap:wrap;justify-content:flex-start;}
+  .header-announcement .ann-text{flex:1 1 100%;}
+  .header-announcement .ann-cta{align-self:flex-start;}
+  .hero-popup-slide{flex-direction:column;min-height:auto;padding:1.5rem;max-height:none;gap:1rem;}
+  .hero-popup-slide img{width:100%;max-width:100%;height:auto;object-fit:cover;margin-right:0;}
+  .featured-card-img img,
+  .cat-card-img img,
+  .custom-made-card img,
+  .door-img-wrap img,
+  .show-hero img,
+  .show-cell img,
+  .show-sm img,
+  .hc-main img,
+  .hc-cell img,
+  .ab-img-main img,
+  .ab-img-sec img,
+  .playlist-thumb img,
+  .hero-popup-slide img{width:100%;height:auto;object-fit:cover;}
+  .show-hero,
+  .show-cell,
+  .show-sm,
+  .door-img-wrap,
+  .featured-card-img,
+  .cat-card-img,
+  .hc-main,
+  .hc-cell{min-height:auto;height:auto;}
+  .playlist-thumb{width:100%;min-width:0;height:auto;}
 }
 @media(max-width:600px){
   html{font-size:14px}
-  header{padding:0 1rem;height:60px;max-width:100%;left:0;right:0;}
+  header{padding:0 1rem;height:auto;max-width:100%;left:0;right:0;}
+  .header-announcement{padding:.55rem .75rem;font-size:.78rem;}
   .logo-img-wrap{width:36px;height:36px;border:1.5px solid var(--brown-pale)}
   .logo-name{font-size:0.95rem}
   .logo-tagline{font-size:0.45rem}
@@ -639,7 +690,8 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .container{padding:0 1rem}
   section{padding:2.5rem 0}
   .hero-left{padding:2.5rem 1rem}
-  .hero-popup-slide{min-height:auto;padding:1rem;gap:1rem}.hero-popup-slide img{width:160px;max-height:160px;height:auto;margin-right:0}
+  .hero-popup-slide{min-height:auto;padding:1rem;gap:1rem;}
+  .hero-popup-slide img{width:100%;max-width:100%;height:auto;margin-right:0;}
   .hero-popup-content{font-size:.85rem}
   .hero-popup-content div:first-child{font-size:1.1rem}
   .hero-stats{grid-template-columns:1fr;gap:1rem}
@@ -650,9 +702,31 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   .footer-grid{grid-template-columns:1fr;gap:1.5rem}
   .about-img-stack{height:300px}
   .ab-img-main{width:100%;height:60%}
-  .ab-img-sec{width:60%;height:50%}
+  .ab-img-sec{width:100%;height:auto}
   .hdr-right{flex-wrap:wrap;justify-content:flex-end;gap:.4rem;}
   .curr-sel{display:none;}
+  .featured-card-img img,
+  .cat-card-img img,
+  .custom-made-card img,
+  .door-img-wrap img,
+  .show-hero img,
+  .show-cell img,
+  .show-sm img,
+  .hc-main img,
+  .hc-cell img,
+  .ab-img-main img,
+  .ab-img-sec img,
+  .playlist-thumb img,
+  .hero-popup-slide img{width:100%;height:auto;object-fit:cover;}
+  .show-hero,
+  .show-cell,
+  .show-sm,
+  .door-img-wrap,
+  .featured-card-img,
+  .cat-card-img,
+  .hc-main,
+  .hc-cell{min-height:auto;height:auto;}
+  .playlist-thumb{width:100%;min-width:0;height:auto;}
   .hdr-icon-btn{padding:.35rem .55rem;min-width:0;}
 }
 </style>
@@ -669,35 +743,41 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
 
 
 <header id="mainHeader">
-  <a href="#home" class="logo-wrap">
-    <div class="logo-img-wrap">
-      <img src="static/legacy-inline-images/interior-1.jpeg" alt="Interior Duct Ltd">
+  <div class="header-row">
+    <a href="#home" class="logo-wrap">
+      <div class="logo-img-wrap">
+        <img src="static/legacy-inline-images/interior-1.jpeg" alt="Interior Duct Ltd">
+      </div>
+      <div class="logo-text-block">
+        <div class="logo-name">Interior Duct Ltd</div>
+        <div class="logo-tagline">Functionality, Durability &amp; Aesthetics</div>
+      </div>
+    </a>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#showroom">Showroom</a>
+      <a href="#custom-made-products">Products</a>
+      <a href="#doors">Doors</a>
+      <a href="#ai-design">AI Design</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="hdr-right">
+      <select class="curr-sel" id="currSel" onchange="setCurrency(this.value)">
+        <option value="NGN">&#8358; NGN</option>
+        <option value="USD">&#36; USD</option>
+        <option value="GBP">&#163; GBP</option>
+        <option value="EUR">&#8364; EUR</option>
+      </select>
+      <button class="hdr-icon-btn" title="Cart" id="cartBtn">&#128722; <sup id="cartCount">0</sup></button>
+      <button class="hdr-cta btn" onclick="openQrOverlay()">Connect With Us</button>
+      <button class="hdr-cta btn" onclick="scrollTo('ai-design')">AI Designer</button>
+      <button class="nav-toggle" id="navToggle" onclick="toggleMobileNav()" aria-label="Menu">&#9776;</button>
     </div>
-    <div class="logo-text-block">
-      <div class="logo-name">Interior Duct Ltd</div>
-      <div class="logo-tagline">Functionality, Durability &amp; Aesthetics</div>
-    </div>
-  </a>
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#showroom">Showroom</a>
-    <a href="#custom-made-products">Products</a>
-    <a href="#doors">Doors</a>
-    <a href="#ai-design">AI Design</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-  </nav>
-  <div class="hdr-right">
-    <select class="curr-sel" id="currSel" onchange="setCurrency(this.value)">
-      <option value="NGN">&#8358; NGN</option>
-      <option value="USD">&#36; USD</option>
-      <option value="GBP">&#163; GBP</option>
-      <option value="EUR">&#8364; EUR</option>
-    </select>
-    <button class="hdr-icon-btn" title="Cart" id="cartBtn">&#128722; <sup id="cartCount">0</sup></button>
-    <button class="hdr-cta btn" onclick="openQrOverlay()">Connect With Us</button>
-    <button class="hdr-cta btn" onclick="scrollTo('ai-design')">AI Designer</button>
-    <button class="nav-toggle" id="navToggle" onclick="toggleMobileNav()" aria-label="Menu">&#9776;</button>
+  </div>
+  <div class="header-announcement">
+    <div class="ann-text" id="socialUpdateText">Fresh furniture stories and short-form videos are rolling in.</div>
+    <a class="btn btn-outline-white btn-sm ann-cta" href="#payments">Visit Media Hub</a>
   </div>
 </header>
 
@@ -712,18 +792,6 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       <div class="qr-head-badge">Live Social App</div>
     </div>
     <iframe id="qrFrame" src="https://barth-cyber.github.io/idl-social-handles/idl.app/" loading="lazy" allow="clipboard-read;camera;microphone" title="IDL Social Handles App"></iframe>
-  </div>
-</div>
-
-<div class="social-strip">
-  <div class="social-banner">
-    <div class="social-copy">
-      <strong>MULTI-CHANNEL UPDATES LIVE</strong>
-      <span id="socialUpdateText">Latest social feed notification.</span>
-    </div>
-    <div class="social-actions">
-      <a class="btn btn-outline-white" href="#payments">Visit Media Hub</a>
-    </div>
   </div>
 </div>
 
@@ -877,6 +945,46 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       </div>
       <div class="hc-cell"><img src="static/legacy-inline-images/interior-3.jpeg" alt="Dining Collection"></div>
       <div class="hc-cell"><img src="static/legacy-inline-images/interior-4.jpeg" alt="Luxury Door"></div>
+    </div>
+  </div>
+</section>
+<section class="review-section" id="reviews">
+  <div class="container">
+    <div class="sec-hdr">
+      <span class="sec-tag">Customer Feedback</span>
+      <h2 class="sec-title">Trusted Reviews from <em>Interior Duct</em> Clients</h2>
+      <div class="divider"></div>
+      <p style="color:var(--text-soft);font-family:var(--f-sub);font-size:1.05rem;max-width:720px;margin:0 auto;line-height:1.8;">Hear from homeowners, designers, and business owners who chose Interior Duct for bespoke furniture, custom doors, and premium interior installations.</p>
+    </div>
+    <div class="review-grid">
+      <article class="review-card">
+        <div class="review-rating">★★★★★</div>
+        <p>“The finish quality is impressive and delivery was seamless. Interior Duct made our lounge look premium and comfortable.”</p>
+        <div class="review-author">– Uche O., Living Room Renovation</div>
+      </article>
+      <article class="review-card">
+        <div class="review-rating">★★★★★</div>
+        <p>“A smart design approach with friendly service. The expert team helped us choose the perfect timber and upholstery for our space.”</p>
+        <div class="review-author">– Ama K., Commercial Fitout</div>
+      </article>
+      <article class="review-card">
+        <div class="review-rating">★★★★★</div>
+        <p>“I appreciated the clarity and speed from concept to completion. Our dining room furniture arrived exactly as promised.”</p>
+        <div class="review-author">– Tunde M., Residential Client</div>
+      </article>
+    </div>
+    <div class="review-banner">
+      <button class="btn btn-navy" onclick="showReviewPopup()">View Latest Review</button>
+      <span class="review-hint">Dynamic customer review pop-ups appear here to highlight fresh testimonials and build trust.</span>
+    </div>
+  </div>
+  <div class="review-popup" id="reviewPopup" aria-hidden="true">
+    <div class="review-popup-card">
+      <button class="review-popup-close" aria-label="Close review popup" onclick="closeReviewPopup()">&times;</button>
+      <div class="review-popup-rating">★★★★★</div>
+      <h3>“Transforming our home was effortless with Interior Duct.”</h3>
+      <p>“Every step felt premium — from the design consultation to the delivery of our custom furniture. The team exceeded our expectations and created a space that truly feels like home.”</p>
+      <div class="review-popup-author">– Chinedu & Ife, Lagos</div>
     </div>
   </div>
 </section>
@@ -1771,14 +1879,14 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
             <div class="c-icon">&#9993;</div>
             <div class="c-text">
               <span class="c-label">Email</span>
-              <span class="c-val">hello@interiorductltd.com</span>
+              <span class="c-val">interiorductltd@gmail.com</span>
             </div>
           </div>
           <div class="c-item">
             <div class="c-icon">&#128337;</div>
             <div class="c-text">
               <span class="c-label">Business Hours</span>
-              <span class="c-val">Mon &ndash; Sat: 8am &ndash; 6pm WAT</span>
+              <span class="c-val">Mon &ndash; Sat: 8am &ndash; 5pm WAT</span>
             </div>
           </div>
           <div class="c-item">
@@ -3112,14 +3220,6 @@ function openWhatsAppProductSlider() {
   .wa-fab-product { right: 1rem !important; bottom: 1rem !important; }
 }
 
-  .social-strip { position: fixed; top: 68px; left: 0; right: 0; width: 100%; z-index: 295; background: rgba(27,58,107,0.98); border-bottom:1px solid rgba(196,168,130,0.18); }
-  .social-banner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 4rem; color:#fff; font-size:.92rem; }
-  @media(min-width:900px) { .social-strip { top: 102px; } }
-  .social-copy { display:flex; flex-direction:column; gap:.35rem; max-width:52%; }
-  .social-copy strong { font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
-  .social-copy span { color:rgba(255,255,255,.8); font-size:.92rem; line-height:1.4; }
-  .social-actions { display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; justify-content:flex-end; }
-  .social-actions .btn { white-space:nowrap; }
   .video-player { position:relative; width:100%; min-height:320px; aspect-ratio:16/9; overflow:hidden; border-radius:18px; background:#000; }
   .video-player iframe { width:100%; height:100%; }
 
@@ -3173,7 +3273,7 @@ function openWhatsAppProductSlider() {
   .chat-box { display: block !important; visibility: visible !important; }
 
   @media(max-width:1100px) { .media-grid { grid-template-columns:1fr; } }
-  @media(max-width:780px) { .social-banner { padding:1rem 1.2rem; flex-direction:column; align-items:flex-start; } .social-copy { max-width:100%; } .media-notice { width:100%; } }
+  @media(max-width:780px) { .media-notice { width:100%; } }
   </style>
 
 <script>
@@ -3388,6 +3488,99 @@ window.addEventListener('load', function() {
         }
       }
     });
+  });
+</script>
+<script>
+ const reviewPopups = [
+  {
+    title: '“Interior Duct gave my home along Sapele Road the exact finish I imagined.”',
+    body: 'I was impressed by the attention to detail and how smoothly everything was delivered. The custom furniture completely transformed my family home and the quality speaks for itself.',
+    author: 'Engr. Philipson, Benin City',
+    rating: '★★★★★'
+  },
+  {
+    title: '“From the first installation to the final setup, the craftsmanship stood out.”',
+    body: 'I trusted Interior Duct with a full showroom-style fit-out for my office in Warri, and they handled it professionally. The finishing and durability were excellent.',
+    author: 'Engr. Alaba, Warri',
+    rating: '★★★★★'
+  },
+  {
+    title: '“Our Port Harcourt project came out looking premium and polished.”',
+    body: 'I appreciated how organized the entire process was. The bespoke furniture arrived on schedule and the finishing added real class to the space.',
+    author: 'Dr. Johnson, Port Harcourt',
+    rating: '★★★★★'
+  },
+  {
+    title: '“The wardrobes and TV console completely upgraded my apartment in GRA.”',
+    body: 'I wanted a modern look without unnecessary delays, and Interior Duct delivered exactly that. Their team was professional and easy to work with from start to finish.',
+    author: 'Mrs. Edesili, Benin City',
+    rating: '★★★★☆'
+  },
+  {
+    title: '“Guests constantly compliment the furniture pieces in our hotel rooms.”',
+    body: 'We hired Interior Duct to furnish sections of our boutique hotel, and the outcome exceeded our expectations. The finishing was neat, elegant, and delivered on time.',
+    author: 'Royal Crest Hotel, Benin City',
+    rating: '★★★★★'
+  },
+  {
+    title: '“Their kitchen cabinet design gave my home a clean and modern feel.”',
+    body: 'I loved how they maximized the available space while still making everything look luxurious. Communication throughout the project was also very good.',
+    author: 'Mrs. Omoregie, Benin City',
+    rating: '★★★★½'
+  },
+  {
+    title: '“Interior Duct handled our reception area makeover professionally.”',
+    body: 'We needed something stylish but durable for daily customer traffic, and they delivered beautifully crafted furniture that matched our brand perfectly.',
+    author: 'Eterno Suites, Benin City',
+    rating: '★★★★☆'
+  },
+  {
+    title: '“The custom office tables and shelves came out better than I expected.”',
+    body: 'I appreciated the creativity and finishing quality. Everything was installed neatly and the workspace now feels more organized and professional.',
+    author: 'Barr. Igbinovia, Benin City',
+    rating: '★★★★★'
+  },
+  {
+    title: '“Their attention to detail made a huge difference in our guest lounge.”',
+    body: 'The team understood the exact atmosphere we wanted for our lounge area and delivered furniture that looked classy and inviting without exceeding our budget.',
+    author: 'Prestige Gold Hotel, Benin City',
+    rating: '★★★★½'
+  }
+];
+  let reviewPopupIndex = 0;
+  const popupEl = document.getElementById('reviewPopup');
+  let reviewTimeout;
+  let reviewInterval;
+
+  function updateReviewPopupContent(index) {
+    const data = reviewPopups[index % reviewPopups.length];
+    const card = popupEl.querySelector('.review-popup-card');
+    card.querySelector('h3').textContent = data.title;
+    card.querySelector('p').textContent = data.body;
+    card.querySelector('.review-popup-author').textContent = data.author;
+    card.querySelector('.review-popup-rating').textContent = data.rating;
+  }
+
+  function showReviewPopup(index = reviewPopupIndex) {
+    updateReviewPopupContent(index);
+    popupEl.classList.add('active');
+    popupEl.setAttribute('aria-hidden', 'false');
+    reviewPopupIndex = (index + 1) % reviewPopups.length;
+    clearTimeout(reviewTimeout);
+    reviewTimeout = setTimeout(() => {
+      closeReviewPopup();
+      reviewInterval = setTimeout(() => showReviewPopup(reviewPopupIndex), 60000);
+    }, 20000);
+  }
+
+  function closeReviewPopup() {
+    popupEl.classList.remove('active');
+    popupEl.setAttribute('aria-hidden', 'true');
+    clearTimeout(reviewTimeout);
+  }
+
+  window.addEventListener('load', function() {
+    reviewInterval = setTimeout(() => showReviewPopup(0), 6000);
   });
 </script>
 
