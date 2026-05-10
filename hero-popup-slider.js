@@ -517,20 +517,20 @@ function startHeroCollageAuto() {
 function initAIChatButton() {
   // Create AI button HTML
   const aiButtonHTML = `
-    <div id="aiChatContainer" style="position:fixed;bottom:5.5rem;right:2rem;z-index:450;width:380px;max-width:90vw;display:none;background:#fff;border-radius:12px;box-shadow:0 8px 48px rgba(27,58,107,0.25);overflow:hidden;animation:slideUp 0.3s ease;">
-      <div style="background:linear-gradient(135deg,#1B3A6B 0%,#2A5298 100%);padding:1.5rem;color:#fff;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <h3 style="margin:0;font-size:1.1rem;margin-bottom:0.3rem;">AI Product Assistant</h3>
-          <p style="margin:0;font-size:0.8rem;opacity:0.9;">Product recommendations for you</p>
-        </div>
+    <div id="aiChatContainer" style="position:fixed;bottom:1rem;right:2rem;z-index:450;width:320px;max-width:90vw;display:none;background:#fff;border-radius:12px;box-shadow:0 8px 48px rgba(27,58,107,0.25);overflow:hidden;animation:slideUp 0.3s ease;">
+      <div style="background:linear-gradient(135deg,#1B3A6B 0%,#2A5298 100%);padding:1rem;color:#fff;display:flex;justify-content:center;align-items:center;position:relative;text-align:center;">
+  <div style="width:100%;">
+    <h3 style="margin:0;font-size:1.1rem;margin-bottom:0.25rem;text-align:center;">AI Product Assistant</h3>
+    <p style="margin:0;font-size:0.8rem;opacity:0.9;text-align:center;">Product recommendations for you</p>
+  </div>
         <button onclick="closeAIChat()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;">×</button>
       </div>
-      <div id="aiProductCarousel" style="height:280px;position:relative;overflow:hidden;background:#f9f9f9;">
+      <div id="aiProductCarousel" style="height:220px;position:relative;overflow:hidden;background:#f9f9f9;">
         <div id="aiCarouselTrack" style="display:flex;height:100%;transition:transform 0.5s cubic-bezier(.77,0,.175,1);">
           <!-- Products will be injected here -->
         </div>
       </div>
-      <div style="padding:1rem;text-align:center;background:#fff;border-top:1px solid #e0e0e0;">
+      <div style="padding:0.75rem;text-align:center;background:#fff;border-top:1px solid #e0e0e0;">
         <a id="aiChatLink" href="javascript:void(0);" onclick="openAIConversation(); return false;"
            class="btn"
            style="width:100%;background:#C9956B;color:#fff;border:none;text-decoration:none;display:inline-block;box-sizing:border-box;padding:0.75rem 1.5rem;border-radius:4px;font-weight:600;font-size:0.9rem;transition:all 0.3s ease;">
@@ -538,7 +538,7 @@ function initAIChatButton() {
         </a>
       </div>
     </div>
-    <button id="aiChatButton" onclick="toggleAIChat()" style="position:fixed;bottom:2rem;right:2rem;z-index:400;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1B3A6B 0%,#2A5298 100%);border:none;color:#fff;font-size:1.8rem;cursor:pointer;box-shadow:0 6px 24px rgba(27,58,107,0.4);transition:all 0.3s ease;animation:bounce 2s infinite;">
+    <button id="aiChatButton" onclick="toggleAIChat()" style="position:fixed;bottom:1rem;right:1rem;z-index:400;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1B3A6B 0%,#2A5298 100%);border:none;color:#fff;font-size:1.8rem;cursor:pointer;box-shadow:0 6px 24px rgba(27,58,107,0.4);transition:all 0.3s ease;animation:bounce 2s infinite;">
       🤖
     </button>
   `;
@@ -576,7 +576,7 @@ function refreshAICarousel() {
 
   track.innerHTML = products.map((p, i) => `
     <div style="min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;cursor:pointer;transition:all 0.3s ease;" onclick="window.currentAIProductIndex=${i}; openWhatsApp(window.aiFeaturedProducts[${i}])">
-      <img src="${encodeURI(p.img)}" alt="${p.name}" style="width:180px;height:180px;object-fit:cover;border-radius:8px;margin-bottom:1rem;box-shadow:0 4px 12px rgba(13,27,42,0.15);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNGRkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxvYWRpbmcgLi4uPC90ZXh0Pjwvc3ZnPg=='">
+      <img src="${encodeURI(p.img)}" alt="${p.name}" style="width:140px;height:140px;object-fit:cover;border-radius:8px;margin-bottom:1rem;box-shadow:0 4px 12px rgba(13,27,42,0.15);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGNEY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNGRkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxvYWRpbmcgLi4uPC90ZXh0Pjwvc3ZnPg=='">
       <div style="text-align:center;">
         <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:#1B3A6B;margin-bottom:0.3rem;line-height:1.3;">${p.name}</div>
         <div style="font-size:0.75rem;color:#999;text-transform:uppercase;">${p.category || 'Featured'}</div>
