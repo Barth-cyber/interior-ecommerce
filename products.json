@@ -1,25 +1,36 @@
 {
   "products": [
     {
-      "category": "Chairs & Seating",
-      "description": "Elegant chesterfield sofa set with premium leather upholstery and classic design.",
+      "category": "Living Room",
+      "description": "Regal seating with premium upholstery and sculpted timber frame.",
+      "dimensions": "Standard dimensions: 1000mm W × 950mm D × 850mm H.",
       "id": 1,
       "image": "Chair_Royal.jpg",
-      "name": "Royal Chesterfield Sofa Set",
+      "name": "Royal Lounge Chair",
       "price": "NGN 2,800,000"
     },
     {
-      "category": "Dining & Tables",
-      "description": "Beautiful mahogany dining table featuring a stunning quartz top for modern elegance.",
+      "category": "Dining",
+      "description": "Luxury dining ensemble with premium wooden construction.",
+      "dimensions": "Standard dimensions: Table 2200mm L × 1000mm W; chairs 450mm W × 550mm D.",
       "id": 2,
       "image": "Dining_Set.jpg",
-      "name": "Mahogany Dining Table with Quartz Top",
+      "name": "Grand Dining Set",
       "price": "NGN 3,200,000"
+    },
+    {
+      "category": "Bedroom",
+      "description": "Elegant bedside table with soft-close drawers.",
+      "dimensions": "Standard dimensions: 520mm H × 450mm W × 400mm D.",
+      "id": 3,
+      "image": "Bedside.jpg",
+      "name": "Classic Bedside Table",
+      "price": "NGN 1,200,000"
     },
     {
       "category": "Dining & Tables",
       "description": "Contemporary dining set with glass top and comfortable seating.",
-      "id": 3,
+      "id": 4,
       "image": "Dining_chari_and_table.jpg",
       "name": "Modern Glass Top Dining Set",
       "price": "NGN 3,400,000"
@@ -27,7 +38,7 @@
     {
       "category": "Bedroom",
       "description": "Luxury master bedroom suite with tufted headboard and premium finishes.",
-      "id": 4,
+      "id": 5,
       "image": "IMG_20251216_WA0032.jpg",
       "name": "Master Bedroom Suite - Tufted Headboard",
       "price": "NGN 4,800,000"

@@ -2959,31 +2959,7 @@ function askAIDesigner() {
   }
 }
 
-function normalizeProductImagePath(image) {
-  if (!image) return '';
-  let src = String(image).trim();
-  if (/^(https?:)?\/\//i.test(src)) return src;
-  src = src.replace(/\\/g, '/').replace(/^\/+/, '');
-  if (!/^IDL_Product_branding\//i.test(src) && !/^idl-images\//i.test(src)) {
-    src = 'IDL_Product_branding/' + src;
-  }
-  src = src.replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
-  return src;
-}
 
-function handleImageError(img) {
-  if (!img || img.dataset.fallback) return;
-  const original = img.dataset.original || img.getAttribute('src') || '';
-  const normalized = normalizeProductImagePath(decodeURIComponent(original));
-  if (normalized && normalized !== original) {
-    img.dataset.original = original;
-    img.dataset.fallback = '1';
-    img.src = encodeURI(normalized);
-    return;
-  }
-  img.dataset.fallback = '1';
-  img.src = 'https://via.placeholder.com/300x200?text=No+Image';
-}
 
 // Product catalog used for category tiles
 let PRODUCT_CATALOG = [];
@@ -3048,7 +3024,15 @@ function getProductMeta(product) {
 }
 
 function getProductImage(product) {
-  return normalizeProductImagePath(product.img || product.image || product.imageUrl || product.photo || '');
+  let imagePath = product.img || product.image || product.imageUrl || product.photo || '';
+  if (!imagePath) return '';
+  // Ensure the path is relative to IDL_Product_branding/
+  if (!imagePath.startsWith('IDL_Product_branding/') && !imagePath.startsWith('idl-images/') && !/^(https?:)?\/\//i.test(imagePath)) {
+    imagePath = 'IDL_Product_branding/' + imagePath;
+  }
+  // Sanitize path for display, replacing spaces and hyphens with underscores
+  imagePath = imagePath.replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
+  return imagePath;
 }
 
 async function loadProductCatalog() {

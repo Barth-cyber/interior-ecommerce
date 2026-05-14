@@ -31,9 +31,11 @@ function normalizeProductImagePath(image) {
   let src = String(image).trim();
   if (/^(https?:)?\/\//i.test(src)) return src;
   src = src.replace(/\\/g, '/').replace(/^\/+/, '');
-  const parts = src.split('/');
-  const filename = parts.pop().replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
-  return [...parts, filename].filter(Boolean).join('/');
+  if (!/^IDL_Product_branding\//i.test(src) && !/^idl-images\//i.test(src)) {
+    src = 'IDL_Product_branding/' + src;
+  }
+  src = src.replace(/\s+/g, '_').replace(/-+/g, '_').replace(/_+/g, '_');
+  return src;
 }
 
 function handleImageError(img) {
