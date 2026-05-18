@@ -1,0 +1,42 @@
+# Railway.app Service Configuration
+# Reference: https://docs.railway.app
+
+[build]
+# Python builder via Nixpacks (auto-detected from Procfile)
+builder = "nixpacks"
+
+[deploy]
+# Service name for this Railway deployment
+name = "interior-ecommerce-api"
+
+# Port to bind to (Railway exposes via $PORT environment variable)
+port = 8000
+
+# Restart policy for failed deployments
+restartPolicy = "on_failure"
+restartPolicyMaxRetries = 5
+
+# Health check settings
+healthcheck = { interval = 10, timeout = 5, retries = 3 }
+
+[env]
+# Python version (must match requirements.txt compatibility)
+PYTHON_VERSION = "3.11.9"
+PYTHONUNBUFFERED = "true"
+FLASK_ENV = "production"
+
+# The following should be set in Railway Dashboard (do NOT commit secrets here):
+# - ADMIN_SECRET_KEY: Secure random value (min 32 chars)
+# - ADMIN_PASSWORD_HASH: Generated hash from werkzeug.security.generate_password_hash()
+# - AWS_ACCESS_KEY_ID: AWS IAM access key for S3
+# - AWS_SECRET_ACCESS_KEY: AWS IAM secret key for S3
+# - AWS_S3_BUCKET_NAME: Interior ecommerce S3 bucket
+# - AWS_S3_REGION: us-east-1 or appropriate AWS region
+# - GEMINI_API_KEY: Google AI API key
+# - OPENAI_API_KEY: OpenAI API key (optional)
+# - ANTHROPIC_API_KEY: Anthropic API key (optional)
+# - MONGO_URI: MongoDB connection string (optional)
+# - STRIPE_SECRET_KEY: Stripe payment secret (optional)
+# - STRIPE_PUBLISHABLE_KEY: Stripe publishable key (optional)
+# - PAYSTACK_SECRET_KEY: Paystack payment secret (optional)
+# - PAYSTACK_PUBLIC_KEY: Paystack public key (optional)

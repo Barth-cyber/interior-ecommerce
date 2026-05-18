@@ -1,0 +1,21 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "python -m pip install -r requirements.txt"
+  },
+  "deploy": {
+    "startCommand": "gunicorn -w 2 -b 0.0.0.0:$PORT application:app",
+    "restartPolicyType": "on_failure",
+    "restartPolicyMaxRetries": 5
+  },
+  "services": {
+    "interior-ecommerce-api": {
+      "environmentVariables": {
+        "PYTHON_VERSION": "3.11.9",
+        "PYTHONUNBUFFERED": "true",
+        "FLASK_ENV": "production"
+      }
+    }
+  }
+}
