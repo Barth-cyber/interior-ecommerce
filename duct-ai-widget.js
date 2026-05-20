@@ -268,6 +268,21 @@
   let promoIndex = 0;
   async function loadPromotions() {
     try {
+      // Try backend promotions API first
+      const apiRes = await fetch('/api/promotions').catch(() => null);
+      if (apiRes && apiRes.ok) {
+        const data = await apiRes.json();
+        const social = data.social || [];
+        const second = data.second_hand || { products: [] };
+        promotions = [];
+        for (const s of social) promotions.push({ type: 'social', title: s.title || s.platform, desc: s.desc || '', url: s.url });
+        for (const p of second.products || []) promotions.push({ type: 'second', title: p.name, desc: p.description || p.desc || '', img: p.image || '', url: 'marketplace.html#' + encodeURIComponent(p.id || p.name) });
+        renderPromo();
+        startPromoRotation();
+        return;
+      }
+
+      // Fallback to static JSON files for environments without the API
       const [socialRes, secondRes] = await Promise.all([
         fetch('social_posts.json').catch(() => null),
         fetch('second_hand_products.json').catch(() => null)
@@ -275,9 +290,7 @@
       const social = socialRes && socialRes.ok ? await socialRes.json() : [];
       const second = secondRes && secondRes.ok ? await secondRes.json() : [];
       promotions = [];
-      // map social posts to promo items
       for (const s of social) promotions.push({ type: 'social', title: s.title || s.platform, desc: s.desc || '', url: s.url });
-      // map second-hand products
       for (const p of second.products || []) promotions.push({ type: 'second', title: p.name, desc: p.description || p.desc || '', img: p.image || '', url: 'marketplace.html#' + encodeURIComponent(p.id || p.name) });
       renderPromo();
       startPromoRotation();

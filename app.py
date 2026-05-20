@@ -491,6 +491,45 @@ def backend_config_js():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# PROMOTIONS API (social posts + second-hand listings)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@app.route('/api/promotions', methods=['GET'])
+def api_promotions():
+    try:
+        base = os.path.abspath('.')
+        social_path = os.path.join(base, 'social_posts.json')
+        second_path = os.path.join(base, 'second_hand_products.json')
+
+        social = []
+        second = { 'products': [] }
+
+        if os.path.isfile(social_path):
+            try:
+                with open(social_path, 'r', encoding='utf-8') as f:
+                    social = json.load(f) or []
+            except Exception:
+                social = []
+
+        if os.path.isfile(second_path):
+            try:
+                with open(second_path, 'r', encoding='utf-8') as f:
+                    second = json.load(f) or { 'products': [] }
+            except Exception:
+                second = { 'products': [] }
+
+        return jsonify({
+            'social': social,
+            'second_hand': second
+        })
+
+    except Exception as e:
+        logger.error(f"Promotions API error: {e}")
+        return jsonify({ 'social': [], 'second_hand': { 'products': [] } }), 500
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # ROOT
 # ─────────────────────────────────────────────────────────────────────────────
 
