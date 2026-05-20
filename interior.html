@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <!-- Version: 2026-05-06-v2 | Cache Buster for GitHub Pages Deployment -->
-  <meta name="backend-url" content="https://api.interiorductltd.com">
+  <meta name="backend-url" content="https://interior-ecommerce-production.up.railway.app">
   <script>
     // Ensure canonical backend URL is set before any scripts load
     // This supports the improved widget that accepts data-backend-url attribute
-    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
   </script>
   <script src="/backend-config.js"></script>
   <script>
     // Additional redundancy: ensure canonical backend URL across multiple variable names
     // Supports legacy code paths that may reference different variable names
     try {
-      const backend = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+      const backend = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
       window.BACKEND_URLS = [backend];
       window.API_BASES = [backend];
       window.backendUrls = [backend];
@@ -29,7 +29,7 @@
       const oldFetch = window.fetch.bind(window);
       function rewriteUrl(input) {
         try {
-          const backend = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
+          const backend = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
           if (typeof input === 'string') {
             // Relative path -> prepend backend
             if (input.startsWith('/')) return backend.replace(/\/$/, '') + input;
@@ -825,7 +825,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
       <a href="#showroom">Showroom</a>
       <a href="#custom-made-products">Products</a>
       <a href="#doors">Doors</a>
-      <a href="#second-hand-marketplace">MARKETPLACE</a>
+      <a href="marketplace.html" target="_blank" rel="noopener noreferrer">MARKETPLACE</a>
       <a href="#ai-design">AI Design</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
@@ -868,7 +868,7 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   <a href="#home" onclick="closeMobileNav()">Home</a>
   <a href="#showroom" onclick="closeMobileNav()">Showroom</a>
   <a href="#custom-made-products" onclick="closeMobileNav()">Products</a>
-  <a href="#second-hand-marketplace" onclick="closeMobileNav()">Marketplace</a>
+  <a href="marketplace.html" target="_blank" rel="noopener noreferrer" onclick="closeMobileNav()">Marketplace</a>
   <a href="#doors" onclick="closeMobileNav()">Doors</a>
   <a href="#ai-design" onclick="closeMobileNav()">AI Design</a>
   <a href="#about" onclick="closeMobileNav()">About Us</a>
@@ -1057,205 +1057,14 @@ footer{background:var(--bg-dark);color:#fff;padding:5rem 0 2rem}
   </div>
 </section>
 <!-- ========================================================= MACHINES & TECHNOLOGY  (Light grey bg) -->
-<section class="machines-section" style="background:var(--bg-lgrey);">
-  <!-- HERO PRODUCT POP-UP SLIDER -->
-  <div class="hero-popup-slider" style="position:relative;top:0;margin:2rem auto;width:90vw;max-width:1100px;overflow:hidden;">
-    <div id="heroPopupTrack" style="display:flex;transition:transform 0.6s cubic-bezier(.77,0,.175,1);position:relative;">
-      <!-- Slides will be injected here by JS -->
-    </div>
-    <div style="text-align:center;margin-top:1.2rem;display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
-      <button class="btn btn-navy" id="heroPopupPrev">&#8592;</button>
-      <button class="btn btn-navy" id="heroPopupNext">&#8594;</button>
-    </div>
-  </div>
-  <div class="container">
-    <div class="sec-hdr">
-      <span class="sec-tag">Technology & Equipment</span>
-      <h2 class="sec-title">State-of-the-Art <em>Machinery</em></h2>
-      <div class="divider"></div>
-      <p style="color:var(--text-soft);font-family:var(--f-sub);font-size:1.05rem;max-width:520px;margin:0 auto">Our workspace is equipped with advanced machinery and digital tools for precision manufacturing, finishing, and design. Explore the technology that powers our premium furniture production.</p>
-    </div>
-    <div class="machines-grid" style="display:grid !important;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:2.5rem;visibility:visible !important;opacity:1 !important;">
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Cutting_Machine.jpg" alt="Radial Arm Saw" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Radial Arm Saw &amp; Fast, Precise Cross-Cutting</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Precision Cross-Cutting of Long Wood Stock.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Metal_Drill_Machine.jpg" alt="Precision Drill Press" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Precision Drill Press</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Accurate hole drilling for metal and timber assemblies.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Banding_Machine.jpg" alt="Edge Bander" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Automated Edge Bander</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Flawless edge finishing for panels and cabinetry.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Bandsaw_Machine.jpg" alt="Band Saw" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Vertical Bandsaw Cutting</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Smooth contours and accurate panel cutting for furniture parts.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Mortisin_Machine1.jpg" alt="Mortising Machine" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Mortise &amp; Tenon Machine</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">High-strength joinery for durable furniture and frame connections.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Planer_Big1.jpg" alt="Heavy-Duty Planer" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Heavy-Duty Thickness Planer</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Uniform board thickness for premium cabinetry and panels.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Planer_Mini2.jpg" alt="Multi-Purpose Planer" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Multi-Purpose Planer</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Fine surface preparation for perfect panel joining.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Sanding_Machine1.jpg" alt="Precision Sanding" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Precision Sanding Station</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Smooth surface finish for flawless final appearance.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Compressor1.jpg" alt="Industrial Compressor" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Industrial Compressor</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Supporting pneumatic tools, finishing stations, and metal work.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Multi_Purpose_Planer_and_cutting_Machine.jpg" alt="Multi-Purpose Cutting" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Multi-Purpose Cutting Station</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Integrated cutting and sizing for fast production flow.</div>
-      </div>
-      <div class="machine-card fade-up" style="display:block !important;visibility:visible !important;opacity:1 !important;">
-        <div class="machine-img" style="height:220px;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow-md);margin-bottom:1.1rem;display:block !important;visibility:visible !important;">
-          <img src="IDL_Product_branding/Factory_Interior_Machine_Space.jpg" alt="Production Floor" style="width:100%;height:100%;object-fit:cover;display:block !important;">
-        </div>
-        <div class="machine-name" style="font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;">Integrated Production Floor</div>
-        <div class="machine-desc" style="font-size:.85rem;color:var(--text-soft);margin-bottom:.7rem;">Coordinated workflow connecting design, cutting, assembly and finishing.</div>
-      </div>
-    </div>
+<!-- Second-hand marketplace moved to a dedicated page. -->
+<section class="second-hand-marketplace-teaser" id="second-hand-marketplace">
+  <div class="container" style="text-align:center;padding:2.4rem 1rem;background:linear-gradient(180deg,rgba(245,246,248,0.95),#fff);border-radius:12px;margin-bottom:1.6rem;">
+    <h3 style="margin:0 0 .6rem;font-size:1.2rem;">Second-Hand Marketplace</h3>
+    <p style="margin:0 0 1rem;color:var(--text-soft);max-width:780px;margin-left:auto;margin-right:auto;">Explore verified second-hand industrial and workshop equipment. Listings rotate in the assistant — click any advertised item to open the full marketplace in a new tab.</p>
+    <a href="marketplace.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:.8rem 1.2rem;background:var(--navy);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;">Open Marketplace &raquo;</a>
   </div>
 </section>
-
-<!-- TICKER  (Navy) -->
-<div class="ticker-wrap">
-  <div class="ticker-inner">
-    <span>Luxury Furniture Manufacturing<span class="tick-sep">&#10022;</span></span>
-    <span>Bespoke Doors &amp; Entrances<span class="tick-sep">&#10022;</span></span>
-    <span>Factory Direct Pricing<span class="tick-sep">&#10022;</span></span>
-    <span>Benin City &middot; Abuja &middot; Port Harcourt<span class="tick-sep">&#10022;</span></span>
-    <span>3D Room Visualisation<span class="tick-sep">&#10022;</span></span>
-    <span>AI Design Assistant &mdash; 24&#47;7<span class="tick-sep">&#10022;</span></span>
-    <span>Paystack &amp; Stripe Payments<span class="tick-sep">&#10022;</span></span>
-    <span>WhatsApp Consultation<span class="tick-sep">&#10022;</span></span>
-    <span>Luxury Furniture Manufacturing<span class="tick-sep">&#10022;</span></span>
-    <span>Bespoke Doors &amp; Entrances<span class="tick-sep">&#10022;</span></span>
-    <span>Factory Direct Pricing<span class="tick-sep">&#10022;</span></span>
-    <span>Benin City &middot; Abuja &middot; Port Harcourt<span class="tick-sep">&#10022;</span></span>
-    <span>3D Room Visualisation<span class="tick-sep">&#10022;</span></span>
-    <span>AI Design Assistant &mdash; 24&#47;7<span class="tick-sep">&#10022;</span></span>
-    <span>Paystack &amp; Stripe Payments<span class="tick-sep">&#10022;</span></span>
-    <span>WhatsApp Consultation<span class="tick-sep">&#10022;</span></span>
-  </div>
-</div>
-
-<!-- FEATURED FURNITURE GALLERY -->
-<section class="featured-section" id="featured">
-  <div class="sec-hdr container">
-    <span class="sec-tag">Featured Collections</span>
-    <h2 class="sec-title">Curated <em>Furniture</em> Galleries</h2>
-    <div class="divider"></div>
-    <p style="color:var(--text-soft);font-family:var(--f-sub);font-size:1.05rem;max-width:720px;margin:1.2rem auto 0;line-height:1.8;">Explore six premium product families handpicked from our IDL branding gallery. These category tiles showcase refined furniture types with rich visuals, elegant dimensions, and tailored finishing details.</p>
-  </div>
-  <div class="container">
-    <div class="featured-grid">
-      <div class="featured-card">
-        <div class="featured-card-img">
-          <img src="IDL_Product_branding/Chair_Royal.jpg" alt="Royal Seating & Lounge" loading="lazy">
-        </div>
-        <div class="featured-card-body">
-          <span class="featured-card-tag">Seating</span>
-          <h3 class="featured-card-title">Royal Seating &amp; Lounge</h3>
-          <p class="featured-card-text">Luxurious lounge and dining seating built for comfort, posture support, and exquisite detail.</p>
-          <div class="featured-card-meta">Typical dimensions: 950mm D × 780mm H. Solid timber frame, premium upholstery, and elegant brass accents.</div>
-          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Royal Seating Collection',desc:'Send me a quote for the Royal Seating Collection.',img:'IDL_Product_branding/Chair_Royal.jpg'})">Request Quote</button></div>
-        </div>
-      </div>
-      <div class="featured-card">
-        <div class="featured-card-img">
-          <img src="IDL_Product_branding/Dining_Set.jpg" alt="Grand Dining Ensemble" loading="lazy">
-        </div>
-        <div class="featured-card-body">
-          <span class="featured-card-tag">Dining</span>
-          <h3 class="featured-card-title">Grand Dining Ensemble</h3>
-          <p class="featured-card-text">Bold dining tables and seating sets created for family stories, formal dinners, and timeless entertaining.</p>
-          <div class="featured-card-meta">Typical dimensions: 2400mm × 1000mm. Hardwood construction with rich finishes and polished edge details.</div>
-          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Grand Dining Ensemble',desc:'Please share pricing for the Grand Dining Ensemble.',img:'IDL_Product_branding/Dining_Set.jpg'})">Request Quote</button></div>
-        </div>
-      </div>
-      <div class="featured-card">
-        <div class="featured-card-img">
-          <img src="IDL_Product_branding/Bedside.jpg" alt="Classic Bedroom Nightstand" loading="lazy">
-        </div>
-        <div class="featured-card-body">
-          <span class="featured-card-tag">Bedroom</span>
-          <h3 class="featured-card-title">Classic Bedroom Nightstand</h3>
-          <p class="featured-card-text">Refined bedside storage with graceful lines, premium joinery, and ample drawer capacity.</p>
-          <div class="featured-card-meta">Typical dimensions: 520mm W × 420mm D × 720mm H. Soft-close drawers, lacquer finish, and elegant handles.</div>
-          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Classic Bedroom Nightstand',desc:'I want a quote for the Classic Bedroom Nightstand.',img:'IDL_Product_branding/Bedside.jpg'})">Request Quote</button></div>
-        </div>
-      </div>
-      <div class="featured-card">
-        <div class="featured-card-img">
-          <img src="IDL_Product_branding/tv_console_white1.jpg" alt="Modern Media Console" loading="lazy">
-        </div>
-        <div class="featured-card-body">
-          <span class="featured-card-tag">Living Room</span>
-          <h3 class="featured-card-title">Modern Media Console</h3>
-          <p class="featured-card-text">Sleek console units with storage solutions and polished surfaces that elevate any living room.</p>
-          <div class="featured-card-meta">Typical dimensions: 2200mm L. Floating design with integrated cable management and premium finish options.</div>
-          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Modern Media Console',desc:'Send me a quote for the Modern Media Console.',img:'IDL_Product_branding/tv_console_white1.jpg'})">Request Quote</button></div>
-        </div>
-      </div>
-      <div class="featured-card">
-        <div class="featured-card-img">
-          <img src="IDL_Product_branding/Office_Desk.jpg" alt="Executive Office Desk" loading="lazy">
-        </div>
-        <div class="featured-card-body">
-          <span class="featured-card-tag">Office</span>
-          <h3 class="featured-card-title">Executive Office Desk</h3>
-          <p class="featured-card-text">Professional work desks and reception furnishings made for high-performance office settings.</p>
-          <div class="featured-card-meta">Typical dimensions: 1800mm × 800mm. Solid surface top with integrated cable tray and elegant storage design.</div>
-          <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Executive Office Desk',desc:'I would like pricing for the Executive Office Desk.',img:'IDL_Product_branding/Office_Desk.jpg'})">Request Quote</button></div>
-        </div>
-      </div>
-      <div class="featured-card">
-        <div class="featured-card-img">
-          <img src="IDL_Product_branding/Kitchen_Cabinet.jpg" alt="Signature Kitchen Cabinetry" loading="lazy">
-        </div>
-        <div class="featured-card-body">
-          <span class="featured-card-tag">Kitchen</span>
-          <h3 class="featured-card-title">Signature Kitchen Cabinetry</h3>
           <p class="featured-card-text">Premium kitchen cabinetry tailored for style, storage, and long-lasting performance.</p>
           <div class="featured-card-meta">Modular units with soft-close doors, custom finishes, and countertop-ready design.</div>
           <div class="featured-card-actions"><button class="featured-card-btn" onclick="openWhatsApp({name:'Signature Kitchen Cabinetry',desc:'Please quote the Signature Kitchen Cabinetry collection.',img:'IDL_Product_branding/Kitchen_Cabinet.jpg'})">Request Quote</button></div>
@@ -2551,11 +2360,9 @@ function getBackendUrls() {
   if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     urls.push('http://localhost:5000');
   }
-  const configured = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+  const configured = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
   if (configured) urls.push(configured);
-  urls.push('https://duct-ai-backend.onrender.com');
-  urls.push('https://interior-ecommerce-backend.onrender.com');
-  urls.push('https://interior-ecommerce-lh3e.onrender.com');
+  urls.push('https://interior-ecommerce-production.up.railway.app');
   return [...new Set(urls)];
 }
 
@@ -3129,7 +2936,7 @@ function getAdminApiBase() {
   // Auto-detect environment: use production URL if not localhost
   return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:5000'                                    // local dev
-    : 'https://duct-ai-backend.onrender.com';                    // production
+    : 'https://interior-ecommerce-production.up.railway.app';    // production
 }
 
 function apiUrl(path) {
@@ -3565,7 +3372,7 @@ function openWhatsAppProductSlider() {
   // Use local backend for localhost or file protocol, canonical backend for production
   const backendUrl = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : 'https://api.interiorductltd.com';
+    : 'https://interior-ecommerce-production.up.railway.app';
   
   // Set window variable for backward compatibility
   window.DUCT_AI_BACKEND_URL = backendUrl;
@@ -3679,7 +3486,7 @@ function openWhatsAppProductSlider() {
 <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
 
 <!-- Duct AI Widget JS - Load immediately (no defer) -->
-<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://api.interiorductltd.com"></script>
+<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://interior-ecommerce-production.up.railway.app"></script>
 
 <!-- Fallback: Ensure widget appears if external script fails -->
 <script>

@@ -1,0 +1,17 @@
+{
+  "products": [
+    { "id": "angle-grinder", "name": "Angle Grinder", "description": "Portable angle grinder for metal and masonry cutting and grinding.", "image": "IDL_Product_branding/Angle_Grinder.jpg" },
+    { "id": "planer", "name": "Planer", "description": "Electric planer for timber surface finishing and thickness control.", "image": "IDL_Product_branding/Planer.jpg" },
+    { "id": "circular-saw", "name": "Circular Saw", "description": "High-power circular saws for accurate panel and board cutting.", "image": "IDL_Product_branding/Circular_Saw.jpg" },
+    { "id": "compressor", "name": "Compressor", "description": "Industrial compressor for pneumatic tools and spray systems.", "image": "IDL_Product_branding/Compressor.jpg" },
+    { "id": "jig-saw", "name": "Jig Saw", "description": "Versatile jig saw for curved and fine cutting tasks.", "image": "IDL_Product_branding/Jig_Saw.jpg" },
+    { "id": "impact-driver", "name": "Impact Driver", "description": "High-torque impact driver for heavy-duty fastening.", "image": "IDL_Product_branding/Impact_Driver.jpg" },
+    { "id": "hammer-drill", "name": "Hammer Drill", "description": "Hammer drill for masonry and concrete drilling tasks.", "image": "IDL_Product_branding/Hammer_Drill.jpg" },
+    { "id": "hand-planes", "name": "Hand Planes", "description": "Set of hand planes for fine woodworking and finishing.", "image": "IDL_Product_branding/Hand_Plane.jpg" },
+    { "id": "saw-blades", "name": "Saw Blades", "description": "Selection of saw blades for various materials and cuts.", "image": "IDL_Product_branding/Saw_Blades.jpg" },
+    { "id": "dehumidifier", "name": "Dehumidifier", "description": "Industrial dehumidifier for workshop climate control.", "image": "IDL_Product_branding/Dehumidifier.jpg" },
+    { "id": "band-saw", "name": "Band Saw", "description": "Robust band saw for resawing and curved cuts.", "image": "IDL_Product_branding/Band_Saw.jpg" },
+    { "id": "fittings", "name": "Furniture Fittings", "description": "Handles, legs and fittings for cabinet and sofa manufacturing.", "image": "IDL_Product_branding/Fittings.jpg" },
+    { "id": "lighting", "name": "Lighting", "description": "Assorted lighting fixtures for showrooms and installations.", "image": "IDL_Product_branding/Lighting.jpg" }
+  ]
+}

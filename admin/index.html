@@ -22,6 +22,7 @@
       <button onclick="showSection('images')">Manage Images</button>
       <button onclick="showSection('content')">Edit Content</button>
       <button onclick="showSection('products')">Manage Products</button>
+        <button onclick="showSection('marketplace')">Manage Marketplace</button>
       <button onclick="showSection('models')">Manage 3D Models</button>
       <button onclick="window.open('/3d-demo','_blank')">3D Viewer Demo</button>
       <button onclick="window.open('/categories.html','_blank')">Organize Images</button>
@@ -83,6 +84,15 @@
       <h2>Manage Products</h2>
       <button onclick="addProduct()">Add Product</button>
       <div id="productsList" style="margin-top:1rem;"></div>
+    </section>
+
+    <section id="marketplace-section" class="admin-section" style="display:none;">
+      <h2>Second-Hand Marketplace</h2>
+      <div>
+        <button onclick="loadMarketplace()">Load Listings</button>
+        <div id="marketplaceList" style="margin-top:1rem;"></div>
+        <div style="margin-top:0.8rem;"><button onclick="saveMarketplace()">Save Listings</button><span id="marketplaceSaveMsg" style="color:#27ae60;display:none;margin-left:0.6rem;">Saved!</span></div>
+      </div>
     </section>
 
     <!-- FAQ -->

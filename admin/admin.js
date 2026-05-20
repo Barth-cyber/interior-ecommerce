@@ -23,9 +23,12 @@ async function fetchImages() {
   try {
     const res = await fetch('/images');
     const files = await res.json();
-    renderImages(files.map(f => `/idl-images/${encodeURIComponent(f)}`));
+    const paths = files.map(f => `/idl-images/${encodeURIComponent(f)}`);
+    renderImages(paths);
+    return files; // return raw filenames for selectors
   } catch (err) {
     console.error('Failed to fetch images:', err);
+    return [];
   }
 }
 
@@ -210,6 +213,75 @@ if (contentForm) {
 
 // ================= PRODUCTS (FIXED) =================
 let products = [];
+
+// ================= MARKETPLACE MANAGEMENT =================
+let marketplace = { products: [] };
+
+async function loadMarketplace() {
+  try {
+    const res = await fetch('/second_hand_products.json');
+    marketplace = await res.json();
+  } catch (e) {
+    console.error('Failed to load marketplace JSON', e);
+    marketplace = { products: [] };
+  }
+  renderMarketplace();
+}
+
+function renderMarketplace() {
+  const el = document.getElementById('marketplaceList');
+  if (!el) return;
+  el.innerHTML = '';
+  marketplace.products.forEach((p, idx) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:0.6rem;border-bottom:1px solid #eee;display:flex;gap:0.6rem;align-items:center;'
+    row.innerHTML = `
+      <div style="width:72px"><img src="${p.image||'IDL_Product_branding/placeholder.jpg'}" style="width:72px;height:56px;object-fit:cover;border-radius:4px;"></div>
+      <div style="flex:1">
+        <strong>${p.name}</strong><br>
+        <input type="text" data-idx="${idx}" data-field="description" value="${(p.description||'').replace(/"/g,'&quot;')}" style="width:100%">
+      </div>
+      <div>
+        <select data-idx="${idx}" data-field="image"></select>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+
+  // populate image selectors
+  fetchImages().then(list => {
+    const selects = document.querySelectorAll('#marketplaceList select');
+    selects.forEach(sel => {
+      const idx = sel.dataset.idx;
+      sel.innerHTML = '<option value="">(select image)</option>' + (list||[]).map(f => `<option value="${f}">${f}</option>`).join('');
+      const cur = marketplace.products[idx].image || '';
+      if (cur) sel.value = cur;
+      sel.addEventListener('change', (e) => {
+        marketplace.products[idx].image = e.target.value;
+        renderMarketplace();
+      });
+    });
+  }).catch(()=>{});
+}
+
+async function saveMarketplace() {
+  try {
+    const res = await fetch('/admin/save-second-hand', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(marketplace)
+    });
+    if (res.ok) {
+      document.getElementById('marketplaceSaveMsg').style.display = '';
+      setTimeout(()=>document.getElementById('marketplaceSaveMsg').style.display='none',2000);
+    } else {
+      alert('Save failed');
+    }
+  } catch (e) {
+    console.error('Save marketplace failed', e);
+    alert('Save failed');
+  }
+}
 
 async function loadProducts() {
   const res = await fetch('/content');

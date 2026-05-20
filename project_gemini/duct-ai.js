@@ -1,10 +1,10 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
-const BACKEND_URLS = [
-  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000'
-    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
-  'https://duct-ai-backend.onrender.com'
-];
+const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : '';
+const BACKEND_URLS = [];
+if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
+if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
+if (!BACKEND_URLS.includes('https://interior-ecommerce-production.up.railway.app')) BACKEND_URLS.push('https://interior-ecommerce-production.up.railway.app');
 let chatHistory = [];
 
 async function fetchBackend(path, options = {}) {

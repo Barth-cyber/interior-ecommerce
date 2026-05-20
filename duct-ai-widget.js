@@ -1,14 +1,13 @@
 (function () {
-  const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+  const currentScript = document.currentScript || Array.from(document.getElementsByTagName('script')).find(s => s.src && s.src.includes('duct-ai-widget.js'));
+  const CANONICAL_BACKEND = (currentScript && currentScript.dataset && currentScript.dataset.backendUrl) || (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
   const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
     : '';
   const BACKEND_URLS = [];
   if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
   if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
-  if (!BACKEND_URLS.includes('https://api.interiorductltd.com')) BACKEND_URLS.push('https://api.interiorductltd.com');
-  if (!BACKEND_URLS.includes('https://duct-ai-backend.onrender.com')) BACKEND_URLS.push('https://duct-ai-backend.onrender.com');
-  if (!BACKEND_URLS.includes('https://interior-ecommerce-backend.onrender.com')) BACKEND_URLS.push('https://interior-ecommerce-backend.onrender.com');
+  if (!BACKEND_URLS.includes('https://interior-ecommerce-production.up.railway.app')) BACKEND_URLS.push('https://interior-ecommerce-production.up.railway.app');
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
 
   function fetchWithTimeout(url, options = {}, timeout = 3000) {
@@ -213,6 +212,11 @@
   const toggle = container.querySelector('.duct-ai-widget-toggle');
   const closeBtn = container.querySelector('.duct-ai-widget-close');
   const messages = container.querySelector('#ductAiMessages');
+  // Promotion area (rotating recommended products & second-hand items)
+  const promoArea = document.createElement('div');
+  promoArea.className = 'duct-ai-widget-promo-area';
+  promoArea.style.cssText = 'padding:0.6rem;border-top:1px solid rgba(13,27,42,0.04);background:linear-gradient(90deg,rgba(250,250,250,0.98),rgba(255,255,255,0.99));';
+  panel.insertBefore(promoArea, panel.querySelector('.duct-ai-widget-messages'));
   const input = container.querySelector('#ductAiInput');
   const send = container.querySelector('#ductAiSend');
   const whatsappBtn = container.querySelector('#ductAiWhatsApp');
@@ -258,6 +262,72 @@
     );
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
   }
+
+  // Promotions: fetch social posts and second-hand listings and rotate them
+  let promotions = [];
+  let promoIndex = 0;
+  async function loadPromotions() {
+    try {
+      const [socialRes, secondRes] = await Promise.all([
+        fetch('social_posts.json').catch(() => null),
+        fetch('second_hand_products.json').catch(() => null)
+      ]);
+      const social = socialRes && socialRes.ok ? await socialRes.json() : [];
+      const second = secondRes && secondRes.ok ? await secondRes.json() : [];
+      promotions = [];
+      // map social posts to promo items
+      for (const s of social) promotions.push({ type: 'social', title: s.title || s.platform, desc: s.desc || '', url: s.url });
+      // map second-hand products
+      for (const p of second.products || []) promotions.push({ type: 'second', title: p.name, desc: p.description || p.desc || '', img: p.image || '', url: 'marketplace.html#' + encodeURIComponent(p.id || p.name) });
+      renderPromo();
+      startPromoRotation();
+    } catch (e) {
+      console.warn('Failed to load promotions', e);
+    }
+  }
+
+  function renderPromo() {
+    promoArea.innerHTML = '';
+    if (!promotions.length) return;
+    const item = promotions[promoIndex % promotions.length];
+    const card = document.createElement('div');
+    card.style.cssText = 'display:flex;gap:0.6rem;align-items:center';
+    const img = document.createElement('img');
+    img.src = item.img || 'static/duct-ai-agent.jpg';
+    img.alt = item.title || '';
+    img.style.cssText = 'width:56px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0;';
+    const copy = document.createElement('div');
+    copy.style.cssText = 'flex:1;min-width:0';
+    const title = document.createElement('div');
+    title.textContent = item.title || '';
+    title.style.cssText = 'font-weight:600;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    const desc = document.createElement('div');
+    desc.textContent = item.desc || '';
+    desc.style.cssText = 'font-size:0.84rem;color:#556;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    copy.appendChild(title);
+    copy.appendChild(desc);
+    const cta = document.createElement('button');
+    cta.textContent = item.type === 'social' ? 'View' : 'Open';
+    cta.style.cssText = 'background:var(--navy);color:#fff;border:none;padding:.45rem .7rem;border-radius:6px;flex-shrink:0;margin-left:0.5rem';
+    cta.addEventListener('click', () => { window.open(item.url, '_blank'); });
+    card.appendChild(img);
+    card.appendChild(copy);
+    card.appendChild(cta);
+    promoArea.appendChild(card);
+  }
+
+  let promoTimer = null;
+  function startPromoRotation() {
+    if (promoTimer) clearInterval(promoTimer);
+    promoTimer = setInterval(() => {
+      if (!promotions.length) return;
+      promoIndex = (promoIndex + 1) % promotions.length;
+      renderPromo();
+    }, 8000);
+  }
+
+  // Load promotions after widget loads
+  setTimeout(loadPromotions, 800);
 
   function requestQuote() {
     const query = chatHistory.map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.text}`).join('\n');

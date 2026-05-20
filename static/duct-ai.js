@@ -1,18 +1,13 @@
 // Duct AI Assistant: Chat, escalation, recommender, and payment integration
-const BACKEND_URLS = [
-  (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000'
-<<<<<<< HEAD
-    : window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com',
-  'https://api.interiorductltd.com',
-  'https://duct-ai-backend.onrender.com',
-  'https://interior-ecommerce-backend.onrender.com',
-  'https://interior-ecommerce-lh3e.onrender.com'
-=======
-    : window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com',
-  'https://duct-ai-backend.onrender.com'
->>>>>>> 8c4c3682f8dc1d4118a96edf35a75788c53cfb01
-];
+const currentScript = document.currentScript || Array.from(document.getElementsByTagName('script')).find(s => s.src && s.src.includes('duct-ai.js'));
+const CANONICAL_BACKEND = (currentScript && currentScript.dataset && currentScript.dataset.backendUrl) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
+const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000'
+  : '';
+const BACKEND_URLS = [];
+if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
+if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
+if (!BACKEND_URLS.includes('https://interior-ecommerce-production.up.railway.app')) BACKEND_URLS.push('https://interior-ecommerce-production.up.railway.app');
 let chatHistory = [];
 
 async function fetchBackend(path, options = {}) {
