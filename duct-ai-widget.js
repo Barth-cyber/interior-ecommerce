@@ -1,11 +1,14 @@
 (function () {
+  const RAILWAY_BACKEND = 'https://interior-ecommerce-production.up.railway.app';
   const CANONICAL_BACKEND = (window.getBackendUrl && window.getBackendUrl()) || window.DUCT_AI_BACKEND_URL || window.__BACKEND_URL__ || '';
   const LOCAL_DEFAULT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? `http://${window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'}:5000`
     : '';
   const BACKEND_URLS = [];
   if (LOCAL_DEFAULT) BACKEND_URLS.push(LOCAL_DEFAULT);
-  if (CANONICAL_BACKEND) BACKEND_URLS.push(CANONICAL_BACKEND);
+  // Railway backend is the primary production endpoint
+  if (!BACKEND_URLS.includes(RAILWAY_BACKEND)) BACKEND_URLS.push(RAILWAY_BACKEND);
+  if (CANONICAL_BACKEND && !BACKEND_URLS.includes(CANONICAL_BACKEND)) BACKEND_URLS.push(CANONICAL_BACKEND);
   if (!BACKEND_URLS.includes('https://api.interiorductltd.com')) BACKEND_URLS.push('https://api.interiorductltd.com');
   if (!BACKEND_URLS.includes('https://duct-ai-backend.onrender.com')) BACKEND_URLS.push('https://duct-ai-backend.onrender.com');
   if (!BACKEND_URLS.includes('https://interior-ecommerce-backend.onrender.com')) BACKEND_URLS.push('https://interior-ecommerce-backend.onrender.com');

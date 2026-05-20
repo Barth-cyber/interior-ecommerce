@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <!-- Version: 2026-05-06-v2 | Cache Buster for GitHub Pages Deployment -->
-  <meta name="backend-url" content="https://api.interiorductltd.com">
+  <meta name="backend-url" content="https://interior-ecommerce-production.up.railway.app">
   <script>
     // Ensure canonical backend URL is set before any scripts load
     // This supports the improved widget that accepts data-backend-url attribute
-    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+    window.DUCT_AI_BACKEND_URL = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
   </script>
   <script src="/backend-config.js"></script>
   <script>
     // Additional redundancy: ensure canonical backend URL across multiple variable names
     // Supports legacy code paths that may reference different variable names
     try {
-      const backend = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+      const backend = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
       window.BACKEND_URLS = [backend];
       window.API_BASES = [backend];
       window.backendUrls = [backend];
@@ -29,7 +29,7 @@
       const oldFetch = window.fetch.bind(window);
       function rewriteUrl(input) {
         try {
-          const backend = window.DUCT_AI_BACKEND_URL || 'https://duct-ai-backend.onrender.com';
+          const backend = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
           if (typeof input === 'string') {
             // Relative path -> prepend backend
             if (input.startsWith('/')) return backend.replace(/\/$/, '') + input;
@@ -2551,8 +2551,11 @@ function getBackendUrls() {
   if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     urls.push('http://localhost:5000');
   }
-  const configured = window.DUCT_AI_BACKEND_URL || 'https://api.interiorductltd.com';
+  const configured = window.DUCT_AI_BACKEND_URL || 'https://interior-ecommerce-production.up.railway.app';
   if (configured) urls.push(configured);
+  // Railway is the primary backend; Render URLs kept as fallbacks
+  if (!urls.includes('https://interior-ecommerce-production.up.railway.app')) urls.push('https://interior-ecommerce-production.up.railway.app');
+  urls.push('https://api.interiorductltd.com');
   urls.push('https://duct-ai-backend.onrender.com');
   urls.push('https://interior-ecommerce-backend.onrender.com');
   urls.push('https://interior-ecommerce-lh3e.onrender.com');
@@ -3129,7 +3132,7 @@ function getAdminApiBase() {
   // Auto-detect environment: use production URL if not localhost
   return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:5000'                                    // local dev
-    : 'https://duct-ai-backend.onrender.com';                    // production
+    : 'https://interior-ecommerce-production.up.railway.app';    // production (Railway)
 }
 
 function apiUrl(path) {
@@ -3565,7 +3568,7 @@ function openWhatsAppProductSlider() {
   // Use local backend for localhost or file protocol, canonical backend for production
   const backendUrl = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : 'https://api.interiorductltd.com';
+    : 'https://interior-ecommerce-production.up.railway.app';
   
   // Set window variable for backward compatibility
   window.DUCT_AI_BACKEND_URL = backendUrl;
@@ -3679,7 +3682,7 @@ function openWhatsAppProductSlider() {
 <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
 
 <!-- Duct AI Widget JS - Load immediately (no defer) -->
-<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://api.interiorductltd.com"></script>
+<script src="duct-ai-widget.js?v=20260429" data-backend-url="https://interior-ecommerce-production.up.railway.app"></script>
 
 <!-- Fallback: Ensure widget appears if external script fails -->
 <script>
