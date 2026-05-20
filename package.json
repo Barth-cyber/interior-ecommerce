@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build": "echo \"No npm build step defined for this repo.\"",
+    "start": "python duct-ai-backend/application.py"
+  },
   "dependencies": {
     "dotenv": "^17.4.2"
   }
