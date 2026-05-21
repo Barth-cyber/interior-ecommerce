@@ -119,11 +119,16 @@
     }
 
     .product-description {
-      color: #666;
+      color: #555;
       font-size: 0.95rem;
-      line-height: 1.5;
+      line-height: 1.6;
       margin-bottom: 1.2rem;
       flex-grow: 1;
+      min-height: 60px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .product-actions {
@@ -227,17 +232,30 @@
   <script>
     // Store scroll position before navigating away
     function goBackHome() {
-      const scrollPos = window.scrollY || window.pageYOffset;
-      sessionStorage.setItem('marketplaceScrollPos', scrollPos);
-      window.location.href = '/interior.html#marketplace';
+      // Navigate back to interior.html (main homepage)
+      window.location.href = '/interior.html';
     }
 
     async function loadMarketplace() {
       try {
-        const res = await fetch('second_hand_products.json');
-        if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
+        console.log('Loading marketplace products...');
+
+        // Try multiple paths for the JSON file
+        let res = await fetch('second_hand_products.json').catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch('./second_hand_products.json').catch(() => null);
+        }
+        if (!res || !res.ok) {
+          res = await fetch('/second_hand_products.json').catch(() => null);
+        }
+
+        if (!res || !res.ok) {
+          throw new Error('Could not find second_hand_products.json file');
+        }
 
         const data = await res.json();
+        console.log('Products loaded:', data);
+
         const container = document.getElementById('productsContainer');
         container.innerHTML = '';
 
@@ -269,21 +287,24 @@
           const category = getCategoryName(product.id);
           const icon = categoryIcons[product.id] || '📦';
 
+          // Use product image or fallback to emoji
           let imageHTML = '';
           if (product.image) {
-            imageHTML = `<img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.innerHTML='${icon}'">`;
+            imageHTML = `<div class="product-image"><img src="${product.image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${icon}'"></div>`;
           } else {
             imageHTML = `<div class="product-image">${icon}</div>`;
           }
+
+          const description = product.description || 'Quality second-hand equipment available for inspection and purchase.';
 
           card.innerHTML = `
             ${imageHTML}
             <div class="product-content">
               <span class="product-badge">${category}</span>
               <h3 class="product-name">${product.name}</h3>
-              <p class="product-description">${product.description || 'Quality second-hand equipment available for inspection.'}</p>
+              <p class="product-description">${description}</p>
               <div class="product-actions">
-                <button class="btn-enquire" onclick="enquireViaWhatsApp('${product.name}')">
+                <button class="btn-enquire" onclick="enquireViaWhatsApp('${product.name.replace(/'/g, "\\'")}')">
                   📱 Enquire
                 </button>
                 <a href="/admin/index.html#images" class="btn-admin">
@@ -296,27 +317,33 @@
           container.appendChild(card);
         });
 
+        console.log('Marketplace loaded successfully with ' + data.products.length + ' products');
+
       } catch (e) {
-        console.error('Failed to load marketplace', e);
+        console.error('Failed to load marketplace:', e);
         const container = document.getElementById('productsContainer');
-        container.innerHTML = `<div class="error">Unable to load marketplace. Please try again later. (${e.message})</div>`;
+        container.innerHTML = `<div class="error">
+          <strong>Unable to load marketplace</strong><br>
+          ${e.message}<br>
+          <small>Please ensure second_hand_products.json exists in the project root</small>
+        </div>`;
       }
     }
 
     function getCategoryName(productId) {
       const categories = {
-        'angle-grinder': 'Tools',
-        'planer': 'Tools',
-        'circular-saw': 'Tools',
-        'compressor': 'Machines',
-        'jig-saw': 'Tools',
-        'impact-driver': 'Tools',
-        'hammer-drill': 'Tools',
-        'hand-planes': 'Tools',
+        'angle-grinder': 'Tools & Machines',
+        'planer': 'Tools & Machines',
+        'circular-saw': 'Tools & Machines',
+        'compressor': 'Tools & Machines',
+        'jig-saw': 'Tools & Machines',
+        'impact-driver': 'Tools & Machines',
+        'hammer-drill': 'Tools & Machines',
+        'hand-planes': 'Tools & Machines',
         'saw-blades': 'Accessories',
-        'dehumidifier': 'Machines',
-        'band-saw': 'Machines',
-        'fittings': 'Fittings',
+        'dehumidifier': 'Tools & Machines',
+        'band-saw': 'Tools & Machines',
+        'fittings': 'Furniture Fittings',
         'lighting': 'Lighting'
       };
       return categories[productId] || 'Equipment';
@@ -330,16 +357,11 @@
     }
 
     // Load marketplace on page load
-    document.addEventListener('DOMContentLoaded', loadMarketplace);
-
-    // Restore scroll position if returning from home
-    window.addEventListener('load', () => {
-      const savedPos = sessionStorage.getItem('marketplaceScrollPos');
-      if (savedPos) {
-        window.scrollTo(0, parseInt(savedPos));
-        sessionStorage.removeItem('marketplaceScrollPos');
-      }
-    });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadMarketplace);
+    } else {
+      loadMarketplace();
+    }
   </script>
 </body>
 </html>
