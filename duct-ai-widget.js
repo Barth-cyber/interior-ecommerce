@@ -10,7 +10,13 @@
   if (!BACKEND_URLS.includes('https://interior-ecommerce-production.up.railway.app')) BACKEND_URLS.push('https://interior-ecommerce-production.up.railway.app');
   const DEFAULT_AVATAR_URL = window.DUCT_AI_AVATAR_URL || 'static/duct-ai-agent.jpg';
 
-  function fetchWithTimeout(url, options = {}, timeout = 3000) {
+  // Startup validation — log resolved backend URLs so connection issues are visible in DevTools
+  console.log('[Duct AI] Widget initialising. Backend URL candidates:', BACKEND_URLS);
+  if (!CANONICAL_BACKEND) {
+    console.warn('[Duct AI] No explicit backend URL found (data-backend-url / DUCT_AI_BACKEND_URL). Falling back to hardcoded Railway URL.');
+  }
+
+  function fetchWithTimeout(url, options = {}, timeout = 5000) {
     const controller = new AbortController();
     const signal = controller.signal;
     const timer = setTimeout(() => controller.abort(), timeout);
@@ -20,10 +26,17 @@
   async function fetchChatBackend(path, options = {}) {
     let lastError = null;
 
+    if (!BACKEND_URLS.length) {
+      console.error('Duct AI: No backend URLs configured. Set data-backend-url on the script tag or window.DUCT_AI_BACKEND_URL.');
+    } else {
+      console.log('Duct AI: Attempting backend request to', BACKEND_URLS, 'path:', path);
+    }
+
     for (const base of BACKEND_URLS) {
       const url = `${base.replace(/\/$/, '')}${path}`;
       try {
-        const response = await fetchWithTimeout(url, options, 3000);
+        console.log('Duct AI: Fetching', url);
+        const response = await fetchWithTimeout(url, options, 5000);
         if (!response.ok) {
           const text = await response.text().catch(() => '');
           const error = new Error(`Backend request failed (${response.status}) at ${url}: ${text}`);
@@ -31,9 +44,10 @@
           lastError = error;
           continue;
         }
+        console.log('Duct AI: Successful response from', url);
         return response;
       } catch (error) {
-        console.error('Duct AI backend fetch exception:', { url, error, options });
+        console.error('Duct AI backend fetch exception:', { url, error: error.message, options });
         lastError = error;
       }
     }
@@ -898,17 +912,13 @@
 
   async function fetchChatData(text) {
     await ensureKnowledgeBaseReady();
-    const localReply = findLocalKbAnswer(text, knowledgeBase);
-    if (localReply) {
-      return { reply: localReply, source: 'knowledge_base' };
-    }
 
     const sessionId = getDuctAiSessionId();
     try {
       const pageTitle = document.title || '';
       const metaDescEl = document.querySelector('meta[name="description"]');
       const pageDescription = metaDescEl && metaDescEl.content ? String(metaDescEl.content).slice(0, 1000) : '';
-      const productEls = Array.from(document.querySelectorAll('[data-product-name]')).map(e => e.dataset.productName).filter(Boolean).slice(0,8);
+      const productEls = Array.from(document.querySelectorAll('[data-product-name]')).map(e => e.dataset.productName).filter(Boolean).slice(0, 8);
       const recentMessages = chatHistory.slice(-6).map(m => ({ role: m.role, text: m.text }));
 
       const payload = {
@@ -926,6 +936,7 @@
         }
       };
 
+      console.log('Duct AI: Sending query to /ai-query:', text);
       const response = await fetchChatBackend('/ai-query', {
         method: 'POST',
         mode: 'cors',
@@ -934,11 +945,20 @@
       });
 
       const data = await response.json();
-      if (!data || (!data.reply && !data.answer && !data.escalate)) {
-        throw new Error('Invalid chat response');
+      console.log('Duct AI: Received response from /ai-query:', data);
+
+      const aiReply = data && (data.reply || data.answer);
+      if (!aiReply && !data.escalate) {
+        console.warn('Duct AI: Backend returned no usable reply field. Response was:', data);
+        throw new Error('Backend response missing reply/answer field');
+      }
+      // Normalise so callers always see data.reply
+      if (!data.reply && data.answer) {
+        data.reply = data.answer;
       }
       return data;
     } catch (error) {
+      console.warn('Duct AI: Backend request failed, falling back to local KB/smart response. Error:', error.message);
       const fallback = await fetchChatDataFallback(text);
       if (fallback) {
         return fallback;
