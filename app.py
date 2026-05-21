@@ -12,6 +12,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv, find_dotenv
 from pymongo import MongoClient
 from werkzeug.security import check_password_hash, generate_password_hash
+from social_media_fetcher import SocialMediaVideoFetcher, get_social_videos
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOAD ENV VARIABLES
@@ -656,6 +657,46 @@ def api_social_sync():
     except Exception as e:
         logger.error(f"Social sync endpoint error: {e}")
         return jsonify({ 'error': 'Social sync failed' }), 500
+
+
+@app.route('/api/media-hub/videos', methods=['GET', 'POST'])
+def api_media_hub_videos():
+    """
+    Fetch videos from social media APIs (YouTube, Instagram, Facebook, Twitter)
+
+    GET: Returns cached videos from video_posts.json
+    POST: Fetches fresh videos from APIs and updates cache
+    """
+    try:
+        if request.method == 'POST':
+            logger.info("Syncing media hub videos from APIs...")
+            videos = get_social_videos(use_cache=False, cache_file=VIDEO_POSTS_PATH)
+
+            return jsonify({
+                'success': True,
+                'videos': videos,
+                'count': len(videos),
+                'source': 'live_apis',
+                'synced_at': datetime.now().isoformat()
+            })
+
+        # GET: Return cached videos
+        videos_data = load_json_file(VIDEO_POSTS_PATH, { 'playlists': [] })
+        return jsonify({
+            'success': True,
+            'videos': videos_data.get('playlists', []),
+            'count': len(videos_data.get('playlists', [])),
+            'source': 'cache',
+            'last_updated': videos_data.get('last_updated', 'unknown')
+        })
+
+    except Exception as e:
+        logger.error(f"Media hub videos endpoint error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'videos': []
+        }), 500
 
 
 @app.route('/api/promotions', methods=['GET'])

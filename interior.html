@@ -2160,9 +2160,10 @@ document.addEventListener('keydown', e => {
 });
 
 const videoSources = [
-  { id: 'ScMzIvxBSi4', label: 'Furniture craftsmanship teaser', note: 'Short advert promoting premium workmanship.', badge: 'NEW' },
-  { id: 'M7lc1UVf-VE', label: 'Safety best practice in furniture handling', note: 'Quick material and assembly safety tips.', badge: 'SAFETY' },
-  { id: 'Ks-_Mh1QhMc', label: 'Ergonomic living room styling', note: 'Motion text-style benefit reel for modern interiors.', badge: 'STYLE' }
+  { type: 'youtube', id: 'ScMzIvxBSi4', label: 'Furniture craftsmanship teaser', note: 'Short advert promoting premium workmanship.', badge: 'NEW' },
+  { type: 'youtube', id: 'M7lc1UVf-VE', label: 'Safety best practice in furniture handling', note: 'Quick material and assembly safety tips.', badge: 'SAFETY' },
+  { type: 'youtube', id: 'Ks-_Mh1QhMc', label: 'Ergonomic living room styling', note: 'Motion text-style benefit reel for modern interiors.', badge: 'STYLE' },
+  { type: 'facebook', id: '1NgAj2P6SH', label: 'Social Media - Shorts & Stories', note: 'Latest shorts, ads, safety, and product stories from our social handles.', badge: 'FEATURED' }
 ];
 const videoTextSlides = [
   'Install furniture on level floors only and always tighten all fasteners during delivery.',
@@ -2183,11 +2184,21 @@ let currentSocialIndex = 0;
 function normalizeVideoEntry(item, index) {
   const rawUrl = item.url || item.source || '';
   let id = item.id || item.videoId || '';
+  let type = item.type || 'youtube';
+
   if (!id && typeof rawUrl === 'string') {
-    const match = rawUrl.match(/(?:v=|\/embed\/|youtube\.com\/watch\?.*v=|youtu\.be\/|\/)([A-Za-z0-9_-]{11})/);
-    if (match) id = match[1];
+    if (rawUrl.includes('facebook.com')) {
+      type = 'facebook';
+      const match = rawUrl.match(/video\.php\?v=(\d+)|facebook\.com\/share\/r\/([A-Za-z0-9]+)/);
+      if (match) id = match[1] || match[2];
+    } else {
+      const match = rawUrl.match(/(?:v=|\/embed\/|youtube\.com\/watch\?.*v=|youtu\.be\/|\/)([A-Za-z0-9_-]{11})/);
+      if (match) id = match[1];
+    }
   }
+
   return {
+    type: type,
     id: id || '',
     label: item.title || item.label || item.name || `Video ${index + 1}`,
     note: item.note || item.description || item.desc || item.platform || 'Latest furniture media highlight.',
@@ -2198,11 +2209,32 @@ function normalizeVideoEntry(item, index) {
 
 async function loadMediaHub() {
   try {
+    let data;
+
+    // Try new media hub endpoint first (with live API data)
+    try {
+      const res = await fetch('/api/media-hub/videos');
+      if (res.ok) {
+        const mediaHubData = await res.json();
+        if (mediaHubData.success && Array.isArray(mediaHubData.videos) && mediaHubData.videos.length) {
+          const normalized = mediaHubData.videos.map(normalizeVideoEntry).filter(v => v.id);
+          if (normalized.length) {
+            videoSources.splice(0, videoSources.length, ...normalized);
+          }
+          console.log('Loaded videos from media hub API');
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Media hub API not available, falling back to promotions', e);
+    }
+
+    // Fallback to promotions endpoint
     const res = await fetch('/api/promotions');
     if (!res.ok) {
       throw new Error('Promotions endpoint returned ' + res.status);
     }
-    const data = await res.json();
+    data = await res.json();
     const videoPayload = data.videos && (data.videos.playlists || data.videos) ? (data.videos.playlists || data.videos) : [];
     if (Array.isArray(videoPayload) && videoPayload.length) {
       const normalized = videoPayload.map(normalizeVideoEntry).filter(v => v.id);
@@ -2240,7 +2272,11 @@ function setActiveVideo(index) {
   const source = videoSources[currentVideoIndex];
   const iframe = document.getElementById('heroVideoFrame');
   if (iframe && source.id) {
-    iframe.src = `https://www.youtube.com/embed/${source.id}?rel=0&autoplay=1&mute=1&modestbranding=1`;
+    if (source.type === 'facebook') {
+      iframe.src = `https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/video.php?v=${source.id}&show_text=false&width=640`;
+    } else {
+      iframe.src = `https://www.youtube.com/embed/${source.id}?rel=0&autoplay=1&mute=1&modestbranding=1`;
+    }
   }
   const videoText = document.getElementById('videoTextSlide');
   if (videoText) {
@@ -2254,12 +2290,20 @@ function setActiveVideo(index) {
 function buildVideoPlaylist() {
   const container = document.getElementById('playlistItems');
   if (!container) return;
-  container.innerHTML = videoSources.map((video, index) => `
-    <div class="playlist-item${index === 0 ? ' active' : ''}" onclick="setActiveVideo(${index})">
-      <div class="playlist-thumb"><img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" alt="${video.label}" /></div>
-      <div class="playlist-info"><strong>${video.label}</strong><small>${video.note}</small></div>
-    </div>
-  `).join('');
+  container.innerHTML = videoSources.map((video, index) => {
+    let thumbUrl;
+    if (video.type === 'facebook') {
+      thumbUrl = `https://graph.instagram.com/${video.id}/picture?access_token=YOUR_ACCESS_TOKEN`;
+    } else {
+      thumbUrl = `https://img.youtube.com/vi/${video.id}/mqdefault.jpg`;
+    }
+    return `
+      <div class="playlist-item${index === 0 ? ' active' : ''}" onclick="setActiveVideo(${index})">
+        <div class="playlist-thumb"><img src="${thumbUrl}" alt="${video.label}" /></div>
+        <div class="playlist-info"><strong>${video.label}</strong><small>${video.note}</small></div>
+      </div>
+    `;
+  }).join('');
 }
 
 function rotateVideoText() {
