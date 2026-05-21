@@ -240,26 +240,32 @@
       try {
         console.log('Loading marketplace products...');
 
-        // Try multiple paths for the JSON file
-        let res = await fetch('second_hand_products.json').catch(() => null);
-        if (!res || !res.ok) {
+        // Try to fetch from Flask API endpoint first
+        let res = await fetch('/api/promotions').catch(() => null);
+        let data;
+
+        if (res && res.ok) {
+          const apiData = await res.json();
+          data = apiData.second_hand || { products: [] };
+          console.log('Products loaded from API:', data);
+        } else {
+          // Fallback to local JSON file
           res = await fetch('./second_hand_products.json').catch(() => null);
+          if (!res || !res.ok) {
+            res = await fetch('/second_hand_products.json').catch(() => null);
+          }
+          if (!res || !res.ok) {
+            throw new Error('Could not find second_hand_products.json file');
+          }
+          data = await res.json();
+          console.log('Products loaded from JSON:', data);
         }
-        if (!res || !res.ok) {
-          res = await fetch('/second_hand_products.json').catch(() => null);
-        }
-
-        if (!res || !res.ok) {
-          throw new Error('Could not find second_hand_products.json file');
-        }
-
-        const data = await res.json();
-        console.log('Products loaded:', data);
 
         const container = document.getElementById('productsContainer');
         container.innerHTML = '';
 
-        if (!data.products || data.products.length === 0) {
+        const products = data.products || [];
+        if (!products || products.length === 0) {
           container.innerHTML = '<p class="error">No products available at this time.</p>';
           return;
         }
@@ -280,7 +286,7 @@
           'lighting': '💡'
         };
 
-        data.products.forEach((product) => {
+        products.forEach((product) => {
           const card = document.createElement('div');
           card.className = 'product-card';
 
@@ -289,8 +295,8 @@
 
           // Use product image or fallback to emoji
           let imageHTML = '';
-          if (product.image) {
-            imageHTML = `<div class="product-image"><img src="${product.image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${icon}'"></div>`;
+          if (product.image && product.image.trim()) {
+            imageHTML = `<div class="product-image"><img src="${product.image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.style.fontSize='3rem';this.parentElement.textContent='${icon}'"></div>`;
           } else {
             imageHTML = `<div class="product-image">${icon}</div>`;
           }
@@ -317,7 +323,7 @@
           container.appendChild(card);
         });
 
-        console.log('Marketplace loaded successfully with ' + data.products.length + ' products');
+        console.log('Marketplace loaded successfully with ' + products.length + ' products');
 
       } catch (e) {
         console.error('Failed to load marketplace:', e);
@@ -325,7 +331,7 @@
         container.innerHTML = `<div class="error">
           <strong>Unable to load marketplace</strong><br>
           ${e.message}<br>
-          <small>Please ensure second_hand_products.json exists in the project root</small>
+          <small>Please try refreshing the page or contact support</small>
         </div>`;
       }
     }
