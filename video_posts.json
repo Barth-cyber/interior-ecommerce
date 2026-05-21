@@ -1,0 +1,25 @@
+{
+  "playlists": [
+    {
+      "id": "ScMzIvxBSi4",
+      "label": "Furniture craftsmanship teaser",
+      "note": "Short advert promoting premium workmanship.",
+      "badge": "NEW",
+      "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4"
+    },
+    {
+      "id": "M7lc1UVf-VE",
+      "label": "Safety best practice in furniture handling",
+      "note": "Quick material and assembly safety tips.",
+      "badge": "SAFETY",
+      "url": "https://www.youtube.com/watch?v=M7lc1UVf-VE"
+    },
+    {
+      "id": "Ks-_Mh1QhMc",
+      "label": "Ergonomic living room styling",
+      "note": "Motion text-style benefit reel for modern interiors.",
+      "badge": "STYLE",
+      "url": "https://www.youtube.com/watch?v=Ks-_Mh1QhMc"
+    }
+  ]
+}

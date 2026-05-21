@@ -6,7 +6,10 @@ function showSection(section) {
     'content',
     'settings',
     'products',
-    'faq-manager'
+    'marketplace',
+    'faq-manager',
+    'chatlogs',
+    'analytics'
   ];
 
   sections.forEach(sec => {
@@ -280,6 +283,33 @@ async function saveMarketplace() {
   } catch (e) {
     console.error('Save marketplace failed', e);
     alert('Save failed');
+  }
+}
+
+async function syncSocialFeeds() {
+  try {
+    const res = await fetch('/api/social-sync', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'}
+    });
+
+    if (!res.ok) {
+      throw new Error(`Sync failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (data.synced) {
+      const msg = document.getElementById('marketplaceSyncMsg');
+      if (msg) {
+        msg.style.display = '';
+        setTimeout(() => msg.style.display = 'none', 3000);
+      }
+    } else {
+      alert('Sync completed but no new data was returned.');
+    }
+  } catch (e) {
+    console.error('Social feed sync failed', e);
+    alert('Social feed sync failed. Check the backend logs.');
   }
 }
 

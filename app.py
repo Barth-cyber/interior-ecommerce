@@ -1,5 +1,7 @@
 import os
+import re
 import json
+import html
 import logging
 from datetime import datetime
 from time import time
@@ -494,6 +496,167 @@ def backend_config_js():
 # PROMOTIONS API (social posts + second-hand listings)
 # ─────────────────────────────────────────────────────────────────────────────
 
+SOCIAL_SYNC_SOURCES = [
+    { 'platform': 'Instagram', 'url': 'https://www.instagram.com/interiorductltd/' },
+    { 'platform': 'TikTok', 'url': 'https://www.tiktok.com/@interiorductltd' },
+    { 'platform': 'Facebook', 'url': 'https://web.facebook.com/interior.duct.ltd/' },
+    { 'platform': 'X', 'url': 'https://x.com/InteriorDuctLtd' },
+    { 'platform': 'YouTube', 'url': 'https://www.youtube.com/@InteriorDuctLtd' },
+    { 'platform': 'LinkedIn', 'url': 'https://www.linkedin.com/company/interior-duct-ltd/' },
+    { 'platform': 'WhatsApp', 'url': 'https://wa.me/c/74638428254311' }
+]
+VIDEO_POSTS_PATH = os.path.join(os.path.abspath('.'), 'video_posts.json')
+
+
+def load_json_file(path, default):
+    if not os.path.isfile(path):
+        return default
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        logger.warning(f"Could not load JSON from {path}: {e}")
+        return default
+
+
+def save_json_file(path, data):
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Could not save JSON to {path}: {e}")
+
+
+def extract_meta_tags(html_text):
+    meta = {}
+    for match in re.finditer(r'<meta[^>]+?(?:property|name)=["\']([^"\']+)["\'][^>]*?content=["\']([^"\']+)["\']', html_text, flags=re.I):
+        meta[match.group(1).strip().lower()] = html.unescape(match.group(2).strip())
+    return meta
+
+
+def extract_json_ld(html_text):
+    items = []
+    for match in re.finditer(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html_text, flags=re.I | re.S):
+        try:
+            payload = json.loads(match.group(1).strip())
+            if isinstance(payload, list):
+                items.extend(payload)
+            else:
+                items.append(payload)
+        except Exception:
+            continue
+    return items
+
+
+def normalize_social_item(item, platform, source_url):
+    if not isinstance(item, dict):
+        return None
+    title = item.get('headline') or item.get('name') or item.get('title') or item.get('caption') or item.get('description') or platform
+    desc = item.get('description') or item.get('text') or item.get('caption') or item.get('summary') or ''
+    url = item.get('url') or item.get('mainEntityOfPage') or source_url
+    image = item.get('image') or item.get('thumbnailUrl') or item.get('thumbnailImage') or ''
+    return {
+        'platform': platform,
+        'title': title,
+        'desc': desc,
+        'url': url,
+        'image': image
+    }
+
+
+def parse_social_page(html_text, source):
+    platform = source.get('platform', 'Social')
+    json_ld_items = extract_json_ld(html_text)
+    for entry in json_ld_items:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get('@type') in ('SocialMediaPosting', 'BlogPosting', 'Article', 'NewsArticle', 'VideoObject', 'WebPage', 'WebSite'):
+            normalized = normalize_social_item(entry, platform, source['url'])
+            if normalized:
+                return [normalized]
+    meta = extract_meta_tags(html_text)
+    if meta:
+        title = meta.get('og:title') or meta.get('twitter:title') or meta.get('title') or platform
+        desc = meta.get('og:description') or meta.get('twitter:description') or ''
+        url = meta.get('og:url') or meta.get('twitter:url') or source['url']
+        image = meta.get('og:image') or meta.get('twitter:image') or ''
+        return [{
+            'platform': platform,
+            'title': title,
+            'desc': desc,
+            'url': url,
+            'image': image
+        }]
+    return [{
+        'platform': platform,
+        'title': f'Latest update from {platform}',
+        'desc': f'View the latest posts on {platform}.',
+        'url': source['url'],
+        'image': ''
+    }]
+
+
+def fetch_social_posts():
+    posts = []
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+    }
+    for source in SOCIAL_SYNC_SOURCES:
+        platform = source.get('platform')
+        if platform == 'WhatsApp':
+            posts.append({
+                'platform': 'WhatsApp',
+                'title': 'Chat with us on WhatsApp',
+                'desc': 'Message us directly for quotes and second-hand listings.',
+                'url': source['url'],
+                'image': ''
+            })
+            continue
+        try:
+            resp = requests.get(source['url'], headers=headers, timeout=12, allow_redirects=True)
+            if resp.status_code != 200:
+                logger.warning(f"Social sync source {source['url']} returned {resp.status_code}")
+                posts.append({
+                    'platform': platform,
+                    'title': f'{platform} updates',
+                    'desc': 'Visit the social channel for the latest posts.',
+                    'url': source['url'],
+                    'image': ''
+                })
+                continue
+            posts.extend(parse_social_page(resp.text, source))
+        except Exception as e:
+            logger.warning(f"Social sync failed for {source['url']}: {e}")
+            posts.append({
+                'platform': platform,
+                'title': f'{platform} update unavailable',
+                'desc': 'Unable to fetch the latest post. Try again later.',
+                'url': source['url'],
+                'image': ''
+            })
+    return posts
+
+
+@app.route('/api/social-sync', methods=['GET', 'POST'])
+def api_social_sync():
+    try:
+        base = os.path.abspath('.')
+        social_path = os.path.join(base, 'social_posts.json')
+        video_path = VIDEO_POSTS_PATH
+        if request.method == 'GET':
+            social = load_json_file(social_path, [])
+            videos = load_json_file(video_path, { 'playlists': [] })
+            return jsonify({ 'social': social, 'videos': videos })
+
+        social = fetch_social_posts()
+        save_json_file(social_path, social)
+        videos = load_json_file(video_path, { 'playlists': [] })
+        return jsonify({ 'social': social, 'videos': videos, 'synced': True })
+    except Exception as e:
+        logger.error(f"Social sync endpoint error: {e}")
+        return jsonify({ 'error': 'Social sync failed' }), 500
+
 
 @app.route('/api/promotions', methods=['GET'])
 def api_promotions():
@@ -502,31 +665,19 @@ def api_promotions():
         social_path = os.path.join(base, 'social_posts.json')
         second_path = os.path.join(base, 'second_hand_products.json')
 
-        social = []
-        second = { 'products': [] }
-
-        if os.path.isfile(social_path):
-            try:
-                with open(social_path, 'r', encoding='utf-8') as f:
-                    social = json.load(f) or []
-            except Exception:
-                social = []
-
-        if os.path.isfile(second_path):
-            try:
-                with open(second_path, 'r', encoding='utf-8') as f:
-                    second = json.load(f) or { 'products': [] }
-            except Exception:
-                second = { 'products': [] }
+        social = load_json_file(social_path, [])
+        second = load_json_file(second_path, { 'products': [] })
+        videos = load_json_file(VIDEO_POSTS_PATH, { 'playlists': [] })
 
         return jsonify({
             'social': social,
-            'second_hand': second
+            'second_hand': second,
+            'videos': videos
         })
 
     except Exception as e:
         logger.error(f"Promotions API error: {e}")
-        return jsonify({ 'social': [], 'second_hand': { 'products': [] } }), 500
+        return jsonify({ 'social': [], 'second_hand': { 'products': [] }, 'videos': { 'playlists': [] } }), 500
 
 
 # ─────────────────────────────────────────────────────────────────────────────

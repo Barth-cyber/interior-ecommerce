@@ -1858,6 +1858,7 @@ Just say "hello" or tell me what room you're furnishing. What would you like to 
         <div class="video-body">
           <p>Featured videos refresh automatically with the latest updates and short-form creative highlights.</p>
           <div class="video-text-slide" id="videoTextSlide">Expert installation leads to stronger furniture and longer product life. Choose certified materials and professional assembly.</div>
+          <div class="video-text-slide" id="socialUpdateText">Live social feed updates from Instagram, TikTok, YouTube, X and LinkedIn will appear here.</div>
         </div>
       </div>
       <div class="playlist-card fade-up">
@@ -2170,7 +2171,7 @@ const videoTextSlides = [
   'Use soft-close hinges and drawer runners to protect furniture from shock damage.',
   'Trusted factory-direct build quality means faster delivery and better warranty support.'
 ];
-const socialUpdates = [
+let socialUpdates = [
   { text: 'New social feed updates are available now.', note: 'Latest social feed notification.' },
   { text: 'Fresh furniture stories and short-form videos are rolling in.', note: 'Latest social feed notification.' },
   { text: 'Design tips, safety shorts, and media highlights are refreshed.', note: 'Latest social feed notification.' }
@@ -2178,6 +2179,48 @@ const socialUpdates = [
 let currentVideoIndex = 0;
 let currentTextIndex = 0;
 let currentSocialIndex = 0;
+
+function normalizeVideoEntry(item, index) {
+  const rawUrl = item.url || item.source || '';
+  let id = item.id || item.videoId || '';
+  if (!id && typeof rawUrl === 'string') {
+    const match = rawUrl.match(/(?:v=|\/embed\/|youtube\.com\/watch\?.*v=|youtu\.be\/|\/)([A-Za-z0-9_-]{11})/);
+    if (match) id = match[1];
+  }
+  return {
+    id: id || '',
+    label: item.title || item.label || item.name || `Video ${index + 1}`,
+    note: item.note || item.description || item.desc || item.platform || 'Latest furniture media highlight.',
+    badge: item.badge || item.category || 'VIDEO',
+    url: rawUrl || ''
+  };
+}
+
+async function loadMediaHub() {
+  try {
+    const res = await fetch('/api/promotions');
+    if (!res.ok) {
+      throw new Error('Promotions endpoint returned ' + res.status);
+    }
+    const data = await res.json();
+    const videoPayload = data.videos && (data.videos.playlists || data.videos) ? (data.videos.playlists || data.videos) : [];
+    if (Array.isArray(videoPayload) && videoPayload.length) {
+      const normalized = videoPayload.map(normalizeVideoEntry).filter(v => v.id);
+      if (normalized.length) {
+        videoSources.splice(0, videoSources.length, ...normalized);
+      }
+    }
+    const socialPayload = data.social || [];
+    if (Array.isArray(socialPayload) && socialPayload.length) {
+      socialUpdates = socialPayload.map(item => ({
+        text: item.title || item.desc || item.platform || 'New social media post available.',
+        note: item.desc || item.title || item.platform || 'View the latest post.'
+      }));
+    }
+  } catch (e) {
+    console.warn('Failed to load media hub content', e);
+  }
+}
 
 function setSocialUpdate(index) {
   if (!Array.isArray(socialUpdates) || socialUpdates.length === 0) return;
@@ -2192,11 +2235,17 @@ function rotateSocialUpdate() {
 }
 
 function setActiveVideo(index) {
+  if (!videoSources.length) return;
   currentVideoIndex = index % videoSources.length;
   const source = videoSources[currentVideoIndex];
   const iframe = document.getElementById('heroVideoFrame');
-  iframe.src = `https://www.youtube.com/embed/${source.id}?rel=0&autoplay=1&mute=1&modestbranding=1`;
-  document.getElementById('videoTextSlide').textContent = source.note;
+  if (iframe && source.id) {
+    iframe.src = `https://www.youtube.com/embed/${source.id}?rel=0&autoplay=1&mute=1&modestbranding=1`;
+  }
+  const videoText = document.getElementById('videoTextSlide');
+  if (videoText) {
+    videoText.textContent = source.note;
+  }
   document.querySelectorAll('.playlist-item').forEach((item, idx) => {
     item.classList.toggle('active', idx === currentVideoIndex);
   });
@@ -2220,7 +2269,8 @@ function rotateVideoText() {
   textEl.textContent = videoTextSlides[currentTextIndex];
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  await loadMediaHub();
   buildVideoPlaylist();
   setActiveVideo(0);
   setSocialUpdate(0);

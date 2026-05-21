@@ -876,6 +876,22 @@ def save_categories():
     return jsonify({'saved': True})
 
 
+@app.route('/admin/save-second-hand', methods=['POST'])
+@login_required
+def save_second_hand():
+    data = request.get_json()
+    if not isinstance(data, dict) or 'products' not in data or not isinstance(data['products'], list):
+        return jsonify({'error': 'Invalid marketplace payload'}), 400
+    target_path = os.path.join(ROOT_DIR, 'second_hand_products.json')
+    try:
+        with open(target_path, 'w', encoding='utf-8') as f:
+            json.dump({ 'products': data['products'] }, f, ensure_ascii=False, indent=2)
+        return jsonify({'saved': True})
+    except Exception as e:
+        app.logger.error(f'Failed to save second-hand marketplace data: {e}')
+        return jsonify({'error': 'Failed to save marketplace data'}), 500
+
+
 @app.route('/static/<path:filename>')
 def static_files(filename):
     return send_from_directory(os.path.join(os.path.dirname(__file__), '..', 'static'), filename)

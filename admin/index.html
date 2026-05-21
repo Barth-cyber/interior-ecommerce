@@ -90,6 +90,8 @@
       <h2>Second-Hand Marketplace</h2>
       <div>
         <button onclick="loadMarketplace()">Load Listings</button>
+        <button onclick="syncSocialFeeds()" style="margin-left:0.75rem;">Sync Social Feeds Now</button>
+        <span id="marketplaceSyncMsg" style="color:#27ae60;display:none;margin-left:0.8rem;">Social feed sync complete!</span>
         <div id="marketplaceList" style="margin-top:1rem;"></div>
         <div style="margin-top:0.8rem;"><button onclick="saveMarketplace()">Save Listings</button><span id="marketplaceSaveMsg" style="color:#27ae60;display:none;margin-left:0.6rem;">Saved!</span></div>
       </div>

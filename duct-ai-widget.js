@@ -171,6 +171,242 @@
 
   loadKnowledgeBase();
 
+  // ============ USER PROFILE & PERSONALIZATION SYSTEM ============
+  class UserProfile {
+    constructor() {
+      this.storageKey = 'duct_ai_user_profile_v1';
+      this.data = this.load();
+    }
+
+    load() {
+      try {
+        const stored = localStorage.getItem(this.storageKey);
+        if (stored) {
+          const profile = JSON.parse(stored);
+          profile.lastUpdated = new Date(profile.lastUpdated || Date.now());
+          return profile;
+        }
+      } catch (e) {
+        console.warn('Failed to load user profile:', e);
+      }
+      return {
+        sessionId: this.generateSessionId(),
+        name: null,
+        phone: null,
+        interests: [],
+        viewedCategories: [],
+        searchHistory: [],
+        productInteractions: {},
+        recommendationEngagements: [],
+        conversationCount: 0,
+        firstVisit: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+        preferences: {
+          style: null,
+          budget: null,
+          rooms: []
+        }
+      };
+    }
+
+    save() {
+      try {
+        this.data.lastUpdated = new Date().toISOString();
+        localStorage.setItem(this.storageKey, JSON.stringify(this.data));
+      } catch (e) {
+        console.warn('Failed to save user profile:', e);
+      }
+    }
+
+    generateSessionId() {
+      return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    setName(name) {
+      this.data.name = name || null;
+      this.save();
+      return this.data.name;
+    }
+
+    setPhone(phone) {
+      this.data.phone = phone || null;
+      this.save();
+      return this.data.phone;
+    }
+
+    addInterest(interest) {
+      if (interest && !this.data.interests.includes(interest)) {
+        this.data.interests.push(interest);
+        this.save();
+      }
+    }
+
+    trackCategoryView(category) {
+      if (category && !this.data.viewedCategories.includes(category)) {
+        this.data.viewedCategories.push(category);
+        this.save();
+      }
+    }
+
+    trackSearch(query) {
+      if (query) {
+        this.data.searchHistory.push({ query, timestamp: Date.now() });
+        if (this.data.searchHistory.length > 50) {
+          this.data.searchHistory = this.data.searchHistory.slice(-50);
+        }
+        this.save();
+      }
+    }
+
+    trackProductInteraction(productName, action = 'view') {
+      if (!this.data.productInteractions[productName]) {
+        this.data.productInteractions[productName] = { views: 0, clicks: 0, recommendations: 0 };
+      }
+      if (action === 'view') this.data.productInteractions[productName].views += 1;
+      if (action === 'click') this.data.productInteractions[productName].clicks += 1;
+      if (action === 'recommend') this.data.productInteractions[productName].recommendations += 1;
+      this.save();
+    }
+
+    addRecommendationEngagement(recommendation) {
+      this.data.recommendationEngagements.push({
+        text: recommendation,
+        timestamp: Date.now(),
+        engaged: false
+      });
+      if (this.data.recommendationEngagements.length > 20) {
+        this.data.recommendationEngagements = this.data.recommendationEngagements.slice(-20);
+      }
+      this.save();
+    }
+
+    getTopInterests() {
+      return this.data.interests.slice(0, 5);
+    }
+
+    getTopCategories() {
+      return this.data.viewedCategories.slice(0, 3);
+    }
+
+    incrementConversationCount() {
+      this.data.conversationCount += 1;
+      this.save();
+    }
+
+    isReturningUser() {
+      return this.data.conversationCount > 1;
+    }
+  }
+
+  const userProfile = new UserProfile();
+
+  function extractPhoneFromWhatsAppContext() {
+    // Try to get phone number from window object (set after WhatsApp escalation)
+    if (window.userPhoneNumber) {
+      return window.userPhoneNumber;
+    }
+    // Try to extract from URL parameters if callback is received
+    const urlParams = new URLSearchParams(window.location.search);
+    const phone = urlParams.get('user_phone') || urlParams.get('phone');
+    if (phone) {
+      userProfile.setPhone(phone);
+      return phone;
+    }
+    return null;
+  }
+
+  function createNameInputDialog() {
+    return new Promise((resolve) => {
+      const dialogOverlay = document.createElement('div');
+      dialogOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10001;';
+      
+      const dialogBox = document.createElement('div');
+      dialogBox.style.cssText = 'background:#fff;padding:2rem;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);max-width:400px;width:90%;';
+      
+      dialogBox.innerHTML = `
+        <div style="text-align:center;">
+          <h2 style="margin:0 0 0.5rem 0;font-size:1.4rem;color:#1b3a6b;">Welcome to Interior Duct!</h2>
+          <p style="margin:0 0 1.5rem 0;color:#666;font-size:0.95rem;">Let me personalize your experience. What's your name?</p>
+          <input type="text" id="userName" placeholder="Your name" style="width:100%;padding:0.8rem;border:2px solid rgba(27,58,107,0.2);border-radius:8px;font-size:1rem;margin-bottom:1rem;box-sizing:border-box;" />
+          <button id="confirmName" style="width:100%;padding:0.8rem;background:#1b3a6b;color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;font-weight:600;transition:all 0.3s;">Start Chatting!</button>
+        </div>
+      `;
+      
+      document.body.appendChild(dialogOverlay);
+      
+      const input = dialogBox.querySelector('#userName');
+      const btn = dialogBox.querySelector('#confirmName');
+      
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') btn.click();
+      });
+      
+      btn.addEventListener('click', () => {
+        const name = input.value.trim();
+        if (name) {
+          userProfile.setName(name);
+          dialogOverlay.remove();
+          resolve(name);
+        } else {
+          input.style.borderColor = '#d32f2f';
+          input.focus();
+        }
+      });
+      
+      dialogOverlay.appendChild(dialogBox);
+      input.focus();
+    });
+  }
+
+  async function initializeUserGreeting() {
+    if (!userProfile.data.name) {
+      const name = await createNameInputDialog();
+      return name;
+    }
+    return userProfile.data.name;
+  }
+
+  function getPersonalizedGreeting() {
+    const name = userProfile.data.name;
+    const isReturning = userProfile.isReturningUser();
+    const topCategories = userProfile.getTopCategories();
+    
+    if (isReturning && name) {
+      let greeting = `Welcome back, ${name}! 👋 `;
+      if (topCategories.length > 0) {
+        greeting += `I noticed you're interested in ${topCategories.join(', ')}. How can I help you today?`;
+      } else {
+        greeting += `Ready to explore more furniture options?`;
+      }
+      return greeting;
+    } else if (name) {
+      return `Hi ${name}! 👋 I'm Duct AI, your personal design advisor. What room are you furnishing or what style interests you?`;
+    }
+    return `Welcome to Interior Duct Ltd! I'm Duct AI, your design advisor. Tell me what room you're furnishing or what style interests you.`;
+  }
+
+  function generateContextAwareRecommendation(query) {
+    const name = userProfile.data.name;
+    const topInterests = userProfile.getTopInterests();
+    const topCategories = userProfile.getTopCategories();
+    
+    let recommendation = '';
+    
+    if (name && topInterests.length > 0) {
+      recommendation = `${name}, based on your interest in ${topInterests.slice(0, 2).join(' and ')}, `;
+    }
+    
+    if (topCategories.length > 0) {
+      recommendation += `I think you'd love checking out our ${topCategories[0]} collection. `;
+    } else {
+      recommendation += `I'd recommend exploring our luxury furniture options. `;
+    }
+    
+    return recommendation.trim();
+  }
+
+  // ============ END USER PROFILE SYSTEM ============
+
   let chatHistory = [];
 
   const container = document.createElement('div');
@@ -222,13 +458,20 @@
   const whatsappBtn = container.querySelector('#ductAiWhatsApp');
   const quoteBtn = container.querySelector('#ductAiQuote');
 
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', async () => {
     container.classList.add('panel-open');
     panel.classList.add('visible');
     overlay.classList.add('visible');
     input.focus();
-    if (messages.children.length === 0) {
-      addMessage('Welcome to Interior Duct Ltd! I\'m Duct AI, your design advisor. Tell me what room you\'re furnishing or what style interests you.', 'assistant');
+    
+    // Initialize user name on first interaction if not already done
+    if (!userProfile.data.name && messages.children.length === 0) {
+      await initializeUserGreeting();
+      addMessage(getPersonalizedGreeting(), 'assistant');
+      renderRecommendations();
+    } else if (messages.children.length === 0) {
+      addMessage(getPersonalizedGreeting(), 'assistant');
+      renderRecommendations();
     }
   });
 
@@ -254,12 +497,20 @@
   function escalateToWhatsApp() {
     const conversationSummary = chatHistory
       .slice(-6)
-      .map(m => `${m.role === 'user' ? 'You' : 'AI'}: ${m.text}`)
+      .map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.text}`)
       .join('\n');
 
+    const userName = userProfile.data.name ? `Name: ${userProfile.data.name}\n` : '';
+    const userPreferences = userProfile.data.preferences.style ? `Preferred Style: ${userProfile.data.preferences.style}\n` : '';
+    
     const message = encodeURIComponent(
-      `Hi! I've been chatting with your AI and would like to speak with a human agent.\n\nRecent conversation:\n${conversationSummary}\n\nPlease assist me with furniture recommendations and pricing.`
+      `Hi! I've been chatting with your AI and would like to speak with a human agent.\n\n${userName}${userPreferences}Recent conversation:\n${conversationSummary}\n\nPlease assist me with furniture recommendations and pricing.`
     );
+    
+    // Store phone number in user profile after escalation
+    window.userPhoneNumber = WHATSAPP_NUMBER;
+    userProfile.setPhone(WHATSAPP_NUMBER);
+    
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
   }
 
@@ -308,7 +559,24 @@
     const img = document.createElement('img');
     img.src = item.img || 'static/duct-ai-agent.jpg';
     img.alt = item.title || '';
-    img.style.cssText = 'width:56px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0;';
+    img.style.cssText = 'width:56px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer;transition:all 0.2s;';
+    img.title = 'Click to inquire about this product via WhatsApp';
+    
+    // Add click handler to escalate product to WhatsApp directly
+    img.addEventListener('click', async () => {
+      escalateProductToWhatsApp(item);
+    });
+    
+    img.addEventListener('mouseover', () => {
+      img.style.opacity = '0.8';
+      img.style.transform = 'scale(1.05)';
+    });
+    
+    img.addEventListener('mouseout', () => {
+      img.style.opacity = '1';
+      img.style.transform = 'scale(1)';
+    });
+    
     const copy = document.createElement('div');
     copy.style.cssText = 'flex:1;min-width:0';
     const title = document.createElement('div');
@@ -327,6 +595,44 @@
     card.appendChild(copy);
     card.appendChild(cta);
     promoArea.appendChild(card);
+  }
+
+  function escalateProductToWhatsApp(product) {
+    const userName = userProfile.data.name || 'Customer';
+    const userPhone = userProfile.data.phone || '';
+    
+    // Build a comprehensive product inquiry message
+    let whatsappMessage = `Hi! I'm interested in the following product:\n\n`;
+    whatsappMessage += `📦 *Product: ${product.title}*\n`;
+    
+    if (product.desc) {
+      whatsappMessage += `📝 Description: ${product.desc}\n`;
+    }
+    
+    if (product.img) {
+      whatsappMessage += `🖼️ Product Image: ${product.img}\n`;
+    }
+    
+    whatsappMessage += `\nCustomer Name: ${userName}\n`;
+    
+    // Add recent chat context if available
+    if (chatHistory.length > 0) {
+      const recentContext = chatHistory.slice(-3).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.text}`).join('\n');
+      whatsappMessage += `\n📋 Recent Chat Context:\n${recentContext}\n`;
+    }
+    
+    whatsappMessage += `\n${userPhone ? 'User Phone: ' + userPhone + '\n' : ''}Please provide me with:\n✓ Pricing details\n✓ Availability\n✓ Customization options\n✓ Delivery information`;
+    
+    const encodedMessage = encodeURIComponent(whatsappMessage);
+    
+    // Open WhatsApp with the complete product inquiry
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+    
+    // Track the product interaction
+    userProfile.trackProductInteraction(product.title, 'click');
+    
+    // Show confirmation to user
+    addMessage(`I'm connecting you to our sales team with details about ${product.title}. Opening WhatsApp now...`, 'assistant');
   }
 
   let promoTimer = null;
@@ -363,7 +669,8 @@
     input.focus();
 
     if (messages.children.length === 0) {
-      addMessage('Welcome to Interior Duct Ltd! I\'m Duct AI, your design advisor. Tell me what room you\'re furnishing or what style interests you.', 'assistant');
+      addMessage(getPersonalizedGreeting(), 'assistant');
+      renderRecommendations();
     }
 
     if (initialText) {
@@ -398,11 +705,74 @@
     });
   }
 
+  const RECOMMENDATION_TOPICS = [
+    { label: '🪑 Furniture Questions', question: 'What types of furniture do you offer?' },
+    { label: '🚪 Custom Doors', question: 'Tell me about your custom doors and entrance designs.' },
+    { label: '💰 Pricing & Options', question: 'What are your pricing and payment options?' },
+    { label: '🚚 Delivery Info', question: 'Where do you deliver and what are shipping costs?' },
+    { label: '🎨 Room Design', question: 'Can you help me design my room?' },
+    { label: '🏭 Used Machinery', question: 'What used machinery do you have available?' }
+  ];
+
+  function renderRecommendations() {
+    if (!messages) return;
+    const existing = messages.querySelector('.duct-ai-recommendations');
+    if (existing) return;
+    
+    const recContainer = document.createElement('div');
+    recContainer.className = 'duct-ai-recommendations';
+    recContainer.style.cssText = 'padding:0.8rem;display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;background:rgba(27,58,107,0.02);border-radius:8px;margin:0.6rem 0;';
+    
+    RECOMMENDATION_TOPICS.forEach(topic => {
+      const btn = document.createElement('button');
+      btn.style.cssText = 'padding:0.6rem 0.8rem;background:#fff;border:1px solid rgba(27,58,107,0.15);border-radius:6px;font-size:0.8rem;cursor:pointer;transition:all 0.2s;text-align:left;font-weight:500;';
+      btn.textContent = topic.label;
+      btn.addEventListener('click', () => {
+        input.value = topic.question;
+        recContainer.remove();
+        sendMessage();
+      });
+      btn.addEventListener('mouseover', () => {
+        btn.style.background = 'rgba(27,58,107,0.05)';
+        btn.style.borderColor = 'rgba(27,58,107,0.3)';
+      });
+      btn.addEventListener('mouseout', () => {
+        btn.style.background = '#fff';
+        btn.style.borderColor = 'rgba(27,58,107,0.15)';
+      });
+      recContainer.appendChild(btn);
+    });
+    
+    messages.appendChild(recContainer);
+  }
+
   window.openDuctAIChat = openDuctAIChat;
   window.openDuctAIWidget = openDuctAIChat;
 
   // Smart AI response patterns for enhanced responses
   const SMART_RESPONSES = {
+    greeting: {
+      keywords: ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy', 'hiya', 'what\'s up', 'what is up'],
+      responses: [
+        'Hello! How are you doing today?',
+        'Hi there! Great to see you. What can I help you with?',
+        'Hey! Welcome to Interior Duct. How are you doing?',
+        'Hello! Ready to explore some amazing furniture options?',
+        'Hi! Happy to assist you today. What\'s on your mind?'
+      ],
+      noEscalate: true
+    },
+    gratitude: {
+      keywords: ['thank', 'thanks', 'appreciate', 'grateful', 'appreciate it', 'thank you', 'thankyou', 'you\'re great', 'you\'re the best', 'excellent', 'awesome', 'amazing', 'perfect', 'much appreciated'],
+      responses: [
+        'You\'re very welcome! I\'m so glad I could help you get what you need. Is there anything else I can assist you with?',
+        'Thank you! It\'s my pleasure to help. Do you need anything else today?',
+        'You\'re welcome! I\'m thrilled I could be of assistance. How else can I support you?',
+        'That\'s so kind of you! I\'m happy I could help. What else can I do for you?',
+        'You\'re welcome! Thank you for letting me assist you. Is there anything else you\'d like to explore?'
+      ],
+      noEscalate: true
+    },
     furniture: {
       keywords: ['chair', 'table', 'sofa', 'bed', 'cabinet', 'desk', 'shelf', 'couch', 'seating', 'dining'],
       responses: [
@@ -420,11 +790,11 @@
       ]
     },
     pricing: {
-      keywords: ['price', 'cost', 'how much', 'quote', 'payment', 'afford', 'budget'],
+      keywords: ['price', 'cost', 'how much', 'quote', 'payment', 'afford', 'budget', 'prices', 'costs', 'pricing'],
       responses: [
-        'Our pricing is competitive with factory-direct savings. Send me details of what you need and I\'ll get you a quote via WhatsApp!',
-        'We offer flexible payment options including Paystack and Stripe. Let me collect your preferences for a formal quote.',
-        'Each product is customized, so pricing varies. Tell me what you\'re looking for and I can provide an estimate.'
+        'For detailed pricing and customized quotes, please click the "Agent" button below to speak with one of our sales specialists on WhatsApp. They\'ll provide you with the most accurate pricing tailored to your needs.',
+        'Pricing varies based on customization and materials. Click the "Agent" button to connect with our team and get a personalized quote instantly via WhatsApp.',
+        'I\'d love to help! For the best pricing and payment options, please click the "Agent" button below. Our team will discuss your budget and provide a formal quote.'
       ]
     },
     delivery: {
@@ -456,14 +826,68 @@
 
   function generateSmartResponse(query) {
     const lowerQuery = query.toLowerCase();
+    const name = userProfile.data.name;
+    const style = userProfile.data.preferences.style;
+    const rooms = userProfile.data.preferences.rooms || [];
     
     // Find matching response category
     for (const category in SMART_RESPONSES) {
       const { keywords, responses } = SMART_RESPONSES[category];
       if (keywords.some(keyword => lowerQuery.includes(keyword))) {
-        // Return a random response from the category
-        return responses[Math.floor(Math.random() * responses.length)];
+        let response = responses[Math.floor(Math.random() * responses.length)];
+        
+        // Special handling for greeting responses
+        if (category === 'greeting' && name) {
+          response = response.replace('Hello!', `Hello ${name}!`)
+                            .replace('Hi there!', `Hi ${name}!`)
+                            .replace('Hey!', `Hey ${name}!`)
+                            .replace('How are you', `How are you`);
+          // Add name context if response contains "How are you"
+          if (response.includes('How are you') && !response.includes(name)) {
+            response = response.replace('How are you', `How are you ${name}`);
+          }
+        }
+        
+        // Special handling for gratitude responses
+        if (category === 'gratitude' && name) {
+          response = response.replace(/I\'m so glad/gi, `${name}, I'm so glad`)
+                            .replace(/I\'m thrilled/gi, `${name}, I'm thrilled`)
+                            .replace(/I\'m happy/gi, `${name}, I'm happy`)
+                            .replace(/I\'m so kind/gi, `That's so kind of you`)
+                            .replace(/Thank you!/gi, `Thank you!`);
+          // If name not yet added, add it at the beginning
+          if (!response.includes(name)) {
+            response = `${name}, ` + response;
+          }
+        }
+        
+        // Personalize the response with user name if available (for non-greeting/gratitude)
+        if (name && category !== 'greeting' && category !== 'gratitude' && !response.includes(name)) {
+          response = response.replace(/^/, `${name}, `);
+        }
+        
+        // Add style preference context if available
+        if (style && category === 'design' && !response.includes(style)) {
+          response = response.replace(/style/, `${style} style`);
+        }
+        
+        // Add room context if available
+        if (rooms.length > 0 && !response.includes('room')) {
+          const roomContext = rooms[0];
+          if (!response.includes(roomContext)) {
+            response = response.replace(/your space/, `your ${roomContext}`);
+          }
+        }
+        
+        return response;
       }
+    }
+    
+    // If no category match, provide a contextual fallback
+    if (name && rooms.length > 0) {
+      return `Hi ${name}! I can help you with your ${rooms[0]}. Could you tell me more about what you're looking for?`;
+    } else if (name) {
+      return `${name}, I'm here to help! Tell me about the room you're furnishing and your style preferences.`;
     }
     
     return null;
@@ -573,6 +997,31 @@
     input.value = '';
     send.disabled = true;
 
+    // Track user search and preferences
+    userProfile.trackSearch(text);
+    userProfile.incrementConversationCount();
+    
+    // Extract and track interests/preferences from query
+    const lowerText = text.toLowerCase();
+    const styleKeywords = { modern: 'Modern', classic: 'Classic', traditional: 'Traditional', minimalist: 'Minimalist', luxury: 'Luxury', industrial: 'Industrial', contemporary: 'Contemporary', rustic: 'Rustic' };
+    for (const [key, label] of Object.entries(styleKeywords)) {
+      if (lowerText.includes(key)) {
+        userProfile.data.preferences.style = label;
+        userProfile.addInterest(label + ' style');
+      }
+    }
+    
+    const roomKeywords = { bedroom: 'Bedroom', living: 'Living Room', office: 'Office', kitchen: 'Kitchen', dining: 'Dining Room', bathroom: 'Bathroom' };
+    for (const [key, label] of Object.entries(roomKeywords)) {
+      if (lowerText.includes(key)) {
+        if (!userProfile.data.preferences.rooms.includes(label)) {
+          userProfile.data.preferences.rooms.push(label);
+        }
+        userProfile.trackCategoryView(label);
+      }
+    }
+    userProfile.save();
+
     const typingIndicator = addTypingIndicator();
 
     try {
@@ -587,8 +1036,11 @@
       }
 
       if (reply) {
-        addMessage(reply, 'assistant');
-        chatHistory.push({ role: 'assistant', text: reply });
+        const personalizedReply = userProfile.data.name && !reply.includes(userProfile.data.name) 
+          ? reply 
+          : reply;
+        addMessage(personalizedReply, 'assistant');
+        chatHistory.push({ role: 'assistant', text: personalizedReply });
       } else if (data.escalate) {
         addMessage('I can connect you with a human agent. Opening WhatsApp now...', 'assistant');
         escalateToWhatsApp();
@@ -598,6 +1050,7 @@
       }
 
       if (data.recommendation) {
+        userProfile.addRecommendationEngagement(data.recommendation);
         addMessage(data.recommendation, 'assistant');
         chatHistory.push({ role: 'assistant', text: data.recommendation });
       }
