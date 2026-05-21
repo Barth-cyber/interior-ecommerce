@@ -571,7 +571,7 @@
     const card = document.createElement('div');
     card.style.cssText = 'display:flex;gap:0.6rem;align-items:center';
     const img = document.createElement('img');
-    img.src = item.img || 'static/duct-ai-agent.jpg';
+    img.src = item.type === 'second' ? 'static/for-sale-badge.jpg' : (item.img || 'static/duct-ai-agent.jpg');
     img.alt = item.title || '';
     img.style.cssText = 'width:56px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer;transition:all 0.2s;';
     img.title = 'Click to inquire about this product via WhatsApp';
