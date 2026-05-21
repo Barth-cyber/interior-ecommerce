@@ -8,45 +8,338 @@
   <title>Second-Hand Marketplace — Interior Duct Ltd</title>
   <link rel="stylesheet" href="duct-ai-widget.css?v=20260429">
   <style>
-    body{font-family:DM Sans, sans-serif;padding:1.2rem;background:#f7f7f9}
-    .market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
-    .market-card{background:#fff;border-radius:10px;padding:1rem;border:1px solid rgba(0,0,0,0.06)}
-    .market-card img{width:100%;height:180px;object-fit:cover;border-radius:6px}
-    .market-card h4{margin:.6rem 0 .3rem}
-    .market-actions{display:flex;gap:.5rem}
-    .btn{padding:.5rem .8rem;border-radius:6px;border:none;cursor:pointer}
-    .btn-primary{background:#1B3A6B;color:#fff}
-    .btn-outline{background:#fff;border:1px solid #ddd}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #f7f7f9 0%, #efefef 100%);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    .marketplace-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #1B3A6B;
+      font-weight: 600;
+    }
+
+    .btn-back {
+      padding: 0.75rem 1.5rem;
+      background: #1B3A6B;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background: #142850;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(27, 58, 107, 0.3);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+      padding: 0;
+    }
+
+    .product-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #e8eef7 0%, #f0f3fa 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: #ddd;
+    }
+
+    .product-content {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-badge {
+      display: inline-block;
+      background: #E8F1FE;
+      color: #1B3A6B;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      width: fit-content;
+    }
+
+    .product-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1B3A6B;
+      margin-bottom: 0.6rem;
+    }
+
+    .product-description {
+      color: #666;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.2rem;
+      flex-grow: 1;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-enquire {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: #1B3A6B;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-enquire:hover {
+      background: #142850;
+    }
+
+    .btn-admin {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: #fff;
+      color: #1B3A6B;
+      border: 2px solid #1B3A6B;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-admin:hover {
+      background: #1B3A6B;
+      color: #fff;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .error {
+      background: #FEE;
+      color: #B33;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .product-actions {
+        flex-direction: column;
+      }
+
+      .btn-enquire, .btn-admin {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-  <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
-    <h1 style="font-size:1.2rem;margin:0">Second-Hand Marketplace</h1>
-    <a href="/interior.html" style="color:#556;text-decoration:none">Back to showroom</a>
-  </header>
+  <div class="marketplace-container">
+    <header>
+      <h1>Second-Hand Marketplace</h1>
+      <button class="btn-back" onclick="goBackHome()">← Back to Home</button>
+    </header>
 
-  <p style="color:#556;max-width:880px">Browse verified listings of pre-owned workshop machines, tools, furniture fittings and lighting. Admins can upload pictures via the Admin panel; listings include images, descriptions and enquiry actions.</p>
-
-  <div id="marketGrid" class="market-grid"></div>
+    <div id="productsContainer" class="products-grid">
+      <div class="loading">Loading marketplace...</div>
+    </div>
+  </div>
 
   <script>
-    async function loadListings(){
-      try{
+    // Store scroll position before navigating away
+    function goBackHome() {
+      const scrollPos = window.scrollY || window.pageYOffset;
+      sessionStorage.setItem('marketplaceScrollPos', scrollPos);
+      window.location.href = '/interior.html#marketplace';
+    }
+
+    async function loadMarketplace() {
+      try {
         const res = await fetch('second_hand_products.json');
+        if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
+
         const data = await res.json();
-        const grid = document.getElementById('marketGrid');
-        grid.innerHTML = '';
-        for(const p of data.products||[]){
-          const card = document.createElement('div');
-          card.className = 'market-card';
-          card.innerHTML = `<img src="${p.image||'IDL_Product_branding/placeholder.jpg'}" alt="${p.name}"><h4>${p.name}</h4><p style=\"color:#555;\">${p.description||''}</p><div class=\"market-actions\"><button class=\"btn btn-primary\" onclick=\"window.open('https://wa.me/2348036850229?text='+encodeURIComponent('Enquiry about '+${JSON.stringify(p.name)}) ,'_blank')\">Enquire via WhatsApp</button><a class=\"btn btn-outline\" href=\"/admin/index.html#images\">Upload image / Admin</a></div>`;
-          grid.appendChild(card);
+        const container = document.getElementById('productsContainer');
+        container.innerHTML = '';
+
+        if (!data.products || data.products.length === 0) {
+          container.innerHTML = '<p class="error">No products available at this time.</p>';
+          return;
         }
-      }catch(e){
-        console.error('Failed to load marketplace listings', e);
+
+        const categoryIcons = {
+          'angle-grinder': '⚙️',
+          'planer': '🔨',
+          'circular-saw': '🔩',
+          'compressor': '💨',
+          'jig-saw': '✂️',
+          'impact-driver': '⚡',
+          'hammer-drill': '🔨',
+          'hand-planes': '🪵',
+          'saw-blades': '⚡',
+          'dehumidifier': '💧',
+          'band-saw': '🔧',
+          'fittings': '🎨',
+          'lighting': '💡'
+        };
+
+        data.products.forEach((product) => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+
+          const category = getCategoryName(product.id);
+          const icon = categoryIcons[product.id] || '📦';
+
+          let imageHTML = '';
+          if (product.image) {
+            imageHTML = `<img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.innerHTML='${icon}'">`;
+          } else {
+            imageHTML = `<div class="product-image">${icon}</div>`;
+          }
+
+          card.innerHTML = `
+            ${imageHTML}
+            <div class="product-content">
+              <span class="product-badge">${category}</span>
+              <h3 class="product-name">${product.name}</h3>
+              <p class="product-description">${product.description || 'Quality second-hand equipment available for inspection.'}</p>
+              <div class="product-actions">
+                <button class="btn-enquire" onclick="enquireViaWhatsApp('${product.name}')">
+                  📱 Enquire
+                </button>
+                <a href="/admin/index.html#images" class="btn-admin">
+                  📸 Upload Image
+                </a>
+              </div>
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+
+      } catch (e) {
+        console.error('Failed to load marketplace', e);
+        const container = document.getElementById('productsContainer');
+        container.innerHTML = `<div class="error">Unable to load marketplace. Please try again later. (${e.message})</div>`;
       }
     }
-    loadListings();
+
+    function getCategoryName(productId) {
+      const categories = {
+        'angle-grinder': 'Tools',
+        'planer': 'Tools',
+        'circular-saw': 'Tools',
+        'compressor': 'Machines',
+        'jig-saw': 'Tools',
+        'impact-driver': 'Tools',
+        'hammer-drill': 'Tools',
+        'hand-planes': 'Tools',
+        'saw-blades': 'Accessories',
+        'dehumidifier': 'Machines',
+        'band-saw': 'Machines',
+        'fittings': 'Fittings',
+        'lighting': 'Lighting'
+      };
+      return categories[productId] || 'Equipment';
+    }
+
+    function enquireViaWhatsApp(productName) {
+      const phoneNumber = '2348036850229';
+      const message = `Hi, I'm interested in the ${productName} from your Second-Hand Marketplace. Can you provide more details and pricing?`;
+      const encodedMessage = encodeURIComponent(message);
+      window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+    }
+
+    // Load marketplace on page load
+    document.addEventListener('DOMContentLoaded', loadMarketplace);
+
+    // Restore scroll position if returning from home
+    window.addEventListener('load', () => {
+      const savedPos = sessionStorage.getItem('marketplaceScrollPos');
+      if (savedPos) {
+        window.scrollTo(0, parseInt(savedPos));
+        sessionStorage.removeItem('marketplaceScrollPos');
+      }
+    });
   </script>
 </body>
 </html>
