@@ -1,0 +1,9 @@
+{
+  "name": "duct-ai-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "python3 -m venv .venv 2>/dev/null || python -m venv .venv && .venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -r requirements.txt",
+    "start": ".venv/bin/python -m gunicorn -w 1 -b 0.0.0.0:$PORT application:app"
+  }
+}

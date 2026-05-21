@@ -1,0 +1,58 @@
+{
+  "company_info": {
+    "name": "Interior Duct Ltd",
+    "tagline": "Luxury Design Advisor",
+    "founder": "Benedict Omoregbe Onaiwu",
+    "headquarters": "Benin City, Edo State, Nigeria",
+    "showrooms": ["Benin City", "Abuja", "Port Harcourt"],
+    "delivery_coverage": "Nationwide across all 36 states",
+    "international_presence": "4 countries served",
+    "experience": "15+ years",
+    "mission": "Deliver premium interior design and furniture solutions that blend functionality, durability and aesthetics."
+  },
+  "contact": {
+    "phone": "+234 803 685 0229",
+    "email_primary": "hello@interiorductltd.com",
+    "business_hours": "Mon-Sat 8am-6pm WAT"
+  },
+  "faqs": [
+    {
+      "q": "What payment methods do you accept?",
+      "a": "We accept Paystack for Nigeria (bank transfer, USSD, card, mobile money) and Stripe for international payments with Visa, Mastercard, Apple Pay and Google Pay."
+    },
+    {
+      "q": "Do you deliver nationwide?",
+      "a": "Yes, we deliver across all 36 states in Nigeria and ship to international customers in selected markets."
+    },
+    {
+      "q": "How can I contact a human agent?",
+      "a": "I recommend you chat with our human agents by clicking the Agent button in this window. Thanks for your time."
+    },
+    {
+      "q": "Can I get a custom furniture quote?",
+      "a": "Yes. For custom quotes, please share your room details and design preferences, or contact us directly on WhatsApp at +234 803 685 0229."
+    },
+    {
+      "q": "What styles do you offer?",
+      "a": "We design luxury interiors in modern, contemporary, classic and custom bespoke styles tailored to your space."
+    }
+  ],
+  "fallback_responses": [
+    "I’m sorry, I’m having trouble answering right now. Please try again in a moment or contact WhatsApp at +234 803 685 0229.",
+    "I recommend you chat with our human agents by clicking the Agent button in this window. Thanks for your time.",
+    "Please allow me a moment to find the best answer. If you need immediate help, use the Agent button for a human team member."
+  ],
+  "human_handoff": {
+    "triggers": [
+      "human",
+      "agent",
+      "live support",
+      "customer support",
+      "talk to a person",
+      "human agent",
+      "real person",
+      "speak to someone"
+    ],
+    "response": "I recommend you chat with our human agents by clicking the Agent button in this window. Thanks for your time."
+  }
+}

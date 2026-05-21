@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: duct-ai-backend
+    runtime: python311
+    buildCommand: "python -m pip install -r requirements.txt"
+    startCommand: "gunicorn -w 1 -b 0.0.0.0:$PORT application:app"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      # ── Required ──────────────────────────────────────────────────────────
+      - key: GEMINI_API_KEY
+        sync: false       # Set manually in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false       # Optional: set manually in Render dashboard
+      - key: ANTHROPIC_API_KEY
+        sync: false       # Optional: set manually in Render dashboard
+      # ── Optional ──────────────────────────────────────────────────────────
+      - key: ANALYTICS_TOKEN
+        generateValue: true   # Random token for /analytics endpoint
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_S3_BUCKET_NAME
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false

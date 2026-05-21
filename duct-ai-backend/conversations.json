@@ -1,0 +1,66 @@
+[
+  {
+    "session_id": "test",
+    "role": "user",
+    "text": "Hello from automated test",
+    "context": {},
+    "ts": "2026-05-05T23:46:56.571032"
+  },
+  {
+    "session_id": "test",
+    "role": "assistant",
+    "text": "I’m sorry, I’m having trouble answering right now. Please try again in a moment or contact WhatsApp at +234 803 685 0229.",
+    "context": {
+      "fallback": true
+    },
+    "ts": "2026-05-05T23:47:15.602904"
+  },
+  {
+    "session_id": "test",
+    "role": "user",
+    "text": "Hello from automated test",
+    "context": {},
+    "ts": "2026-05-06T00:10:39.094502"
+  },
+  {
+    "session_id": "test",
+    "role": "assistant",
+    "text": "I’m sorry, I’m having trouble answering right now. Please try again in a moment or contact WhatsApp at +234 803 685 0229.",
+    "context": {
+      "fallback": true
+    },
+    "ts": "2026-05-06T00:10:40.866314"
+  },
+  {
+    "session_id": "test",
+    "role": "user",
+    "text": "Hello from automated test",
+    "context": {},
+    "ts": "2026-05-06T00:18:53.980154"
+  },
+  {
+    "session_id": "test",
+    "role": "assistant",
+    "text": "I’m sorry, I’m having trouble answering right now. Please try again in a moment or contact WhatsApp at +234 803 685 0229.",
+    "context": {
+      "fallback": true
+    },
+    "ts": "2026-05-06T00:18:56.746358"
+  },
+  {
+    "session_id": "test-session",
+    "role": "user",
+    "text": "Hello, can you help me?",
+    "context": {},
+    "ts": "2026-05-06T03:08:12.006012"
+  },
+  {
+    "session_id": "test-session",
+    "role": "assistant",
+    "text": "I’m sorry, I’m having trouble answering right now. Please try again in a moment or contact WhatsApp at +234 803 685 0229.",
+    "context": {
+      "fallback": true
+    },
+    "ts": "2026-05-06T03:08:22.638900"
+  }
+]
