@@ -681,13 +681,26 @@ def api_promotions():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ROOT
+# STATIC FILES / SPA ROUTING
 # ─────────────────────────────────────────────────────────────────────────────
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 
 @app.route("/")
 def root():
+    interior_path = os.path.join(BASE_DIR, 'interior.html')
+    if os.path.isfile(interior_path):
+        return send_from_directory(BASE_DIR, 'interior.html')
+    return jsonify({"error": "Interior file not found"}), 404
 
-    return send_from_directory('.', 'interior.html')
+
+@app.route('/marketplace')
+def marketplace():
+    marketplace_path = os.path.join(BASE_DIR, 'marketplace.html')
+    if os.path.isfile(marketplace_path):
+        return send_from_directory(BASE_DIR, 'marketplace.html')
+    return jsonify({"error": "Marketplace file not found"}), 404
 
 
 @app.route('/<path:path>')
@@ -695,16 +708,26 @@ def serve_static(path):
 
     # Serve frontend static assets from either the root or the static folder
     if path.startswith('static/'):
-        return send_from_directory('static', path[len('static/'):])
+        static_file_path = os.path.join(BASE_DIR, path)
+        if os.path.isfile(static_file_path):
+            return send_from_directory(BASE_DIR, path)
+        return jsonify({"error": "File not found"}), 404
 
-    if os.path.isfile(path):
-        return send_from_directory('.', path)
+    file_path = os.path.join(BASE_DIR, path)
+    if os.path.isfile(file_path):
+        return send_from_directory(BASE_DIR, path)
 
-    static_path = os.path.join('static', path)
+    # Try static folder
+    static_path = os.path.join(BASE_DIR, 'static', path)
     if os.path.isfile(static_path):
-        return send_from_directory('static', path)
+        return send_from_directory(os.path.join(BASE_DIR, 'static'), path)
 
-    return send_from_directory('.', 'interior.html')
+    # Default to interior.html for SPA routing
+    interior_path = os.path.join(BASE_DIR, 'interior.html')
+    if os.path.isfile(interior_path):
+        return send_from_directory(BASE_DIR, 'interior.html')
+
+    return jsonify({"error": "Resource not found"}), 404
 
 
 # ─────────────────────────────────────────────────────────────────────────────
