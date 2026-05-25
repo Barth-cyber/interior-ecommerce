@@ -541,7 +541,7 @@
         const second = data.second_hand || { products: [] };
         promotions = [];
         for (const s of social) promotions.push({ type: 'social', title: s.title || s.platform, desc: s.desc || '', url: s.url });
-        for (const p of second.products || []) promotions.push({ type: 'second', title: p.name, desc: p.description || p.desc || '', img: p.image || '', url: 'marketplace.html#' + encodeURIComponent(p.id || p.name) });
+        for (const p of second.products || []) promotions.push({ type: 'second', title: p.name, desc: p.description || p.desc || '', img: p.image || '', url: 'https://www.interiorductltd.com/marketplace.html#' + encodeURIComponent(p.id || p.name) });
         renderPromo();
         startPromoRotation();
         return;
